@@ -81,14 +81,14 @@ export default function Home() {
           </h1>
 
           {/* Subheadline */}
-          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 10px", lineHeight: 1.5 }}>
+          <p style={{ fontSize: 20, color: "#CBD5E1", margin: "0 0 12px", lineHeight: 1.5 }}>
             Ping your site and find out right now
           </p>
 
           {/* Trust line */}
-          <p style={{ fontSize: 13, color: "#475569", margin: "0 0 36px" }}>
+          <p style={{ fontSize: 16, color: "#94A3B8", margin: "0 0 36px" }}>
             Free.&nbsp;&nbsp;No account needed.&nbsp;&nbsp;No credit card.&nbsp;&nbsp;
-            <span style={{ color: "#10D9A0", fontWeight: 600 }}>Yes — it&apos;s really free.</span>
+            <span style={{ color: "#10D9A0", fontWeight: 700 }}>Yes — it&apos;s really free.</span>
           </p>
 
           {/* Form */}
@@ -139,7 +139,7 @@ export default function Home() {
 
           <a
             href="#hurdles"
-            style={{ display: "block", marginTop: 20, fontSize: 13, color: "#475569", textDecoration: "none" }}
+            style={{ display: "block", marginTop: 20, fontSize: 16, color: "#94A3B8", textDecoration: "none" }}
           >
             Why does 1 second matter? &#8595;
           </a>
