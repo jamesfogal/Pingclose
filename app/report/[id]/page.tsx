@@ -33,15 +33,15 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{
-        width: 80, height: 80, borderRadius: "50%",
-        border: `4px solid ${color}`,
+        width: 90, height: 90, borderRadius: "50%",
+        border: `5px solid ${color}`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        margin: "0 auto 8px",
+        margin: "0 auto 10px",
         background: color + "15"
       }}>
-        <span style={{ fontSize: 22, fontWeight: 800, color }}>{score}</span>
+        <span style={{ fontSize: 26, fontWeight: 800, color }}>{score}</span>
       </div>
-      <div style={{ fontSize: 11, color: "#64748B" }}>{label}</div>
+      <div style={{ fontSize: 16, color: "#94A3B8" }}>{label}</div>
     </div>
   );
 }
@@ -49,12 +49,12 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
 function Metric({ label, value, unit, good }: { label: string; value: string | number; unit?: string; good: boolean }) {
   return (
     <div style={{
-      background: "#111827", border: "1px solid #1F2937",
-      borderRadius: 8, padding: "12px 14px"
+      background: "#0D1528", border: "1px solid #1E3050",
+      borderRadius: 8, padding: "14px 16px"
     }}>
-      <div style={{ fontSize: 10, color: "#64748B", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: good ? "#10D9A0" : "#F87171" }}>
-        {value}{unit && <span style={{ fontSize: 12, color: "#64748B", marginLeft: 2 }}>{unit}</span>}
+      <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: good ? "#10D9A0" : "#F87171" }}>
+        {value}{unit && <span style={{ fontSize: 15, color: "#64748B", marginLeft: 3 }}>{unit}</span>}
       </div>
     </div>
   );
@@ -73,13 +73,13 @@ export default function ReportPage() {
   }, [params.id]);
 
   if (loading) return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#CBD5E1", fontFamily: "system-ui, sans-serif", fontSize: 18 }}>
       Loading your report...
     </main>
   );
 
   if (!audit) return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#CBD5E1", fontFamily: "system-ui, sans-serif", fontSize: 18 }}>
       Report not found. <a href="/" style={{ color: "#10D9A0", marginLeft: 8 }}>Run a new audit →</a>
     </main>
   );
@@ -89,17 +89,17 @@ export default function ReportPage() {
   const verdictText = audit.passes_one_second ? "✅ Passes the 1-second test" : "❌ Failing Google's first hurdle";
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-      <div style={{ maxWidth: 700, margin: "0 auto", padding: "40px 24px" }}>
+    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px 60px" }}>
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: "#10D9A0", marginBottom: 8 }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "#10D9A0", marginBottom: 10, letterSpacing: "-0.5px" }}>
             Ping<span style={{ color: "#F1F5F9" }}>Close</span>
           </div>
-          <div style={{ fontSize: 13, color: "#475569" }}>Speed & SEO Audit Report</div>
-          <div style={{ fontSize: 15, color: "#94A3B8", marginTop: 8, fontWeight: 600 }}>{hostname}</div>
-          <div style={{ fontSize: 11, color: "#374151", marginTop: 4 }}>
+          <div style={{ fontSize: 17, color: "#94A3B8" }}>Speed & SEO Audit Report</div>
+          <div style={{ fontSize: 20, color: "#F1F5F9", marginTop: 8, fontWeight: 700 }}>{hostname}</div>
+          <div style={{ fontSize: 16, color: "#64748B", marginTop: 4 }}>
             {new Date(audit.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </div>
         </div>
@@ -108,11 +108,11 @@ export default function ReportPage() {
         <div style={{
           background: audit.passes_one_second ? "#10D9A015" : "#F8717115",
           border: `1px solid ${verdictColor}40`,
-          borderRadius: 12, padding: "20px 24px",
+          borderRadius: 12, padding: "24px",
           textAlign: "center", marginBottom: 24
         }}>
-          <div style={{ fontSize: 20, fontWeight: 700, color: verdictColor }}>{verdictText}</div>
-          <div style={{ fontSize: 13, color: "#64748B", marginTop: 6 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: verdictColor }}>{verdictText}</div>
+          <div style={{ fontSize: 17, color: "#94A3B8", marginTop: 8, lineHeight: 1.6 }}>
             {audit.passes_one_second
               ? "Your site is clearing Google's first hurdle. Now let's make sure you win the race."
               : "Your site is failing Google's most basic performance requirement. Your competitors are passing you on the first step."}
@@ -121,9 +121,9 @@ export default function ReportPage() {
 
         {/* Score rings */}
         <div style={{
-          background: "#111827", border: "1px solid #1F2937",
-          borderRadius: 12, padding: "24px",
-          display: "flex", justifyContent: "center", gap: 40,
+          background: "#0D1528", border: "1px solid #1E3050",
+          borderRadius: 12, padding: "28px",
+          display: "flex", justifyContent: "center", gap: 48,
           marginBottom: 24
         }}>
           <ScoreRing score={audit.mobile_score} label="Mobile Score" />
@@ -132,7 +132,7 @@ export default function ReportPage() {
 
         {/* Core Web Vitals */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", letterSpacing: "0.08em", marginBottom: 12 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.06em", marginBottom: 14 }}>
             CORE WEB VITALS
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
@@ -147,13 +147,13 @@ export default function ReportPage() {
 
         {/* Tech Stack */}
         <div style={{
-          background: "#111827", border: "1px solid #1F2937",
-          borderRadius: 12, padding: "20px 24px", marginBottom: 24
+          background: "#0D1528", border: "1px solid #1E3050",
+          borderRadius: 12, padding: "24px", marginBottom: 24
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", letterSpacing: "0.08em", marginBottom: 14 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.06em", marginBottom: 16 }}>
             TECH STACK IDENTIFIED
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {[
               ["CMS / Platform", audit.cms],
               ["Hosting Provider", audit.hosting],
@@ -161,8 +161,8 @@ export default function ReportPage() {
               ["HTTP Version", audit.http_version],
             ].map(([label, value]) => (
               <div key={label}>
-                <div style={{ fontSize: 10, color: "#475569", marginBottom: 2 }}>{label}</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#F1F5F9" }}>{value || "Unknown"}</div>
+                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 18, fontWeight: 600, color: "#F1F5F9" }}>{value || "Unknown"}</div>
               </div>
             ))}
           </div>
@@ -170,24 +170,24 @@ export default function ReportPage() {
 
         {/* Image Analysis */}
         <div style={{
-          background: "#111827", border: "1px solid #1F2937",
-          borderRadius: 12, padding: "20px 24px", marginBottom: 24
+          background: "#0D1528", border: "1px solid #1E3050",
+          borderRadius: 12, padding: "24px", marginBottom: 24
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", letterSpacing: "0.08em", marginBottom: 14 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.06em", marginBottom: 16 }}>
             IMAGE ANALYSIS
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {[
               { label: "Images converted to WebP", pass: audit.images_webp },
               { label: "Lazy loading enabled", pass: audit.images_lazy_loaded },
               { label: `Render-blocking scripts: ${audit.render_blocking_scripts}`, pass: audit.render_blocking_scripts === 0 },
               { label: `Largest image: ${audit.largest_image_kb}KB`, pass: audit.largest_image_kb < 200 },
             ].map(({ label, pass }) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ color: pass ? "#10D9A0" : "#F87171", fontSize: 14, flexShrink: 0 }}>
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ color: pass ? "#10D9A0" : "#F87171", fontSize: 18, flexShrink: 0, fontWeight: 700 }}>
                   {pass ? "✓" : "✗"}
                 </span>
-                <span style={{ fontSize: 13, color: pass ? "#94A3B8" : "#F1F5F9" }}>{label}</span>
+                <span style={{ fontSize: 17, color: pass ? "#94A3B8" : "#F1F5F9" }}>{label}</span>
               </div>
             ))}
           </div>
@@ -197,15 +197,15 @@ export default function ReportPage() {
         {audit.top_issues?.length > 0 && (
           <div style={{
             background: "#F8717108", border: "1px solid #F8717130",
-            borderRadius: 12, padding: "20px 24px", marginBottom: 24
+            borderRadius: 12, padding: "24px", marginBottom: 24
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#F87171", letterSpacing: "0.08em", marginBottom: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#F87171", letterSpacing: "0.06em", marginBottom: 16 }}>
               TOP ISSUES FOUND
             </div>
             {audit.top_issues.map((issue, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                <span style={{ color: "#F87171", flexShrink: 0 }}>→</span>
-                <span style={{ fontSize: 13, color: "#F1F5F9" }}>{issue}</span>
+              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                <span style={{ color: "#F87171", flexShrink: 0, fontSize: 17 }}>→</span>
+                <span style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.5 }}>{issue}</span>
               </div>
             ))}
           </div>
@@ -215,15 +215,15 @@ export default function ReportPage() {
         {audit.top_fixes?.length > 0 && (
           <div style={{
             background: "#10D9A008", border: "1px solid #10D9A030",
-            borderRadius: 12, padding: "20px 24px", marginBottom: 32
+            borderRadius: 12, padding: "24px", marginBottom: 32
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#10D9A0", letterSpacing: "0.08em", marginBottom: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#10D9A0", letterSpacing: "0.06em", marginBottom: 16 }}>
               TOP FIXES TO WIN THE RACE
             </div>
             {audit.top_fixes.map((fix, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                <span style={{ color: "#10D9A0", flexShrink: 0 }}>✓</span>
-                <span style={{ fontSize: 13, color: "#F1F5F9" }}>{fix}</span>
+              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                <span style={{ color: "#10D9A0", flexShrink: 0, fontSize: 17 }}>✓</span>
+                <span style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.5 }}>{fix}</span>
               </div>
             ))}
           </div>
@@ -232,13 +232,13 @@ export default function ReportPage() {
         {/* Closing hook */}
         <div style={{
           background: "#0D1528", border: "1px solid #1E3050",
-          borderRadius: 12, padding: "28px 24px", textAlign: "center"
+          borderRadius: 12, padding: "32px", textAlign: "center"
         }}>
-          <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", lineHeight: 1.6, marginBottom: 20 }}>
+          <div style={{ fontSize: 20, fontWeight: 600, color: "#F1F5F9", lineHeight: 1.6, marginBottom: 12 }}>
             We know exactly what it takes to get your site under 1 second.<br />
             We&apos;ve done it for dozens of local businesses in St. Louis.
           </div>
-          <div style={{ fontSize: 15, color: "#94A3B8", marginBottom: 24 }}>
+          <div style={{ fontSize: 18, color: "#94A3B8", marginBottom: 28 }}>
             Want us to take a look?
           </div>
           <a
@@ -246,20 +246,20 @@ export default function ReportPage() {
             style={{
               display: "inline-block",
               background: "#10D9A0", color: "#0B0E16",
-              fontSize: 15, fontWeight: 700,
-              padding: "12px 32px", borderRadius: 8,
-              textDecoration: "none", marginBottom: 12
+              fontSize: 18, fontWeight: 700,
+              padding: "14px 36px", borderRadius: 8,
+              textDecoration: "none", marginBottom: 14
             }}
           >
             📞 Call Jim — (314) 517-2533
           </a>
-          <div style={{ fontSize: 12, color: "#475569" }}>
+          <div style={{ fontSize: 17, color: "#64748B" }}>
             Jim Fogal · Local SEO & Web Performance · St. Louis, MO
           </div>
         </div>
 
         <div style={{ textAlign: "center", marginTop: 32 }}>
-          <a href="/" style={{ fontSize: 13, color: "#374151", textDecoration: "none" }}>
+          <a href="/" style={{ fontSize: 17, color: "#64748B", textDecoration: "none" }}>
             ← Run another audit at PingClose.com
           </a>
         </div>
