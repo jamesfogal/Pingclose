@@ -37,7 +37,7 @@ export default function Home() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
 
       {/* ABOVE THE FOLD */}
       <section style={{
@@ -60,7 +60,7 @@ export default function Home() {
 
         {/* Logo */}
         <div style={{ marginBottom: 48, textAlign: "center", position: "relative" }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px" }}>
+          <div style={{ fontSize: 32, fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px" }}>
             Ping<span style={{ color: "#F1F5F9" }}>Close</span>
           </div>
         </div>
@@ -69,10 +69,10 @@ export default function Home() {
 
           {/* Headline */}
           <h1 style={{
-            fontSize: "clamp(32px, 5vw, 52px)",
+            fontSize: "clamp(36px, 5vw, 56px)",
             fontWeight: 800,
             lineHeight: 1.1,
-            margin: "0 0 16px",
+            margin: "0 0 20px",
             letterSpacing: "-1.5px",
             color: "#F9FAFB"
           }}>
@@ -81,27 +81,27 @@ export default function Home() {
           </h1>
 
           {/* Subheadline */}
-          <p style={{ fontSize: 20, color: "#CBD5E1", margin: "0 0 12px", lineHeight: 1.5 }}>
+          <p style={{ fontSize: 22, color: "#CBD5E1", margin: "0 0 14px", lineHeight: 1.5 }}>
             Ping your site and find out right now
           </p>
 
           {/* Trust line */}
-          <p style={{ fontSize: 16, color: "#94A3B8", margin: "0 0 36px" }}>
+          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 40px", lineHeight: 1.6 }}>
             Free.&nbsp;&nbsp;No account needed.&nbsp;&nbsp;No credit card.&nbsp;&nbsp;
             <span style={{ color: "#10D9A0", fontWeight: 700 }}>Yes — it&apos;s really free.</span>
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <input
               type="text"
               placeholder="yourwebsite.com"
               value={url}
               onChange={e => setUrl(e.target.value)}
               style={{
-                width: "100%", padding: "14px 18px",
-                background: "#111827", border: "1.5px solid #1F2937",
-                borderRadius: 10, color: "#F1F5F9", fontSize: 16,
+                width: "100%", padding: "16px 20px",
+                background: "#111827", border: "2px solid #374151",
+                borderRadius: 10, color: "#F1F5F9", fontSize: 18,
                 outline: "none", boxSizing: "border-box"
               }}
             />
@@ -111,25 +111,25 @@ export default function Home() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               style={{
-                width: "100%", padding: "14px 18px",
-                background: "#111827", border: "1.5px solid #1F2937",
-                borderRadius: 10, color: "#F1F5F9", fontSize: 16,
+                width: "100%", padding: "16px 20px",
+                background: "#111827", border: "2px solid #374151",
+                borderRadius: 10, color: "#F1F5F9", fontSize: 18,
                 outline: "none", boxSizing: "border-box"
               }}
             />
 
-            {error && <div style={{ fontSize: 13, color: "#F87171", textAlign: "left" }}>{error}</div>}
+            {error && <div style={{ fontSize: 16, color: "#F87171", textAlign: "left" }}>{error}</div>}
 
             <button
               type="submit"
               disabled={loading}
               style={{
-                width: "100%", padding: "16px",
+                width: "100%", padding: "18px",
                 background: loading ? "#0D1528" : "#10D9A0",
                 border: "2px solid #10D9A0",
                 borderRadius: 10,
                 color: loading ? "#10D9A0" : "#0B0E16",
-                fontSize: 16, fontWeight: 700,
+                fontSize: 18, fontWeight: 700,
                 cursor: loading ? "not-allowed" : "pointer"
               }}
             >
@@ -139,9 +139,9 @@ export default function Home() {
 
           <a
             href="#hurdles"
-            style={{ display: "block", marginTop: 20, fontSize: 16, color: "#94A3B8", textDecoration: "none" }}
+            style={{ display: "block", marginTop: 24, fontSize: 17, color: "#94A3B8", textDecoration: "none" }}
           >
-            Why does 1 second matter? &#8595;
+            Why does 1 second matter? ↓
           </a>
         </div>
       </section>
@@ -150,12 +150,12 @@ export default function Home() {
       <section id="hurdles" style={{ padding: "80px 24px", background: "#080F1C", textAlign: "center" }}>
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
 
-          <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1px" }}>
+          <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, margin: "0 0 20px", letterSpacing: "-1px" }}>
             If You Can&apos;t Clear the First Hurdle,<br />
             <span style={{ color: "#F87171" }}>You Can&apos;t Win the Race</span>
           </h2>
 
-          <p style={{ fontSize: 16, color: "#64748B", margin: "0 0 60px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 20, color: "#94A3B8", margin: "0 0 60px", lineHeight: 1.6 }}>
             Google&apos;s first hurdle is loading your website in under 1 second on a 4G phone.<br />
             Most local businesses fail it before the race even begins.
           </p>
@@ -175,21 +175,19 @@ export default function Home() {
             ].map((runner, i) => (
               <div key={i} style={{
                 display: "flex", alignItems: "flex-end", gap: 12,
-                marginBottom: i < 5 ? 12 : 0,
-                paddingBottom: i < 5 ? 12 : 0,
+                marginBottom: i < 5 ? 16 : 0,
+                paddingBottom: i < 5 ? 16 : 0,
                 borderBottom: i < 5 ? "1px solid #152035" : "none"
               }}>
-                <div style={{ width: 90, textAlign: "right", flexShrink: 0, paddingBottom: 4 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: runner.isYou ? "#F87171" : "#10D9A0", marginBottom: 2 }}>
+                <div style={{ width: 110, textAlign: "right", flexShrink: 0, paddingBottom: 4 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: runner.isYou ? "#F87171" : "#10D9A0", marginBottom: 4 }}>
                     {runner.label}
                   </div>
-                  <div style={{ fontSize: 20 }}>{runner.isYou ? "😰" : "🏃"}</div>
+                  <div style={{ fontSize: 22 }}>{runner.isYou ? "😰" : "🏃"}</div>
                 </div>
 
                 <div style={{ flex: 1, position: "relative", height: runner.isYou ? 90 : 30, display: "flex", alignItems: "flex-end" }}>
-                  {/* track line */}
                   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 6, background: "#152035", borderRadius: 3 }} />
-                  {/* hurdle post */}
                   <div style={{
                     position: "absolute", left: "40%", bottom: 0,
                     width: runner.isYou ? 6 : 4,
@@ -197,7 +195,6 @@ export default function Home() {
                     background: runner.isYou ? "#F87171" : "#10D9A0",
                     borderRadius: "2px 2px 0 0"
                   }} />
-                  {/* hurdle bar */}
                   <div style={{
                     position: "absolute",
                     left: "calc(40% - 10px)",
@@ -209,8 +206,8 @@ export default function Home() {
                   }} />
                 </div>
 
-                <div style={{ width: 36, flexShrink: 0, paddingBottom: 8 }}>
-                  <div style={{ fontSize: 10, color: runner.isYou ? "#F87171" : "#475569", fontWeight: runner.isYou ? 700 : 400 }}>
+                <div style={{ width: 50, flexShrink: 0, paddingBottom: 8 }}>
+                  <div style={{ fontSize: 16, color: runner.isYou ? "#F87171" : "#94A3B8", fontWeight: runner.isYou ? 700 : 400 }}>
                     {runner.isYou ? "10 ft" : "4 ft"}
                   </div>
                 </div>
@@ -218,7 +215,7 @@ export default function Home() {
             ))}
           </div>
 
-          <p style={{ fontSize: 15, color: "#64748B", lineHeight: 1.7, maxWidth: 580, margin: "0 auto 48px" }}>
+          <p style={{ fontSize: 19, color: "#94A3B8", lineHeight: 1.7, maxWidth: 580, margin: "0 auto 48px" }}>
             Every competitor with a fast website clears the first hurdle cleanly.<br />
             A slow site makes that hurdle <strong style={{ color: "#F87171" }}>10 feet tall</strong> — before the race even starts.<br />
             How difficult is it to win when you can&apos;t clear the first one?
@@ -230,7 +227,7 @@ export default function Home() {
             borderRadius: 16, padding: "32px 24px", textAlign: "left",
             maxWidth: 560, margin: "0 auto 48px"
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", letterSpacing: "0.08em", marginBottom: 20 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.08em", marginBottom: 24 }}>
               WHAT WE CHECK IN THE BACKGROUND
             </div>
             {[
@@ -241,11 +238,11 @@ export default function Home() {
               ["📱", "4G Mobile Test", "Real-world load speed on a mobile connection"],
               ["🏆", "The Verdict", "Pass/fail with your top 3 fixes to win the race"],
             ].map(([icon, title, desc]) => (
-              <div key={title} style={{ display: "flex", gap: 14, marginBottom: 14 }}>
-                <div style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{icon}</div>
+              <div key={title} style={{ display: "flex", gap: 16, marginBottom: 18 }}>
+                <div style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{icon}</div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#F1F5F9", marginBottom: 2 }}>{title}</div>
-                  <div style={{ fontSize: 12, color: "#64748B" }}>{desc}</div>
+                  <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", marginBottom: 4 }}>{title}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8" }}>{desc}</div>
                 </div>
               </div>
             ))}
@@ -255,18 +252,18 @@ export default function Home() {
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             style={{
               background: "#10D9A0", color: "#0B0E16",
-              fontSize: 16, fontWeight: 700,
-              padding: "14px 36px", borderRadius: 10,
+              fontSize: 18, fontWeight: 700,
+              padding: "16px 40px", borderRadius: 10,
               border: "none", cursor: "pointer"
             }}
           >
-            Ping My Site — It&apos;s Free &#8594;
+            Ping My Site — It&apos;s Free →
           </button>
         </div>
       </section>
 
       <style>{`
-        input::placeholder { color: #374151; }
+        input::placeholder { color: #6B7280; font-size: 18px; }
         * { box-sizing: border-box; }
       `}</style>
     </main>
