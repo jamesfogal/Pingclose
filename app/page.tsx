@@ -58,10 +58,14 @@ export default function Home() {
           backgroundSize: "40px 40px"
         }} />
 
-        {/* Logo */}
+        {/* Logo + Nav */}
         <div style={{ marginBottom: 48, textAlign: "center", position: "relative" }}>
-          <div style={{ fontSize: 32, fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px" }}>
+          <div style={{ fontSize: 32, fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px", marginBottom: 16 }}>
             Ping<span style={{ color: "#F1F5F9" }}>Close</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
+            <a href="/faq" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none" }}>FAQ</a>
+            <a href="/pricing" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none" }}>Pricing</a>
           </div>
         </div>
 
