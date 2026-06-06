@@ -242,7 +242,7 @@ export default function ReportPage() {
             Want us to take a look?
           </div>
           <a
-            href="tel:+13145551234"
+            href="tel:+13145172533"
             style={{
               display: "inline-block",
               background: "#10D9A0", color: "#0B0E16",
@@ -251,7 +251,7 @@ export default function ReportPage() {
               textDecoration: "none", marginBottom: 12
             }}
           >
-            📞 Call Jim — (314) 555-1234
+            📞 Call Jim — (314) 517-2533
           </a>
           <div style={{ fontSize: 12, color: "#475569" }}>
             Jim Fogal · Local SEO & Web Performance · St. Louis, MO
