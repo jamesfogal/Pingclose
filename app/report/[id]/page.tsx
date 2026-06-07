@@ -483,18 +483,79 @@ export default function ReportPage() {
           </div>
         )}
 
-        {/* 15. ALL ISSUES */}
-        {audit.top_issues?.length > 0 && (
-          <div style={{ background: "#F8717108", border: "1px solid #F8717130", borderRadius: 12, padding: "24px", marginBottom: 20 }}>
-            <div style={{ ...SECTION_LABEL, color: "#F87171" }}>🚨 All Issues Found ({audit.top_issues.length})</div>
-            {audit.top_issues.map((issue, i) => (
-              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-                <span style={{ color: "#F87171", flexShrink: 0, fontSize: 17 }}>→</span>
-                <span style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.5 }}>{issue}</span>
+        {/* 15. ALL ISSUES — scored red to green */}
+        {audit.top_issues?.length > 0 && (() => {
+          // Parse scored issues: format is "[10] 🔴 message"
+          const parsed = audit.top_issues.map(raw => {
+            const match = raw.match(/^\[(\d+)\]\s(.+)$/);
+            if (match) return { score: parseInt(match[1]), text: match[2] };
+            return { score: 5, text: raw };
+          });
+
+          const scoreColor = (s: number) =>
+            s >= 9 ? "#F87171" : s >= 7 ? "#FB923C" : s >= 5 ? "#FBBF24" : "#4ADE80";
+          const scoreBg = (s: number) =>
+            s >= 9 ? "#F8717120" : s >= 7 ? "#FB923C20" : s >= 5 ? "#FBBF2420" : "#4ADE8020";
+          const scoreBorder = (s: number) =>
+            s >= 9 ? "#F8717140" : s >= 7 ? "#FB923C40" : s >= 5 ? "#FBBF2440" : "#4ADE8040";
+          const scoreLabel = (s: number) =>
+            s >= 9 ? "CRITICAL" : s >= 7 ? "SERIOUS" : s >= 5 ? "MODERATE" : "MINOR";
+
+          return (
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ ...SECTION_LABEL, color: "#F87171" }}>
+                🚨 Issues Found — {parsed.length} Total
               </div>
-            ))}
-          </div>
-        )}
+
+              {/* Legend */}
+              <div style={{ display: "flex", gap: 16, marginBottom: 16, flexWrap: "wrap" }}>
+                {[
+                  { label: "Critical", color: "#F87171", range: "9-10" },
+                  { label: "Serious", color: "#FB923C", range: "7-8" },
+                  { label: "Moderate", color: "#FBBF24", range: "5-6" },
+                  { label: "Minor", color: "#4ADE80", range: "3-4" },
+                ].map(({ label, color, range }) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 14, color: "#64748B" }}>{label} ({range})</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {parsed.map((issue, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "flex-start", gap: 12,
+                    background: scoreBg(issue.score),
+                    border: `1px solid ${scoreBorder(issue.score)}`,
+                    borderRadius: 8, padding: "12px 14px"
+                  }}>
+                    {/* Score badge */}
+                    <div style={{
+                      flexShrink: 0, width: 36, height: 36,
+                      borderRadius: 8,
+                      background: scoreColor(issue.score) + "30",
+                      border: `2px solid ${scoreColor(issue.score)}`,
+                      display: "flex", flexDirection: "column",
+                      alignItems: "center", justifyContent: "center"
+                    }}>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: scoreColor(issue.score), lineHeight: 1 }}>{issue.score}</span>
+                    </div>
+
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: scoreColor(issue.score), letterSpacing: "0.08em", marginBottom: 3 }}>
+                        {scoreLabel(issue.score)}
+                      </div>
+                      <div style={{ fontSize: 16, color: "#F1F5F9", lineHeight: 1.5 }}>
+                        {issue.text.replace(/^[🔴🟠🟡🟢]\s/, '')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* 16. TOP FIXES */}
         {audit.top_fixes?.length > 0 && (
