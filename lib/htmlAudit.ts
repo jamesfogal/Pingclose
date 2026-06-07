@@ -45,6 +45,12 @@ export interface TechStackResult {
   hasUptimeMonitoring: boolean;
   uptimeService: string;
 
+  // Backup detection
+  hasBackup: boolean;
+  backupService: string;
+  backupCoveredByHost: boolean;
+  backupMessage: string;
+
   // Image alt text (enriched)
   imagesWithoutAlt: string[];
 
@@ -132,6 +138,7 @@ export async function detectTechStack(url: string): Promise<TechStackResult> {
       hasFAQSchema: false, hasPricingSchema: false, hasLocalBusinessSchema: false, hasReviewSchema: false,
       hasGA4: false, hasGTM: false, hasFacebookPixel: false, hasTikTokPixel: false, hasCallTracking: false,
       hasUptimeMonitoring: false, uptimeService: '',
+      hasBackup: false, backupService: '', backupCoveredByHost: false, backupMessage: 'Could not fetch page to check backup status.',
       imagesWithoutAlt: [], hasAutoPlayVideo: false, videoHasPoster: false,
       wordpressPluginIssues: []
     };
@@ -251,14 +258,73 @@ export async function detectTechStack(url: string): Promise<TechStackResult> {
   const hasCallTracking = html.includes('callrail.com') || html.includes('calltracking') || html.includes('callfire.com');
 
   // ── Uptime Monitoring ────────────────────────────────────────────
+  // External pingers (UptimeRobot, Pingdom, StatusCake) are NOT detectable
+  // from page HTML — they monitor from outside. We only detect page-injected agents.
   let hasUptimeMonitoring = false;
   let uptimeService = '';
-  if (html.includes('uptimerobot.com') || html.includes('UptimeRobot')) { hasUptimeMonitoring = true; uptimeService = 'UptimeRobot'; }
-  else if (html.includes('pingdom.com')) { hasUptimeMonitoring = true; uptimeService = 'Pingdom'; }
-  else if (html.includes('statuscake.com')) { hasUptimeMonitoring = true; uptimeService = 'StatusCake'; }
-  else if (html.includes('freshping.io') || html.includes('freshping.com')) { hasUptimeMonitoring = true; uptimeService = 'Freshping'; }
-  else if (html.includes('betteruptime.com')) { hasUptimeMonitoring = true; uptimeService = 'Better Uptime'; }
-  else if (html.includes('datadoghq.com')) { hasUptimeMonitoring = true; uptimeService = 'Datadog'; }
+  if (html.includes('datadoghq.com')) { hasUptimeMonitoring = true; uptimeService = 'Datadog'; }
+  else if (html.includes('newrelic.com') || html.includes('nr-data.net')) { hasUptimeMonitoring = true; uptimeService = 'New Relic'; }
+  else if (html.includes('managewp') || html.includes('manage-wp')) { hasUptimeMonitoring = true; uptimeService = 'ManageWP'; }
+
+  // ── Backup Detection ─────────────────────────────────────────────
+  let hasBackup = false;
+  let backupService = '';
+  let backupCoveredByHost = false;
+  let backupMessage = '';
+
+  if (hosting === 'WP Engine') {
+    hasBackup = true; backupCoveredByHost = true;
+    backupService = 'WP Engine Daily Backups';
+    backupMessage = 'WP Engine automatically backs up your site daily and retains 40 days of backups.';
+  } else if (hosting === 'Kinsta') {
+    hasBackup = true; backupCoveredByHost = true;
+    backupService = 'Kinsta Daily Backups';
+    backupMessage = 'Kinsta automatically backs up your site daily and retains 14-30 days of backups.';
+  } else if (cms === 'Wix') {
+    hasBackup = true; backupCoveredByHost = true;
+    backupService = 'Wix Automatic Backups';
+    backupMessage = 'Wix automatically saves versions of your site that can be restored.';
+  } else if (cms === 'Squarespace') {
+    hasBackup = true; backupCoveredByHost = true;
+    backupService = 'Squarespace Automatic Backups';
+    backupMessage = 'Squarespace handles backups automatically on their infrastructure.';
+  } else if (cms === 'Shopify') {
+    hasBackup = true; backupCoveredByHost = true;
+    backupService = 'Shopify Automatic Backups';
+    backupMessage = 'Shopify maintains backups of your store data automatically.';
+  }
+
+  if (!hasBackup) {
+    if (html.includes('updraftplus') || html.includes('updraft-plus')) {
+      hasBackup = true; backupService = 'UpdraftPlus';
+      backupMessage = 'UpdraftPlus backup plugin detected — automated backups are configured.';
+    } else if (html.includes('jetpack-backup') || (html.includes('jetpack') && html.includes('backup'))) {
+      hasBackup = true; backupService = 'Jetpack Backup';
+      backupMessage = 'Jetpack Backup detected — real-time or daily backups are running.';
+    } else if (html.includes('backupbuddy') || html.includes('backup-buddy')) {
+      hasBackup = true; backupService = 'BackupBuddy';
+      backupMessage = 'BackupBuddy detected — automated backups are configured.';
+    } else if (html.includes('managewp') || html.includes('manage-wp')) {
+      hasBackup = true; backupService = 'ManageWP Backups';
+      backupMessage = 'ManageWP detected — includes automated backup management.';
+    } else if (html.includes('vaultpress')) {
+      hasBackup = true; backupService = 'VaultPress (Jetpack)';
+      backupMessage = 'VaultPress backup service detected — real-time backups are active.';
+    } else if (html.includes('duplicator')) {
+      hasBackup = true; backupService = 'Duplicator';
+      backupMessage = 'Duplicator plugin detected — manual or scheduled backups configured.';
+    }
+  }
+
+  if (!hasBackup) {
+    if (cms === 'WordPress') {
+      backupMessage = 'No backup software detected on your WordPress site. If your site is hacked, your host has a server failure, or a bad plugin update corrupts your database — full restoration may be impossible. Everything you have built could be gone permanently.';
+    } else if (cms !== 'Custom / Unknown') {
+      backupMessage = 'No backup solution detected. Verify your hosting provider includes automated backups.';
+    } else {
+      backupMessage = 'Could not determine backup status. Contact your hosting provider to confirm automated backups are enabled.';
+    }
+  }
 
   // ── Images without alt text ──────────────────────────────────────
   const imgTags = html.match(/<img[^>]+>/gi) || [];
@@ -325,6 +391,10 @@ export async function detectTechStack(url: string): Promise<TechStackResult> {
     hasCallTracking,
     hasUptimeMonitoring,
     uptimeService,
+    hasBackup,
+    backupService,
+    backupCoveredByHost,
+    backupMessage,
     imagesWithoutAlt,
     hasAutoPlayVideo,
     videoHasPoster,

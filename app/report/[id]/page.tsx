@@ -98,6 +98,10 @@ interface Audit {
       hasCallTracking: boolean;
       hasUptimeMonitoring: boolean;
       uptimeService: string;
+      hasBackup: boolean;
+      backupService: string;
+      backupCoveredByHost: boolean;
+      backupMessage: string;
       imagesWithoutAlt: string[];
       wordpressPluginIssues: string[];
     };
@@ -349,19 +353,39 @@ export default function ReportPage() {
         )}
 
         {/* 8. UPTIME MONITORING */}
-        <div style={{ background: tech?.hasUptimeMonitoring ? "#10D9A010" : "#F8717110", border: `1px solid ${tech?.hasUptimeMonitoring ? "#10D9A040" : "#F8717140"}`, borderRadius: 12, padding: "20px 24px", marginBottom: 20 }}>
+        <div style={{ background: tech?.hasUptimeMonitoring ? "#10D9A010" : "#FBBF2410", border: `1px solid ${tech?.hasUptimeMonitoring ? "#10D9A040" : "#FBBF2440"}`, borderRadius: 12, padding: "20px 24px", marginBottom: 20 }}>
           <div style={SECTION_LABEL}>🔔 Uptime Monitoring</div>
           {tech?.hasUptimeMonitoring ? (
             <div style={{ fontSize: 17, color: "#10D9A0" }}>✓ {tech.uptimeService} detected — you will be notified if your site goes down</div>
           ) : (
             <>
-              <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600, marginBottom: 8 }}>⚠️ No uptime monitoring detected</div>
+              <div style={{ fontSize: 17, color: "#FBBF24", fontWeight: 600, marginBottom: 8 }}>❓ Cannot verify uptime monitoring</div>
               <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.7 }}>
-                Your site could be down right now and you would not know for hours. Every minute your site is down, potential customers hit a dead page and leave. Free tools like UptimeRobot send an email the moment your site goes offline.
+                External monitoring tools like UptimeRobot and Pingdom ping your site from outside — they leave no detectable code on your page. If you do not have any monitoring set up, your site could go down without you knowing for hours. Free tools like UptimeRobot take 2 minutes to configure and send an email the moment your site goes offline.
               </div>
             </>
           )}
         </div>
+
+        {/* 8b. BACKUP DETECTION */}
+        {tech && (
+          <div style={{ background: tech.hasBackup ? "#10D9A010" : "#F8717110", border: `1px solid ${tech.hasBackup ? "#10D9A040" : "#F8717140"}`, borderRadius: 12, padding: "20px 24px", marginBottom: 20 }}>
+            <div style={SECTION_LABEL}>💾 Backup Status</div>
+            {tech.hasBackup ? (
+              <>
+                <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600, marginBottom: 8 }}>
+                  ✓ {tech.backupService}{tech.backupCoveredByHost ? " — Included with your host" : " — Plugin detected"}
+                </div>
+                <div style={{ fontSize: 17, color: "#94A3B8", lineHeight: 1.7 }}>{tech.backupMessage}</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600, marginBottom: 8 }}>☠️ No backup software detected</div>
+                <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.7 }}>{tech.backupMessage}</div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* 9. TECH STACK */}
         <div style={DARK_CARD}>
