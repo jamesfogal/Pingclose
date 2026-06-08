@@ -318,11 +318,11 @@ export async function detectTechStack(url: string): Promise<TechStackResult> {
 
   if (!hasBackup) {
     if (cms === 'WordPress') {
-      backupMessage = 'No backup software detected on your WordPress site. If your site is hacked, your host has a server failure, or a bad plugin update corrupts your database — full restoration may be impossible. Everything you have built could be gone permanently.';
+      backupMessage = 'Backup status unverifiable from outside — backup plugins run in the WordPress admin and leave no trace in public HTML. Confirm with your host or check your WP admin for UpdraftPlus, Jetpack Backup, or host-level snapshots.';
     } else if (cms !== 'Custom / Unknown') {
-      backupMessage = 'No backup solution detected. Verify your hosting provider includes automated backups.';
+      backupMessage = 'Backup status unverifiable from outside. Confirm your hosting provider includes automated backups in your plan.';
     } else {
-      backupMessage = 'Could not determine backup status. Contact your hosting provider to confirm automated backups are enabled.';
+      backupMessage = 'Backup status unverifiable from outside. Contact your hosting provider to confirm automated backups are enabled.';
     }
   }
 
