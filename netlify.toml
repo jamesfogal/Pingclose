@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  node_bundler = "nft"
+
+# Extend timeout for the audit function — PageSpeed + email can take 25s
+[[headers]]
+  for = "/api/audit"
+  [headers.values]
+    X-Netlify-Max-Execution-Time = "26"
