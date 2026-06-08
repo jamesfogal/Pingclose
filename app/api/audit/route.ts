@@ -175,8 +175,8 @@ export async function POST(req: NextRequest) {
         .eq('id', audit.id);
     }
 
-    // ── Send emails in parallel ──────────────────────────────────
-    await Promise.all([
+    // ── Send emails — non-blocking so a Resend failure never kills the audit ──
+    const emailResults = await Promise.allSettled([
       sendReportEmail(email, audit.id, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond),
       sendLeadNotification({
         reportId: audit.id,
@@ -192,6 +192,13 @@ export async function POST(req: NextRequest) {
         primaryKeyword: techResult.primaryKeyword
       })
     ]);
+
+    // Log any email failures for debugging — but never surface to user
+    emailResults.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        console.error(`Email ${i === 0 ? 'report' : 'lead-notify'} failed:`, r.reason);
+      }
+    });
 
     return NextResponse.json({ success: true, reportId: audit.id });
 
