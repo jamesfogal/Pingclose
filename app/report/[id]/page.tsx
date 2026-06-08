@@ -557,7 +557,74 @@ export default function ReportPage() {
           );
         })()}
 
-        {/* 16. TOP FIXES */}
+        {/* 16. KEYWORD VISIBILITY */}
+        {(() => {
+          const keyword = audit.full_report?.tech?.primaryKeyword;
+          const h1 = audit.full_report?.tech?.h1Text;
+          const hasSchema = audit.full_report?.tech?.hasLocalBusinessSchema;
+          const hasFAQ = audit.full_report?.tech?.hasFAQSchema;
+          const hasPricing = audit.full_report?.tech?.hasPricingSchema;
+          if (!keyword && !h1) return null;
+          const domain = (() => { try { return new URL(audit.url).hostname; } catch { return audit.url; } })();
+          const googleSearchUrl = `https://www.google.com/search?q=site:${domain}`;
+          const rankCheckUrl = keyword ? `https://www.google.com/search?q=${encodeURIComponent(keyword)}` : null;
+          return (
+            <div style={{ background: "#0D152808", border: "1px solid #1E3050", borderRadius: 12, padding: "24px", marginBottom: 20 }}>
+              <div style={{ ...SECTION_LABEL }}>🔍 Keyword Visibility</div>
+              {keyword && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: "#64748B", marginBottom: 6 }}>PRIMARY KEYWORD DETECTED FROM PAGE</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                    <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", padding: "8px 14px", background: "#111827", border: "1px solid #1E3050", borderRadius: 8 }}>
+                      &ldquo;{keyword}&rdquo;
+                    </div>
+                    {rankCheckUrl && (
+                      <a href={rankCheckUrl} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#60A5FA", textDecoration: "none", padding: "8px 14px", border: "1px solid #60A5FA30", borderRadius: 8 }}>
+                        Check Google Rankings →
+                      </a>
+                    )}
+                    <a href={googleSearchUrl} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#94A3B8", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", borderRadius: 8 }}>
+                      Site: Index Check →
+                    </a>
+                  </div>
+                </div>
+              )}
+              {h1 && (
+                <div style={{ marginBottom: 16, padding: "12px 16px", background: "#111827", borderRadius: 8, borderLeft: "3px solid #FBBF24" }}>
+                  <div style={{ fontSize: 11, color: "#64748B", marginBottom: 4 }}>CURRENT H1 TAG</div>
+                  <div style={{ fontSize: 15, color: "#F1F5F9", fontStyle: "italic" }}>&ldquo;{h1}&rdquo;</div>
+                  {h1 && !h1.match(/[A-Z][a-z]+ (MO|Missouri|IL|Illinois|St\. Louis)/i) && (
+                    <div style={{ fontSize: 13, color: "#FBBF24", marginTop: 6 }}>
+                      ⚠ No city or state detected in H1 — missing local keyword signal
+                    </div>
+                  )}
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
+                {[
+                  { label: "LocalBusiness Schema", value: hasSchema, good: true },
+                  { label: "FAQ Schema", value: hasFAQ, good: true },
+                  { label: "Pricing Schema", value: hasPricing, good: true },
+                ].map(({ label, value, good }) => (
+                  <div key={label} style={{ padding: "10px 12px", background: "#111827", borderRadius: 8, border: `1px solid ${value ? "#10D9A030" : "#F8717120"}` }}>
+                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 3 }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: value ? "#10D9A0" : "#F87171" }}>
+                      {value ? `✓ Detected` : `✗ Missing`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {(!hasSchema || !hasFAQ) && (
+                <div style={{ marginTop: 12, fontSize: 14, color: "#64748B", lineHeight: 1.6 }}>
+                  {!hasSchema && <div>→ Missing LocalBusiness schema — Google has less confidence in your local signals and NAP data.</div>}
+                  {!hasFAQ && <div>→ Missing FAQ schema — competitors with FAQ pages get free rich results above your listing.</div>}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* 17. TOP FIXES */}
         {audit.top_fixes?.length > 0 && (
           <div style={{ background: "#10D9A008", border: "1px solid #10D9A030", borderRadius: 12, padding: "24px", marginBottom: 20 }}>
             <div style={{ ...SECTION_LABEL, color: "#10D9A0" }}>✅ Top Fixes to Win the Race</div>
@@ -571,25 +638,41 @@ export default function ReportPage() {
         )}
 
         {/* CLOSING CTA */}
-        <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "36px", textAlign: "center" }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.5, marginBottom: 12 }}>
-            Ready to hear that phone ring?
+        <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "36px", marginBottom: 12 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
+            We know exactly what it takes to fix every issue on this report.
           </div>
-          <div style={{ fontSize: 18, color: "#94A3B8", marginBottom: 8, lineHeight: 1.6 }}>
-            We know exactly what it takes to fix every issue on this report.<br />
+          <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
+            Speed. Local SEO. Google Business Profile. Conversion tracking. All of it.<br />
             We&apos;ve done it for dozens of local businesses in St. Louis.
           </div>
-          <div style={{ fontSize: 17, color: "#64748B", marginBottom: 28 }}>
-            Speed. Citations. Google Business Profile. Conversion tracking. All of it.
+
+          {/* Three contact options */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 24 }}>
+            <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "18px 16px", background: "#10D9A0", borderRadius: 10, textDecoration: "none" }}>
+              <span style={{ fontSize: 22 }}>📞</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
+              <span style={{ fontSize: 13, color: "#0B0E16", opacity: 0.8 }}>(314) 517-2533</span>
+            </a>
+            <a href="mailto:james.fogal@gmail.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "18px 16px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 10, textDecoration: "none" }}>
+              <span style={{ fontSize: 22 }}>✉️</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
+              <span style={{ fontSize: 13, color: "#64748B" }}>james.fogal@gmail.com</span>
+            </a>
+            <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "18px 16px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 10, textDecoration: "none" }}>
+              <span style={{ fontSize: 22 }}>🔧</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#F1F5F9" }}>Fix It Yourself</span>
+              <span style={{ fontSize: 13, color: "#64748B" }}>LocalSEOAEOPro.com</span>
+            </a>
           </div>
-          <a href="tel:+13145172533" style={{ display: "inline-block", background: "#10D9A0", color: "#0B0E16", fontSize: 18, fontWeight: 700, padding: "16px 40px", borderRadius: 8, textDecoration: "none", marginBottom: 16 }}>
-            📞 Call Jim — (314) 517-2533
-          </a>
-          <div style={{ fontSize: 16, color: "#64748B" }}>Jim Fogal · Local SEO & Web Performance · St. Louis, MO</div>
+
+          <div style={{ textAlign: "center", fontSize: 15, color: "#475569" }}>
+            Jim Fogal · Local SEO & Web Performance · St. Louis, MO
+          </div>
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 32 }}>
-          <a href="/" style={{ fontSize: 17, color: "#64748B", textDecoration: "none" }}>← Run another audit at PingClose.com</a>
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <a href="/" style={{ fontSize: 15, color: "#475569", textDecoration: "none" }}>← Run another audit at PingClose.com</a>
         </div>
 
       </div>

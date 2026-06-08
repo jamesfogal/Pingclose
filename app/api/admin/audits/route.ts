@@ -15,10 +15,14 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(200);
 
-  if (filter === 'agency') query = query.eq('agency_signal', true);
-  if (filter === 'failing') query = query.eq('passes_one_second', false);
-  if (filter === 'contacted') query = query.eq('contacted', true);
-  if (filter === 'new') query = query.eq('contacted', false);
+  if (filter === 'agency')      query = query.eq('agency_signal', true);
+  if (filter === 'failing')     query = query.eq('passes_one_second', false);
+  if (filter === 'new')         query = query.eq('pipeline_stage', 'new');
+  if (filter === 'contacted')   query = query.eq('pipeline_stage', 'contacted');
+  if (filter === 'appointment') query = query.eq('pipeline_stage', 'appointment');
+  if (filter === 'quoted')      query = query.eq('pipeline_stage', 'quoted');
+  if (filter === 'closed_won')  query = query.eq('pipeline_stage', 'closed_won');
+  if (filter === 'closed_lost') query = query.eq('pipeline_stage', 'closed_lost');
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -32,15 +36,22 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id, contacted, notes } = await req.json();
+  const { id, pipeline_stage, notes } = await req.json();
+
+  const updateData: Record<string, unknown> = { notes };
+
+  if (pipeline_stage) {
+    updateData.pipeline_stage = pipeline_stage;
+    // Keep legacy contacted field in sync
+    updateData.contacted = ['contacted','appointment','quoted','closed_won'].includes(pipeline_stage);
+    if (pipeline_stage === 'contacted') {
+      updateData.contacted_at = new Date().toISOString();
+    }
+  }
 
   const { error } = await supabase
     .from('pingclose_audits')
-    .update({
-      contacted,
-      contacted_at: contacted ? new Date().toISOString() : null,
-      notes
-    })
+    .update(updateData)
     .eq('id', id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
