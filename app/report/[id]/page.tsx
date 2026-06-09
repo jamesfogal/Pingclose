@@ -663,23 +663,25 @@ export default function ReportPage() {
             </>
           )}
 
-          {/* Three contact options */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 16 }}>
-            <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none" }}>
-              <span style={{ fontSize: 28 }}>📞</span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
-              <span style={{ fontSize: 17, color: "#0B0E16", opacity: 0.85, fontWeight: 600 }}>(314) 517-2533</span>
+          {/* Three contact options — LocalSEOAEOPro first, full width */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 16 }}>
+            <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A060", borderRadius: 12, textDecoration: "none" }}>
+              <span style={{ fontSize: 32 }}>🚀</span>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", textAlign: "center", lineHeight: 1.3 }}>Get the Free Report from LocalSEOAEOPro.com</span>
+              <span style={{ fontSize: 17, color: "#CBD5E1", textAlign: "center", lineHeight: 1.6 }}>We don&apos;t just tell you what&apos;s wrong — we fix it. 98% fixed in 24 hours.</span>
             </a>
-            <a href="mailto:james.fogal@gmail.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
-              <span style={{ fontSize: 28 }}>✉️</span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
-              <span style={{ fontSize: 16, color: "#94A3B8" }}>james.fogal@gmail.com</span>
-            </a>
-            <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "2px solid #10D9A040", borderRadius: 12, textDecoration: "none" }}>
-              <span style={{ fontSize: 28 }}>🔧</span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: "#10D9A0" }}>Click Here — It&apos;s Free</span>
-              <span style={{ fontSize: 16, color: "#94A3B8", textAlign: "center", lineHeight: 1.4 }}>LocalSEOAEOPro.com will give you a full report on everything else — free</span>
-            </a>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+              <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none" }}>
+                <span style={{ fontSize: 28 }}>📞</span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
+                <span style={{ fontSize: 17, color: "#0B0E16", opacity: 0.85, fontWeight: 600 }}>(314) 517-2533</span>
+              </a>
+              <a href="mailto:james.fogal@gmail.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
+                <span style={{ fontSize: 28 }}>✉️</span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
+                <span style={{ fontSize: 16, color: "#94A3B8" }}>james.fogal@gmail.com</span>
+              </a>
+            </div>
           </div>
         </div>
 
