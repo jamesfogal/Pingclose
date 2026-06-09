@@ -104,6 +104,41 @@ export async function sendReportEmail(
   });
 }
 
+// ── Limit Hit Notification ───────────────────────────────────────
+export async function sendLimitNotification(email: string, attemptNumber: number) {
+  const resend = await getResend();
+  await resend.emails.send({
+    from: `PingClose Leads <${fromEmail}>`,
+    to: NOTIFY_EMAIL,
+    subject: `🔥 Rate Limit Hit — ${email} ran ${attemptNumber} audits today`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head><meta charset="utf-8"></head>
+        <body style="margin:0;padding:0;background:#0B0E16;font-family:system-ui,sans-serif;">
+          <div style="max-width:500px;margin:0 auto;padding:40px 24px;">
+            <div style="font-size:24px;font-weight:800;color:#10D9A0;margin-bottom:8px;">PingClose</div>
+            <div style="font-size:14px;color:#64748B;margin-bottom:32px;">Rate Limit Alert</div>
+            <div style="background:#0D1528;border:1px solid #F8717140;border-radius:12px;padding:24px;margin-bottom:24px;">
+              <div style="font-size:18px;font-weight:700;color:#F87171;margin-bottom:16px;">🔥 Heavy User Alert</div>
+              <div style="font-size:16px;color:#94A3B8;margin-bottom:8px;">
+                <strong style="color:#F1F5F9;">${email}</strong> just attempted audit #${attemptNumber} today.
+              </div>
+              <div style="font-size:15px;color:#64748B;">
+                They hit the 5/day limit. This could be an agency auditing client sites or a very motivated prospect.
+              </div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:12px;padding:20px;text-align:center;">
+              <div style="font-size:16px;color:#F1F5F9;font-weight:600;margin-bottom:8px;">This person is HOT — reach out now</div>
+              <div style="font-size:14px;color:#64748B;">Anyone running 5+ audits in a day is serious about their SEO.</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+}
+
 // ── Jim's Lead Notification Email ────────────────────────────────
 export async function sendLeadNotification(params: {
   reportId: string;

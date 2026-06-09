@@ -20,23 +20,26 @@ export async function POST(req: NextRequest) {
                 req.headers.get('x-real-ip') ||
                 '0.0.0.0';
 
-    // Duplicate check — same email + domain in last 24 hours
-    const domain = new URL(normalizedUrl).hostname;
+    // Rate limit — max 5 audits per email per 24 hours
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    const { data: existing } = await supabase
+    const { count: auditCount } = await supabase
       .from('pingclose_audits')
-      .select('id')
+      .select('*', { count: 'exact', head: true })
       .eq('email', email)
-      .ilike('url', `%${domain}%`)
-      .gte('created_at', yesterday)
-      .limit(1)
-      .maybeSingle();
+      .gte('created_at', yesterday);
 
-    if (existing) {
+    if (auditCount && auditCount >= 5) {
+      // Notify Jim that someone hit the limit
+      try {
+        const { sendLimitNotification } = await import('@/lib/email');
+        await sendLimitNotification(email, auditCount + 1);
+      } catch (e) {
+        console.error('Limit notification failed:', e);
+      }
       return NextResponse.json({
-        duplicate: true,
-        message: "Your report is already on its way — check your inbox."
+        limit: true,
+        message: "You've run 5 free audits today. Come back tomorrow for more!"
       });
     }
 

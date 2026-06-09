@@ -27,6 +27,10 @@ export default function Home() {
         router.push("/check?duplicate=true");
         return;
       }
+      if (data.limit) {
+        router.push("/check?limit=true");
+        return;
+      }
       if (data.error) { setError(data.error); setLoading(false); return; }
 
       router.push(`/check?id=${data.reportId}`);

@@ -6,6 +6,7 @@ import Link from "next/link";
 function CheckContent() {
   const params = useSearchParams();
   const duplicate = params.get("duplicate");
+  const limit = params.get("limit");
   const reportId = params.get("id");
 
   // ── Report is ready — show CTA ──────────────────────────────────
@@ -141,6 +142,44 @@ function CheckContent() {
           </p>
           <Link href="/" style={{ fontSize: 15, color: "#475569", textDecoration: "none" }}>
             ← Back to PingClose
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Rate limit hit ───────────────────────────────────────────────
+  if (limit) {
+    return (
+      <main style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)",
+        color: "#F1F5F9",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "24px",
+      }}>
+        <div style={{ textAlign: "center", maxWidth: "480px" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
+          <div style={{ fontSize: "26px", fontWeight: 800, marginBottom: "12px" }}>You've Been Busy!</div>
+          <div style={{ fontSize: "16px", color: "#94A3B8", marginBottom: "24px", lineHeight: 1.6 }}>
+            You've run 5 free audits today — that's the daily limit. Come back tomorrow for more free audits.
+          </div>
+          <div style={{
+            background: "#111827", border: "1px solid #1F2937", borderRadius: "12px",
+            padding: "20px", marginBottom: "24px",
+          }}>
+            <div style={{ fontSize: "15px", color: "#64748B", marginBottom: "8px" }}>Need more audits right now?</div>
+            <div style={{ fontSize: "15px", color: "#F1F5F9" }}>
+              Call or text <a href="tel:+13145172533" style={{ color: "#10D9A0", fontWeight: 700 }}>(314) 517-2533</a> — Jim Fogal
+            </div>
+          </div>
+          <Link href="/" style={{
+            display: "inline-block", background: "#10D9A0", color: "#0B0E16",
+            fontWeight: 700, fontSize: "16px", padding: "12px 32px",
+            borderRadius: "8px", textDecoration: "none",
+          }}>
+            Back to PingClose
           </Link>
         </div>
       </main>
