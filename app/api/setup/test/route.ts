@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(apiKey);
     await resend.emails.send({
       from: 'PingClose <jim@pingclose.com>',
-      to: 'james.fogal@gmail.com',
+      to: 'jim@pingclose.com',
       subject: '✅ PingClose Email Test — It Works!',
       html: `
         <div style="background:#0B0E16;color:#F1F5F9;padding:40px;font-family:system-ui,sans-serif;max-width:500px;margin:0 auto;border-radius:12px;">

@@ -20,7 +20,11 @@ export async function POST(req: NextRequest) {
                 req.headers.get('x-real-ip') ||
                 '0.0.0.0';
 
-    // Rate limit — max 5 audits per email per 24 hours
+    // VIP emails — no rate limit ever
+    const VIP_EMAILS = ['jim@pingclose.com', 'james.fogal@gmail.com', 'james.fogal@citywidealarms.com'];
+    const isVIP = VIP_EMAILS.includes(email.toLowerCase());
+
+    // Rate limit — max 5 audits per email per 24 hours (VIPs exempt)
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     const { count: auditCount } = await supabase
@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
       .eq('email', email)
       .gte('created_at', yesterday);
 
-    if (auditCount && auditCount >= 5) {
+    if (!isVIP && auditCount && auditCount >= 5) {
       // Notify Jim that someone hit the limit
       try {
         const { sendLimitNotification } = await import('@/lib/email');

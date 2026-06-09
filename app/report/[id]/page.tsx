@@ -676,10 +676,10 @@ export default function ReportPage() {
                 <span style={{ fontSize: 18, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
                 <span style={{ fontSize: 17, color: "#0B0E16", opacity: 0.85, fontWeight: 600 }}>(314) 517-2533</span>
               </a>
-              <a href="mailto:james.fogal@gmail.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
+              <a href="mailto:jim@pingclose.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
                 <span style={{ fontSize: 28 }}>✉️</span>
                 <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
-                <span style={{ fontSize: 16, color: "#94A3B8" }}>james.fogal@gmail.com</span>
+                <span style={{ fontSize: 16, color: "#94A3B8" }}>jim@pingclose.com</span>
               </a>
             </div>
           </div>

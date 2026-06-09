@@ -54,7 +54,7 @@ export default function SetupPage() {
     });
     const d = await res.json();
     setTesting(false);
-    setTestResult(d.ok ? '✅ Test email sent — check james.fogal@gmail.com' : `❌ Failed: ${d.error}`);
+    setTestResult(d.ok ? '✅ Test email sent — check jim@pingclose.com' : `❌ Failed: ${d.error}`);
   }
 
   const inputStyle = {
