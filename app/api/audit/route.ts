@@ -158,6 +158,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) throw error;
+    console.log('AUDIT: saved to supabase, id:', audit.id);
 
     // ── Agency signal check ──────────────────────────────────────
     let agencySignal = false;
