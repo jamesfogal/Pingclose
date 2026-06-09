@@ -637,37 +637,49 @@ export default function ReportPage() {
           </div>
         )}
 
-        {/* CLOSING CTA */}
+        {/* CLOSING CTA — conditional based on score */}
         <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "36px", marginBottom: 12 }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
-            We know exactly what it takes to fix every issue on this report.
-          </div>
-          <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
-            Speed. Local SEO. Google Business Profile. Conversion tracking. All of it.<br />
-            We&apos;ve done it for dozens of local businesses in St. Louis.
-          </div>
+          {audit.passes_one_second && audit.mobile_score >= 90 ? (
+            // PASSING — curiosity pitch
+            <>
+              <div style={{ fontSize: 22, fontWeight: 700, color: "#10D9A0", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
+                Your site is fast — but is the rest of the story this good?
+              </div>
+              <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
+                Speed is just the first hurdle. Want to see how your Local SEO, Google Business Profile,<br />
+                citations, and conversion tracking stack up against your competitors?
+              </div>
+            </>
+          ) : (
+            // FAILING — fix pitch
+            <>
+              <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
+                We know exactly what it takes to fix every issue on this report.
+              </div>
+              <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
+                Speed. Local SEO. Google Business Profile. Conversion tracking. All of it.<br />
+                We&apos;ve done it for dozens of local businesses in St. Louis.
+              </div>
+            </>
+          )}
 
           {/* Three contact options */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
             <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "18px 16px", background: "#10D9A0", borderRadius: 10, textDecoration: "none" }}>
               <span style={{ fontSize: 22 }}>📞</span>
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
-              <span style={{ fontSize: 13, color: "#0B0E16", opacity: 0.8 }}>(314) 517-2533</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
+              <span style={{ fontSize: 14, color: "#0B0E16", opacity: 0.8 }}>(314) 517-2533</span>
             </a>
             <a href="mailto:james.fogal@gmail.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "18px 16px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 10, textDecoration: "none" }}>
               <span style={{ fontSize: 22 }}>✉️</span>
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
-              <span style={{ fontSize: 13, color: "#64748B" }}>james.fogal@gmail.com</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
+              <span style={{ fontSize: 14, color: "#94A3B8" }}>james.fogal@gmail.com</span>
             </a>
             <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "18px 16px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 10, textDecoration: "none" }}>
               <span style={{ fontSize: 22 }}>🔧</span>
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#F1F5F9" }}>Fix It Yourself</span>
-              <span style={{ fontSize: 13, color: "#64748B" }}>LocalSEOAEOPro.com</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#F1F5F9" }}>See the Full SEO Picture</span>
+              <span style={{ fontSize: 14, color: "#94A3B8" }}>LocalSEOAEOPro.com</span>
             </a>
-          </div>
-
-          <div style={{ textAlign: "center", fontSize: 15, color: "#475569" }}>
-            Jim Fogal · Local SEO & Web Performance · St. Louis, MO
           </div>
         </div>
 
