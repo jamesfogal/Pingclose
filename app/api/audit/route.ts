@@ -176,6 +176,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Send emails — non-blocking so a Resend failure never kills the audit ──
+    console.log('EMAIL: attempting send to', email, 'from env:', process.env.RESEND_FROM_EMAIL, 'key set:', !!process.env.RESEND_API_KEY);
     const emailResults = await Promise.allSettled([
       sendReportEmail(email, audit.id, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond),
       sendLeadNotification({
@@ -196,7 +197,9 @@ export async function POST(req: NextRequest) {
     // Log any email failures for debugging — but never surface to user
     emailResults.forEach((r, i) => {
       if (r.status === 'rejected') {
-        console.error(`Email ${i === 0 ? 'report' : 'lead-notify'} failed:`, r.reason);
+        console.error(`EMAIL FAILED ${i === 0 ? 'report' : 'lead-notify'}:`, r.reason);
+      } else {
+        console.log(`EMAIL OK ${i === 0 ? 'report' : 'lead-notify'}`);
       }
     });
 
