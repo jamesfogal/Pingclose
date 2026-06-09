@@ -1,8 +1,16 @@
 import { Resend } from 'resend';
+import { supabase } from '@/lib/supabase';
 
-function getResend() {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error('RESEND_API_KEY not set');
+async function getResend(): Promise<Resend> {
+  // Try Supabase config first (set via /setup page)
+  const { data } = await supabase
+    .from('platform_config')
+    .select('value')
+    .eq('key', 'resend_api_key')
+    .single();
+
+  const key = data?.value || process.env.RESEND_API_KEY;
+  if (!key || !key.startsWith('re_')) throw new Error('No valid Resend API key configured. Visit /setup to add your key.');
   return new Resend(key);
 }
 
@@ -26,7 +34,7 @@ export async function sendReportEmail(
 
   const hostname = (() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })();
 
-  const resend = getResend();
+  const resend = await getResend();
   await resend.emails.send({
     from: `PingClose <${fromEmail}>`,
     to: toEmail,
@@ -126,7 +134,7 @@ export async function sendLeadNotification(params: {
   const verdictText = passesOneSecond ? '✅ Passing Google\'s 1-second test' : '❌ FAILING Google\'s first hurdle';
   const urgency = !passesOneSecond ? '🔥 HOT LEAD — Site is failing. Call them now.' : '📋 New audit submitted.';
 
-  const resend = getResend();
+  const resend = await getResend();
   await resend.emails.send({
     from: `PingClose Leads <${fromEmail}>`,
     to: NOTIFY_EMAIL,
