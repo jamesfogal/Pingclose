@@ -16,7 +16,7 @@ async function getResend(): Promise<Resend> {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pingclose.com';
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'jim@pingclose.com';
-const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'james.fogal@gmail.com';
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'jim@pingclose.com';
 
 // ── Client Report Email ───────────────────────────────────────────
 export async function sendReportEmail(
