@@ -4,14 +4,11 @@ import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
-  const [url,        setUrl]        = useState("");
-  const [phone,      setPhone]      = useState("");
-  const [email,      setEmail]      = useState("");
-  const [smsChecked, setSmsChecked] = useState(true);
-  const [emailChecked, setEmailChecked] = useState(true);
-  const [loading,    setLoading]    = useState(false);
-  const [pinged,     setPinged]     = useState(false);
-  const [error,      setError]      = useState("");
+  const [url,     setUrl]     = useState("");
+  const [email,   setEmail]   = useState("");
+  const [loading, setLoading] = useState(false);
+  const [pinged,  setPinged]  = useState(false);
+  const [error,   setError]   = useState("");
   const audioCtx = useRef<AudioContext | null>(null);
 
   function playPing() {
@@ -34,19 +31,11 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!url) { setError("Please enter your website URL."); return; }
-    if (!phone && !email) { setError("Please enter a phone number or email so we can send your report."); return; }
-    if (smsChecked && !phone) { setError("Enter your mobile number to receive the report by text."); return; }
-    if (emailChecked && !email) { setError("Enter your email address to receive the report by email."); return; }
+    if (!url || !email) { setError("Please enter your website URL and email."); return; }
     playPing();
     setPinged(true);
     setLoading(true);
-    const params = new URLSearchParams({ url });
-    if (phone)        params.set("phone",  phone);
-    if (email)        params.set("email",  email);
-    if (smsChecked)   params.set("sms",    "1");
-    if (emailChecked) params.set("mail",   "1");
-    router.push(`/check?${params.toString()}`);
+    router.push(`/check?url=${encodeURIComponent(url)}&email=${encodeURIComponent(email)}`);
   }
 
   return (
@@ -111,7 +100,6 @@ export default function Home() {
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-            {/* URL */}
             <input
               type="text"
               placeholder="yourwebsite.com"
@@ -119,78 +107,13 @@ export default function Home() {
               onChange={e => setUrl(e.target.value)}
               style={{ width: "100%", padding: "16px 20px", background: "#111827", border: "2px solid #374151", borderRadius: 10, color: "#F1F5F9", fontSize: 18, outline: "none", boxSizing: "border-box" }}
             />
-
-            {/* Phone */}
             <input
-              type="tel"
-              placeholder="Mobile number — we'll text you the report"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               style={{ width: "100%", padding: "16px 20px", background: "#111827", border: "2px solid #374151", borderRadius: 10, color: "#F1F5F9", fontSize: 18, outline: "none", boxSizing: "border-box" }}
             />
-
-            {/* Delivery options */}
-            <div style={{ background: "#111827", border: "1px solid #1E293B", borderRadius: 10, padding: "14px 18px" }}>
-              <div style={{ fontSize: 13, color: "#64748B", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
-                How to receive your report
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-
-                {/* SMS option */}
-                <label style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-                  <div
-                    onClick={() => setSmsChecked(v => !v)}
-                    style={{
-                      width: 22, height: 22, borderRadius: 6, flexShrink: 0,
-                      background: smsChecked ? "#10D9A0" : "transparent",
-                      border: `2px solid ${smsChecked ? "#10D9A0" : "#374151"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.15s", cursor: "pointer",
-                    }}
-                  >
-                    {smsChecked && <span style={{ color: "#0B0E16", fontSize: 14, fontWeight: 800, lineHeight: 1 }}>✓</span>}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 16, color: "#F1F5F9", fontWeight: 600 }}>
-                      📱 Text me the link <span style={{ fontSize: 13, color: "#10D9A0", fontWeight: 700 }}>— Recommended</span>
-                    </div>
-                    <div style={{ fontSize: 14, color: "#64748B" }}>98% open rate — you'll have it in seconds</div>
-                  </div>
-                </label>
-
-                {/* Email option */}
-                <label style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-                  <div
-                    onClick={() => setEmailChecked(v => !v)}
-                    style={{
-                      width: 22, height: 22, borderRadius: 6, flexShrink: 0,
-                      background: emailChecked ? "#10D9A0" : "transparent",
-                      border: `2px solid ${emailChecked ? "#10D9A0" : "#374151"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.15s", cursor: "pointer",
-                    }}
-                  >
-                    {emailChecked && <span style={{ color: "#0B0E16", fontSize: 14, fontWeight: 800, lineHeight: 1 }}>✓</span>}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 16, color: "#F1F5F9", fontWeight: 600 }}>✉️ Email me the link</div>
-                    <div style={{ fontSize: 14, color: "#64748B" }}>Permanent link — easy to share or revisit</div>
-                  </div>
-                </label>
-
-                {/* Email input — shown when email is checked */}
-                {emailChecked && (
-                  <input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    style={{ width: "100%", padding: "13px 16px", background: "#0D1528", border: "1px solid #374151", borderRadius: 8, color: "#F1F5F9", fontSize: 16, outline: "none", boxSizing: "border-box", marginTop: 2 }}
-                  />
-                )}
-
-              </div>
-            </div>
 
             {error && <div style={{ fontSize: 16, color: "#F87171", textAlign: "left" }}>{error}</div>}
 
