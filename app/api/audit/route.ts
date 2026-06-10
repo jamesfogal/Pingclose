@@ -197,19 +197,18 @@ export async function POST(req: NextRequest) {
       deliveryTasks.push(sendReportEmail(email, audit.id, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond));
     }
     deliveryTasks.push(sendLeadNotification({
-        reportId: audit.id,
-        url: normalizedUrl,
-        email,
-        mobileScore: speedResult.mobileScore,
-        desktopScore: speedResult.desktopScore,
-        passesOneSecond: speedResult.passesOneSecond,
-        cms: techResult.cms,
-        hosting: techResult.hosting,
-        hostingVerdictLabel: techResult.hostingVerdictLabel,
-        agencySignal,
-        primaryKeyword: techResult.primaryKeyword
-      })
-    ]);
+      reportId: audit.id,
+      url: normalizedUrl,
+      email: email || null,
+      mobileScore: speedResult.mobileScore,
+      desktopScore: speedResult.desktopScore,
+      passesOneSecond: speedResult.passesOneSecond,
+      cms: techResult.cms,
+      hosting: techResult.hosting,
+      hostingVerdictLabel: techResult.hostingVerdictLabel,
+      agencySignal,
+      primaryKeyword: techResult.primaryKeyword
+    }));
 
     const deliveryResults = await Promise.allSettled(deliveryTasks);
 
