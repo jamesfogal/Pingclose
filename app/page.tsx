@@ -276,15 +276,17 @@ export default function Home() {
                         }} />
                       </div>
                       {/* Label */}
-                      <div style={{
-                        fontSize: lane.isYou ? 11 : 10,
-                        fontWeight: lane.isYou ? 800 : 400,
-                        color: lane.color,
-                        textAlign: "center",
-                        whiteSpace: "nowrap",
-                      }}>
-                        {lane.isYou ? "YOUR SITE" : ""}
-                      </div>
+                      {lane.isYou && (
+                        <div style={{
+                          fontSize: 16,
+                          fontWeight: 800,
+                          color: lane.color,
+                          textAlign: "center",
+                          whiteSpace: "nowrap",
+                        }}>
+                          YOUR SITE
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -308,8 +310,8 @@ export default function Home() {
                   alignItems: "flex-end",
                   gap: 4,
                 }}>
-                  <div style={{ fontSize: 13, color: "#F87171", fontWeight: 700 }}>YOUR HURDLE: 10 ft 🔴</div>
-                  <div style={{ fontSize: 13, color: "#10D9A0" }}>Competitors: 4 ft ✅</div>
+                  <div style={{ fontSize: 16, color: "#F87171", fontWeight: 700 }}>YOUR HURDLE: 10 ft 🔴</div>
+                  <div style={{ fontSize: 16, color: "#10D9A0" }}>Competitors: 4 ft ✅</div>
                 </div>
               </div>
             </div>
@@ -320,7 +322,7 @@ export default function Home() {
               padding: "14px 24px",
               borderTop: "1px solid #1E3050",
               textAlign: "center",
-              fontSize: 14,
+              fontSize: 16,
               color: "#64748B",
             }}>
               Every competitor with a fast website sees a 4 ft hurdle. A slow site makes yours <strong style={{ color: "#F87171" }}>10 feet tall.</strong>

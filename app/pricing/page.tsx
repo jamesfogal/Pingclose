@@ -140,7 +140,7 @@ export default function PricingPage() {
 
           {/* What's included */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", marginBottom: 14 }}>WHAT WE FIX</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", marginBottom: 14, textTransform: "uppercase" }}>WHAT WE FIX</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {[
                 "Speed & Core Web Vitals",
@@ -166,13 +166,13 @@ export default function PricingPage() {
 
           {/* Page count pricing */}
           <div style={{ background: "#080F1C", borderRadius: 10, padding: "20px", marginBottom: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", marginBottom: 14 }}>PRICING BY SITE SIZE</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", marginBottom: 14, textTransform: "uppercase" }}>PRICING BY SITE SIZE</div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
                     {["Pages", "Price", "Example"].map(h => (
-                      <th key={h} style={{ fontSize: 14, fontWeight: 700, color: "#475569", textAlign: "left", padding: "6px 12px", borderBottom: `1px solid ${BORDER}` }}>{h}</th>
+                      <th key={h} style={{ fontSize: 13, fontWeight: 700, color: "#475569", textAlign: "left", padding: "6px 12px", borderBottom: `1px solid ${BORDER}`, textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -187,7 +187,7 @@ export default function PricingPage() {
                     <tr key={i}>
                       <td style={{ fontSize: 16, color: "#F1F5F9", padding: "10px 12px", borderBottom: `1px solid ${BORDER}` }}>{pages}</td>
                       <td style={{ fontSize: 16, color: TEAL, fontWeight: 600, padding: "10px 12px", borderBottom: `1px solid ${BORDER}` }}>{price}</td>
-                      <td style={{ fontSize: 15, color: "#64748B", padding: "10px 12px", borderBottom: `1px solid ${BORDER}` }}>{example}</td>
+                      <td style={{ fontSize: 16, color: "#64748B", padding: "10px 12px", borderBottom: `1px solid ${BORDER}` }}>{example}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -236,7 +236,7 @@ export default function PricingPage() {
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", marginBottom: 14 }}>WHAT HAPPENS EVERY MONTH</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", marginBottom: 14, textTransform: "uppercase" }}>WHAT HAPPENS EVERY MONTH</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {[
                 "Weekly 404 error cleanup",

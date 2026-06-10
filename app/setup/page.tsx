@@ -99,7 +99,7 @@ export default function SetupPage() {
                 autoFocus
               />
             </div>
-            {error && <div style={{ color: '#F87171', fontSize: '14px', marginBottom: '12px' }}>{error}</div>}
+            {error && <div style={{ color: '#F87171', fontSize: '16px', marginBottom: '12px' }}>{error}</div>}
             <button type="submit" style={{ ...btnStyle, width: '100%' }}>Enter Setup</button>
           </form>
         </div>
@@ -118,7 +118,7 @@ export default function SetupPage() {
         {/* Resend API Key */}
         <div style={{ background: '#111827', border: '1px solid #1F2937', borderRadius: '12px', padding: '28px', marginBottom: '24px' }}>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', marginBottom: '8px', textTransform: 'uppercase' }}>Resend API Key</div>
-          <div style={{ fontSize: '14px', color: '#475569', marginBottom: '20px' }}>
+          <div style={{ fontSize: '16px', color: '#475569', marginBottom: '20px' }}>
             Get your key from <a href="https://resend.com/api-keys" target="_blank" rel="noreferrer" style={{ color: '#10D9A0' }}>resend.com/api-keys</a> — starts with <code style={{ background: '#1F2937', padding: '2px 6px', borderRadius: '4px' }}>re_</code>
           </div>
           <form onSubmit={handleSave}>
@@ -131,8 +131,8 @@ export default function SetupPage() {
                 style={inputStyle}
               />
             </div>
-            {error && <div style={{ color: '#F87171', fontSize: '14px', marginBottom: '12px' }}>{error}</div>}
-            {saved && <div style={{ color: '#10D9A0', fontSize: '14px', marginBottom: '12px' }}>✅ Saved successfully</div>}
+            {error && <div style={{ color: '#F87171', fontSize: '16px', marginBottom: '12px' }}>{error}</div>}
+            {saved && <div style={{ color: '#10D9A0', fontSize: '16px', marginBottom: '12px' }}>✅ Saved successfully</div>}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button type="submit" style={btnStyle} disabled={saving}>
                 {saving ? 'Saving...' : 'Save Key'}
@@ -147,7 +147,7 @@ export default function SetupPage() {
               </button>
             </div>
             {testResult && (
-              <div style={{ marginTop: '16px', fontSize: '15px', color: testResult.startsWith('✅') ? '#10D9A0' : '#F87171' }}>
+              <div style={{ marginTop: '16px', fontSize: '16px', color: testResult.startsWith('✅') ? '#10D9A0' : '#F87171' }}>
                 {testResult}
               </div>
             )}
@@ -157,7 +157,7 @@ export default function SetupPage() {
         {/* Status */}
         <div style={{ background: '#111827', border: '1px solid #1F2937', borderRadius: '12px', padding: '24px' }}>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', marginBottom: '16px', textTransform: 'uppercase' }}>Current Status</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', color: '#94A3B8' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', color: '#94A3B8' }}>
             <span style={{ color: resendKey.startsWith('re_') ? '#10D9A0' : '#F87171' }}>
               {resendKey.startsWith('re_') ? '✅' : '❌'}
             </span>
@@ -166,7 +166,7 @@ export default function SetupPage() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '32px' }}>
-          <a href="/admin" style={{ color: '#475569', fontSize: '14px' }}>← Back to Admin</a>
+          <a href="/admin" style={{ color: '#475569', fontSize: '16px' }}>← Back to Admin</a>
         </div>
       </div>
     </main>

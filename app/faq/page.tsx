@@ -227,7 +227,7 @@ export default function FAQPage() {
           </p>
           <div style={{
             display: "inline-block",
-            fontSize: 15,
+            fontSize: 16,
             color: TEAL,
             background: TEAL + "15",
             border: `1px solid ${TEAL}30`,

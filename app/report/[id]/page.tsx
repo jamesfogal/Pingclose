@@ -126,9 +126,9 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
 function Metric({ label, value, unit, good }: { label: string; value: string | number; unit?: string; good: boolean }) {
   return (
     <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 8, padding: "14px 16px" }}>
-      <div style={{ fontSize: 14, color: "#64748B", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 13, color: "#64748B", marginBottom: 6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: good ? "#10D9A0" : "#F87171" }}>
-        {value}{unit && <span style={{ fontSize: 14, color: "#64748B", marginLeft: 3 }}>{unit}</span>}
+        {value}{unit && <span style={{ fontSize: 16, color: "#64748B", marginLeft: 3 }}>{unit}</span>}
       </div>
     </div>
   );
@@ -140,7 +140,7 @@ function CheckRow({ label, pass, detail }: { label: string; pass: boolean; detai
       <span style={{ color: pass ? "#10D9A0" : "#F87171", fontSize: 18, flexShrink: 0, fontWeight: 700, marginTop: 1 }}>{pass ? "✓" : "✗"}</span>
       <div>
         <span style={{ fontSize: 17, color: pass ? "#94A3B8" : "#F1F5F9" }}>{label}</span>
-        {detail && <div style={{ fontSize: 15, color: "#64748B", marginTop: 3 }}>{detail}</div>}
+        {detail && <div style={{ fontSize: 16, color: "#64748B", marginTop: 3 }}>{detail}</div>}
       </div>
     </div>
   );
@@ -253,7 +253,7 @@ export default function ReportPage() {
                   <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>🚫 {speed.renderBlockingScripts} Render-Blocking Scripts</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>These scripts freeze your page before any content loads.</div>
                   {speed.renderBlockingDetails.slice(0, 3).map((r, i) => (
-                    <div key={i} style={{ fontSize: 14, color: "#64748B", marginTop: 4, fontFamily: "monospace" }}>→ {r.url.split("/").pop()?.substring(0, 60)} ({r.savingsMs}ms)</div>
+                    <div key={i} style={{ fontSize: 13, color: "#64748B", marginTop: 4, fontFamily: "monospace" }}>→ {r.url.split("/").pop()?.substring(0, 60)} ({r.savingsMs}ms)</div>
                   ))}
                 </div>
               )}
@@ -297,22 +297,22 @@ export default function ReportPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9" }}>{speed?.totalImages ?? 0}</div>
-              <div style={{ fontSize: 14, color: "#64748B", marginTop: 4 }}>Total Images</div>
+              <div style={{ fontSize: 13, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Images</div>
             </div>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: "#10D9A0" }}>{speed?.webpImages ?? 0}</div>
-              <div style={{ fontSize: 14, color: "#64748B", marginTop: 4 }}>WebP ✓</div>
+              <div style={{ fontSize: 13, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>WebP ✓</div>
             </div>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: (speed?.nonWebpImages ?? 0) > 0 ? "#F87171" : "#10D9A0" }}>{speed?.nonWebpImages ?? 0}</div>
-              <div style={{ fontSize: 14, color: "#64748B", marginTop: 4 }}>Not WebP ✗</div>
+              <div style={{ fontSize: 13, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Not WebP ✗</div>
             </div>
           </div>
 
           {(speed?.estimatedWebPSavingKb ?? 0) > 0 && (
             <div style={{ background: "#10D9A010", border: "1px solid #10D9A030", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
               <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>💡 Converting to WebP would save approximately {speed!.estimatedWebPSavingKb}KB</div>
-              <div style={{ fontSize: 15, color: "#94A3B8", marginTop: 4 }}>WebP images are 25–35% smaller than JPG/PNG with identical visual quality.</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>WebP images are 25–35% smaller than JPG/PNG with identical visual quality.</div>
             </div>
           )}
 
@@ -329,7 +329,7 @@ export default function ReportPage() {
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 13, color: "#64748B", marginBottom: 8, fontWeight: 600, letterSpacing: "0.06em" }}>IMAGES THAT NEED CONVERTING TO WEBP:</div>
               {speed!.nonWebpImageList.slice(0, 8).map((img, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1E3050", fontSize: 14 }}>
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1E3050", fontSize: 13 }}>
                   <span style={{ color: "#94A3B8", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
                     {img.url.split("/").pop()?.substring(0, 50) || img.url}
                   </span>
@@ -400,7 +400,7 @@ export default function ReportPage() {
               ["E-commerce", tech?.ecommerce || "None detected"],
             ] as [string, string][]).map(([label, value]) => (
               <div key={label}>
-                <div style={{ fontSize: 14, color: "#64748B", marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 13, color: "#64748B", marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                 <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9" }}>{value || "Unknown"}</div>
               </div>
             ))}
@@ -517,7 +517,7 @@ export default function ReportPage() {
                 ].map(({ label, color, range }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 14, color: "#64748B" }}>{label} ({range})</span>
+                    <span style={{ fontSize: 13, color: "#64748B", fontWeight: 600 }}>{label} ({range})</span>
                   </div>
                 ))}
               </div>
@@ -539,11 +539,11 @@ export default function ReportPage() {
                       display: "flex", flexDirection: "column",
                       alignItems: "center", justifyContent: "center"
                     }}>
-                      <span style={{ fontSize: 14, fontWeight: 800, color: scoreColor(issue.score), lineHeight: 1 }}>{issue.score}</span>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: scoreColor(issue.score), lineHeight: 1 }}>{issue.score}</span>
                     </div>
 
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: scoreColor(issue.score), letterSpacing: "0.08em", marginBottom: 3 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: scoreColor(issue.score), letterSpacing: "0.08em", marginBottom: 3, textTransform: "uppercase" }}>
                         {scoreLabel(issue.score)}
                       </div>
                       <div style={{ fontSize: 16, color: "#F1F5F9", lineHeight: 1.5 }}>
@@ -573,17 +573,17 @@ export default function ReportPage() {
               <div style={{ ...SECTION_LABEL }}>🔍 Keyword Visibility</div>
               {keyword && (
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, color: "#64748B", marginBottom: 6 }}>PRIMARY KEYWORD DETECTED FROM PAGE</div>
+                  <div style={{ fontSize: 13, color: "#64748B", marginBottom: 6, fontWeight: 700, letterSpacing: "0.08em" }}>PRIMARY KEYWORD DETECTED FROM PAGE</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                     <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", padding: "8px 14px", background: "#111827", border: "1px solid #1E3050", borderRadius: 8 }}>
                       &ldquo;{keyword}&rdquo;
                     </div>
                     {rankCheckUrl && (
-                      <a href={rankCheckUrl} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#60A5FA", textDecoration: "none", padding: "8px 14px", border: "1px solid #60A5FA30", borderRadius: 8 }}>
+                      <a href={rankCheckUrl} target="_blank" rel="noreferrer" style={{ fontSize: 16, color: "#60A5FA", textDecoration: "none", padding: "8px 14px", border: "1px solid #60A5FA30", borderRadius: 8 }}>
                         Check Google Rankings →
                       </a>
                     )}
-                    <a href={googleSearchUrl} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "#94A3B8", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", borderRadius: 8 }}>
+                    <a href={googleSearchUrl} target="_blank" rel="noreferrer" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", borderRadius: 8 }}>
                       Site: Index Check →
                     </a>
                   </div>
@@ -591,8 +591,8 @@ export default function ReportPage() {
               )}
               {h1 && (
                 <div style={{ marginBottom: 16, padding: "12px 16px", background: "#111827", borderRadius: 8, borderLeft: "3px solid #FBBF24" }}>
-                  <div style={{ fontSize: 11, color: "#64748B", marginBottom: 4 }}>CURRENT H1 TAG</div>
-                  <div style={{ fontSize: 15, color: "#F1F5F9", fontStyle: "italic" }}>&ldquo;{h1}&rdquo;</div>
+                  <div style={{ fontSize: 13, color: "#64748B", marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em" }}>CURRENT H1 TAG</div>
+                  <div style={{ fontSize: 16, color: "#F1F5F9", fontStyle: "italic" }}>&ldquo;{h1}&rdquo;</div>
                   {h1 && !h1.match(/[A-Z][a-z]+ (MO|Missouri|IL|Illinois|St\. Louis)/i) && (
                     <div style={{ fontSize: 13, color: "#FBBF24", marginTop: 6 }}>
                       ⚠ No city or state detected in H1 — missing local keyword signal
@@ -607,15 +607,15 @@ export default function ReportPage() {
                   { label: "Pricing Schema", value: hasPricing, good: true },
                 ].map(({ label, value, good }) => (
                   <div key={label} style={{ padding: "10px 12px", background: "#111827", borderRadius: 8, border: `1px solid ${value ? "#10D9A030" : "#F8717120"}` }}>
-                    <div style={{ fontSize: 11, color: "#64748B", marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: value ? "#10D9A0" : "#F87171" }}>
+                    <div style={{ fontSize: 13, color: "#64748B", marginBottom: 3, fontWeight: 700, letterSpacing: "0.06em" }}>{label}</div>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: value ? "#10D9A0" : "#F87171" }}>
                       {value ? `✓ Detected` : `✗ Missing`}
                     </div>
                   </div>
                 ))}
               </div>
               {(!hasSchema || !hasFAQ) && (
-                <div style={{ marginTop: 12, fontSize: 14, color: "#64748B", lineHeight: 1.6 }}>
+                <div style={{ marginTop: 12, fontSize: 16, color: "#64748B", lineHeight: 1.6 }}>
                   {!hasSchema && <div>→ Missing LocalBusiness schema — Google has less confidence in your local signals and NAP data.</div>}
                   {!hasFAQ && <div>→ Missing FAQ schema — competitors with FAQ pages get free rich results above your listing.</div>}
                 </div>
@@ -686,7 +686,7 @@ export default function ReportPage() {
         </div>
 
         <div style={{ textAlign: "center", marginTop: 24 }}>
-          <a href="/" style={{ fontSize: 15, color: "#475569", textDecoration: "none" }}>← Run another audit at PingClose.com</a>
+          <a href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>← Run another audit at PingClose.com</a>
         </div>
 
       </div>

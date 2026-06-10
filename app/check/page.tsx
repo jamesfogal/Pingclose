@@ -71,7 +71,7 @@ function CheckContent() {
           </a>
 
           {/* Email note */}
-          <p style={{ fontSize: 15, color: "#475569", margin: "0 0 48px" }}>
+          <p style={{ fontSize: 16, color: "#475569", margin: "0 0 48px" }}>
             We also sent it to your inbox — the link is permanent and shareable.
           </p>
 
@@ -84,7 +84,7 @@ function CheckContent() {
             textAlign: "left",
             marginBottom: 32
           }}>
-            <div style={{ fontSize: 11, color: "#64748B", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 14, textTransform: "uppercase" }}>
+            <div style={{ fontSize: 13, color: "#64748B", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 14, textTransform: "uppercase" }}>
               Your report includes
             </div>
             {[
@@ -96,13 +96,13 @@ function CheckContent() {
               "Exactly what to fix and in what order",
             ].map(item => (
               <div key={item} style={{ display: "flex", gap: 12, marginBottom: 10, alignItems: "flex-start" }}>
-                <span style={{ color: "#10D9A0", fontSize: 14, flexShrink: 0, marginTop: 2 }}>✓</span>
-                <span style={{ fontSize: 15, color: "#94A3B8" }}>{item}</span>
+                <span style={{ color: "#10D9A0", fontSize: 16, flexShrink: 0, marginTop: 2 }}>✓</span>
+                <span style={{ fontSize: 16, color: "#94A3B8" }}>{item}</span>
               </div>
             ))}
           </div>
 
-          <Link href="/" style={{ fontSize: 15, color: "#475569", textDecoration: "none" }}>
+          <Link href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
             ← Back to PingClose
           </Link>
         </div>
@@ -140,7 +140,7 @@ function CheckContent() {
           <p style={{ fontSize: 19, color: "#CBD5E1", lineHeight: 1.6, margin: "0 0 32px" }}>
             Your report is already in your inbox — check your email.
           </p>
-          <Link href="/" style={{ fontSize: 15, color: "#475569", textDecoration: "none" }}>
+          <Link href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
             ← Back to PingClose
           </Link>
         </div>
@@ -161,16 +161,16 @@ function CheckContent() {
       }}>
         <div style={{ textAlign: "center", maxWidth: "480px" }}>
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
-          <div style={{ fontSize: "26px", fontWeight: 800, marginBottom: "12px" }}>You've Been Busy!</div>
+          <div style={{ fontSize: "26px", fontWeight: 800, marginBottom: "12px" }}>You&apos;ve Been Busy!</div>
           <div style={{ fontSize: "16px", color: "#94A3B8", marginBottom: "24px", lineHeight: 1.6 }}>
-            You've run 5 free audits today — that's the daily limit. Come back tomorrow for more free audits.
+            You&apos;ve run 5 free audits today — that&apos;s the daily limit. Come back tomorrow for more free audits.
           </div>
           <div style={{
             background: "#111827", border: "1px solid #1F2937", borderRadius: "12px",
             padding: "20px", marginBottom: "24px",
           }}>
-            <div style={{ fontSize: "15px", color: "#64748B", marginBottom: "8px" }}>Need more audits right now?</div>
-            <div style={{ fontSize: "15px", color: "#F1F5F9" }}>
+            <div style={{ fontSize: "16px", color: "#64748B", marginBottom: "8px" }}>Need more audits right now?</div>
+            <div style={{ fontSize: "16px", color: "#F1F5F9" }}>
               Call or text <a href="tel:+13145172533" style={{ color: "#10D9A0", fontWeight: 700 }}>(314) 517-2533</a> — Jim Fogal
             </div>
           </div>
@@ -259,7 +259,7 @@ function CheckContent() {
           Check your email — your report link is permanent and shareable.
         </p>
 
-        <Link href="/" style={{ fontSize: 15, color: "#475569", textDecoration: "none" }}>
+        <Link href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
           ← Back to PingClose
         </Link>
       </div>
