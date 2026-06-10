@@ -3,13 +3,14 @@ import { supabase } from '@/lib/supabase';
 import { runPageSpeed } from '@/lib/pagespeed';
 import { detectTechStack } from '@/lib/htmlAudit';
 import { sendReportEmail, sendLeadNotification } from '@/lib/email';
+import { sendReportSms } from '@/lib/sms';
 
 export async function POST(req: NextRequest) {
   try {
-    const { url, email } = await req.json();
+    const { url, email, phone, deliverySms = false, deliveryEmail = true } = await req.json();
 
-    if (!url || !email) {
-      return NextResponse.json({ error: 'URL and email are required' }, { status: 400 });
+    if (!url || (!email && !phone)) {
+      return NextResponse.json({ error: 'URL and at least one delivery method are required' }, { status: 400 });
     }
 
     // Normalize URL
@@ -135,7 +136,8 @@ export async function POST(req: NextRequest) {
       .from('pingclose_audits')
       .insert({
         url: normalizedUrl,
-        email,
+        email: email || null,
+        phone: phone || null,
         ip_address: ip,
         mobile_score: speedResult.mobileScore,
         desktop_score: speedResult.desktopScore,
@@ -183,11 +185,18 @@ export async function POST(req: NextRequest) {
         .eq('id', audit.id);
     }
 
-    // ── Send emails — non-blocking so a Resend failure never kills the audit ──
-    console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
-    const emailResults = await Promise.allSettled([
-      sendReportEmail(email, audit.id, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond),
-      sendLeadNotification({
+    // ── Send SMS + email — non-blocking so failures never kill the audit ──
+    const hostname = (() => { try { return new URL(normalizedUrl).hostname; } catch { return normalizedUrl; } })();
+    const deliveryTasks: Promise<unknown>[] = [];
+
+    if (deliverySms && phone) {
+      deliveryTasks.push(sendReportSms(phone, audit.id, hostname, speedResult.mobileScore, speedResult.passesOneSecond));
+    }
+    if (deliveryEmail && email) {
+      console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
+      deliveryTasks.push(sendReportEmail(email, audit.id, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond));
+    }
+    deliveryTasks.push(sendLeadNotification({
         reportId: audit.id,
         url: normalizedUrl,
         email,
@@ -202,12 +211,14 @@ export async function POST(req: NextRequest) {
       })
     ]);
 
-    // Log any email failures for debugging — but never surface to user
-    emailResults.forEach((r, i) => {
+    const deliveryResults = await Promise.allSettled(deliveryTasks);
+
+    // Log any failures — never surface to user
+    deliveryResults.forEach((r, i) => {
       if (r.status === 'rejected') {
-        console.error(`EMAIL FAILED ${i === 0 ? 'report' : 'lead-notify'}:`, r.reason);
+        console.error(`DELIVERY FAILED [${i}]:`, r.reason);
       } else {
-        console.log(`EMAIL OK ${i === 0 ? 'report' : 'lead-notify'}`);
+        console.log(`DELIVERY OK [${i}]`);
       }
     });
 

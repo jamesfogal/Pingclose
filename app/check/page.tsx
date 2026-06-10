@@ -217,6 +217,9 @@ function CheckContent() {
   const reportId  = params.get("id");
   const pendingUrl   = params.get("url");
   const pendingEmail = params.get("email");
+  const pendingPhone = params.get("phone");
+  const deliverySms  = params.get("sms")  === "1";
+  const deliveryEmail = params.get("mail") === "1";
 
   // apiDone = true as soon as the fetch returns (success or handled error)
   const [apiDone, setApiDone]   = useState(false);
@@ -235,14 +238,20 @@ function CheckContent() {
   );
 
   useEffect(() => {
-    if (status !== "running" || !pendingUrl || !pendingEmail) return;
+    if (status !== "running" || !pendingUrl) return;
 
     const run = async () => {
       try {
         const res  = await fetch("/api/audit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: pendingUrl, email: pendingEmail }),
+          body: JSON.stringify({
+            url: pendingUrl,
+            email: pendingEmail || null,
+            phone: pendingPhone || null,
+            deliverySms,
+            deliveryEmail,
+          }),
         });
         const data = await res.json();
 
@@ -317,7 +326,7 @@ function CheckContent() {
         <CountdownTimer apiDone={apiDone} onZero={handleZero} />
 
         <p style={{ fontSize: 16, color: "#475569", textAlign: "center", marginTop: 24, marginBottom: 20 }}>
-          Your report will also land in your inbox.
+          {deliverySms && pendingPhone ? "📱 We'll text you the report link when it's ready." : "✉️ We'll email you the report link when it's ready."}
         </p>
         <div style={{ textAlign: "center" }}>
           <Link href="/" style={{ fontSize: 16, color: "#374151", textDecoration: "none" }}>← Cancel</Link>
