@@ -35,30 +35,8 @@ export default function Home() {
     playPing();
     setPinged(true);
     setLoading(true);
-
-    try {
-      const res = await fetch("/api/audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, email })
-      });
-      const data = await res.json();
-
-      if (data.duplicate) {
-        router.push("/check?duplicate=true");
-        return;
-      }
-      if (data.limit) {
-        router.push("/check?limit=true");
-        return;
-      }
-      if (data.error) { setError(data.error); setLoading(false); return; }
-
-      router.push(`/check?id=${data.reportId}`);
-    } catch {
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
-    }
+    // Redirect immediately — the check page runs the audit and shows the progress animation
+    router.push(`/check?url=${encodeURIComponent(url)}&email=${encodeURIComponent(email)}`);
   }
 
   return (

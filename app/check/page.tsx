@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 
 function CheckContent() {
@@ -8,9 +8,46 @@ function CheckContent() {
   const duplicate = params.get("duplicate");
   const limit = params.get("limit");
   const reportId = params.get("id");
+  const pendingUrl = params.get("url");
+  const pendingEmail = params.get("email");
+
+  const [status, setStatus] = useState<"running" | "ready" | "duplicate" | "limit" | "error">(
+    duplicate ? "duplicate" : limit ? "limit" : reportId ? "ready" : pendingUrl ? "running" : "running"
+  );
+  const [doneId, setDoneId] = useState<string | null>(reportId);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    // Only run the audit if we have url+email params (fresh submission from homepage)
+    if (!pendingUrl || !pendingEmail) return;
+
+    const run = async () => {
+      try {
+        const res = await fetch("/api/audit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: pendingUrl, email: pendingEmail })
+        });
+        const data = await res.json();
+
+        if (data.duplicate) { setStatus("duplicate"); return; }
+        if (data.limit)     { setStatus("limit");     return; }
+        if (data.error)     { setStatus("error"); setErrorMsg(data.error); return; }
+
+        setDoneId(data.reportId);
+        setStatus("ready");
+      } catch {
+        setStatus("error");
+        setErrorMsg("Something went wrong. Please try again.");
+      }
+    };
+
+    run();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Report is ready — show CTA ──────────────────────────────────
-  if (reportId) {
+  if (status === "ready" && doneId) {
     return (
       <main style={{
         minHeight: "100vh",
@@ -53,7 +90,7 @@ function CheckContent() {
 
           {/* Primary CTA */}
           <a
-            href={`/report/${reportId}`}
+            href={`/report/${doneId}`}
             style={{
               display: "inline-block",
               background: "#10D9A0",
@@ -75,7 +112,7 @@ function CheckContent() {
             We also sent it to your inbox — the link is permanent and shareable.
           </p>
 
-          {/* What&apos;s in the report */}
+          {/* What's in the report */}
           <div style={{
             background: "#0D1528",
             border: "1px solid #1E3050",
@@ -111,7 +148,7 @@ function CheckContent() {
   }
 
   // ── Duplicate — already sent ─────────────────────────────────────
-  if (duplicate) {
+  if (status === "duplicate") {
     return (
       <main style={{
         minHeight: "100vh",
@@ -149,7 +186,7 @@ function CheckContent() {
   }
 
   // ── Rate limit hit ───────────────────────────────────────────────
-  if (limit) {
+  if (status === "limit") {
     return (
       <main style={{
         minHeight: "100vh",
@@ -186,7 +223,36 @@ function CheckContent() {
     );
   }
 
-  // ── Fallback — landed here directly, no id or duplicate ─────────
+  // ── Error ────────────────────────────────────────────────────────
+  if (status === "error") {
+    return (
+      <main style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)",
+        color: "#F1F5F9",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "24px",
+      }}>
+        <div style={{ textAlign: "center", maxWidth: "480px" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>⚠️</div>
+          <div style={{ fontSize: "24px", fontWeight: 800, marginBottom: "12px" }}>Something went wrong</div>
+          <div style={{ fontSize: "16px", color: "#94A3B8", marginBottom: "28px", lineHeight: 1.6 }}>
+            {errorMsg || "The audit couldn't complete. Please try again."}
+          </div>
+          <Link href="/" style={{
+            display: "inline-block", background: "#10D9A0", color: "#0B0E16",
+            fontWeight: 700, fontSize: "16px", padding: "14px 32px",
+            borderRadius: "8px", textDecoration: "none",
+          }}>
+            ← Try Again
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Running — progress animation (default state while audit runs) ─
   return (
     <main style={{
       minHeight: "100vh",
@@ -214,7 +280,7 @@ function CheckContent() {
         </h1>
         <p style={{ fontSize: 19, color: "#CBD5E1", lineHeight: 1.6, margin: "0 0 40px" }}>
           We&apos;re running your full speed audit right now.<br />
-          Your report will land in your inbox in about 60 seconds.
+          Your report will be ready in about 30 seconds.
         </p>
 
         {/* Animated progress bar */}
@@ -228,7 +294,7 @@ function CheckContent() {
             height: "100%",
             background: "linear-gradient(90deg, #10D9A0, #60A5FA)",
             borderRadius: 10,
-            animation: "progress 12s ease-in-out forwards"
+            animation: "progress 30s ease-in-out forwards"
           }} />
         </div>
 
@@ -267,12 +333,12 @@ function CheckContent() {
       <style>{`
         @keyframes progress {
           0% { width: 0%; }
-          15% { width: 20%; }
-          35% { width: 45%; }
-          60% { width: 68%; }
-          80% { width: 85%; }
-          95% { width: 96%; }
-          100% { width: 100%; }
+          10% { width: 15%; }
+          25% { width: 35%; }
+          50% { width: 58%; }
+          75% { width: 78%; }
+          90% { width: 92%; }
+          100% { width: 99%; }
         }
       `}</style>
     </main>
