@@ -138,7 +138,7 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
   const metaDescription = metaDescMatch?.[1]?.trim() || '';
   const metaDescriptionLength = metaDescription.length;
 
-  const h1Matches = html.match(/<h1[^>]*>([^<]+)<\/h1>/gi) || [];
+  const h1Matches = html.match(/<h1[^>]*>[\s\S]*?<\/h1>/gi) || [];
   const hasH1 = h1Matches.length > 0;
   const h1Text = h1Matches[0]?.replace(/<[^>]+>/g, '').trim() || '';
   const multipleH1s = h1Matches.length > 1;

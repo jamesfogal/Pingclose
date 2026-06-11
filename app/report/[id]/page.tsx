@@ -713,6 +713,9 @@ export default function ReportPage() {
 
         {/* CLOSING CTA — conditional based on score */}
         <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "36px", marginBottom: 12 }}>
+          <h1 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, color: "#F1F5F9", textAlign: "center", margin: "0 0 24px", letterSpacing: "-1px", lineHeight: 1.15 }}>
+            We Find <span style={{ color: "#10D9A0" }}>Broken Websites</span>
+          </h1>
           {audit.passes_one_second && audit.mobile_score >= 90 ? (
             // PASSING — curiosity pitch
             <>

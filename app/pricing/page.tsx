@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Pricing — Free Speed Test + LocalSEOAEOPro Fix Options",
+  description: "PingClose speed tests are free. For full-site fixes — lazy loading, schema markup, and page optimization — see LocalSEOAEOPro pricing.",
+  alternates: { canonical: "https://pingclose.com/pricing" },
+  openGraph: {
+    title: "PingClose Pricing",
+    description: "Free above-the-fold speed test. Full-site fixes at LocalSEOAEOPro.",
+    url: "https://pingclose.com/pricing",
+  },
+};
 
 const TEAL = "#10D9A0";
 const NAVY = "#0D1528";
