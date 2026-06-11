@@ -91,7 +91,7 @@ export default function Home() {
       border: `2px solid ${focused ? "#10D9A0" : "#374151"}`,
       borderRadius: 10, color: "#F1F5F9", fontSize: 18,
       outline: "none", boxSizing: "border-box" as const,
-      transition: "border-color 0.2s, box-shadow 0.2s",
+      transition: "border-color 180ms cubic-bezier(0.23,1,0.32,1), box-shadow 180ms cubic-bezier(0.23,1,0.32,1)",
       boxShadow: focused ? "0 0 0 3px #10D9A015" : "none",
     };
   }
@@ -104,7 +104,7 @@ export default function Home() {
     color: canSubmit ? "#0B0E16" : "#10D9A0",
     fontSize: 18, fontWeight: 700,
     cursor: canSubmit ? "pointer" : "not-allowed" as const,
-    transition: "all 0.2s",
+    transition: "background 180ms cubic-bezier(0.23,1,0.32,1), box-shadow 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)",
   };
 
   const schema = {
@@ -145,12 +145,12 @@ export default function Home() {
           </div>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
             <a href="/faq"
-              style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A040", borderRadius: 8, padding: "10px 22px", transition: "background 0.2s" }}
+              style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A040", borderRadius: 8, padding: "10px 22px", transition: "background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A025"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A015"; }}
             >Website Speed FAQ</a>
             <a href="/pricing"
-              style={{ fontSize: 17, fontWeight: 600, color: "#10D9A0", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A060", borderRadius: 8, padding: "10px 22px", transition: "background 0.2s" }}
+              style={{ fontSize: 17, fontWeight: 600, color: "#10D9A0", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A060", borderRadius: 8, padding: "10px 22px", transition: "background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A025"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A015"; }}
             >See Pricing →</a>
@@ -185,7 +185,9 @@ export default function Home() {
                   {error && <div style={{ fontSize: 16, color: "#F87171" }}>{error}</div>}
                   <button type="submit" disabled={loading} style={btnStyle}
                     onMouseEnter={e => { if (canSubmit) (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px #10D9A040"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; (e.currentTarget as HTMLElement).style.transform = ""; }}
+                    onMouseDown={e => { if (canSubmit) (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+                    onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
                   >
                     {loading ? "Checking your site…" : "Ping My Site Free →"}
                   </button>
@@ -377,7 +379,7 @@ export default function Home() {
               ["🏆", "The Verdict",    "Pass/fail with your top issues to fix first"],
             ].map(([icon, title, desc]) => (
               <div key={String(title)}
-                style={{ display: "flex", gap: 16, marginBottom: 16, padding: "10px 12px", borderRadius: 8, transition: "background 0.15s", cursor: "default" }}
+                style={{ display: "flex", gap: 16, marginBottom: 16, padding: "10px 12px", borderRadius: 8, transition: "background 150ms cubic-bezier(0.23,1,0.32,1)", cursor: "default" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A008"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
               >
@@ -392,9 +394,11 @@ export default function Home() {
 
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            style={{ background: "#10D9A0", color: "#0B0E16", fontSize: 18, fontWeight: 700, padding: "16px 40px", borderRadius: 10, border: "none", cursor: "pointer", transition: "all 0.2s" }}
+            style={{ background: "#10D9A0", color: "#0B0E16", fontSize: 18, fontWeight: 700, padding: "16px 40px", borderRadius: 10, border: "none", cursor: "pointer", transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 28px #10D9A040"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
+            onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+            onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
           >
             Ping My Site — It&apos;s Free →
           </button>
@@ -412,16 +416,26 @@ export default function Home() {
           .stats-grid   { grid-template-columns: 1fr !important; }
           .preview-card { display: none !important; }
         }
-        @keyframes ping {
-          75%, 100% { transform: scale(2.5); opacity: 0; }
+        @media (hover: hover) and (pointer: fine) {
+          a:active { transform: scale(0.97); }
         }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.4; }
+        @media (prefers-reduced-motion: no-preference) {
+          @keyframes ping {
+            75%, 100% { transform: scale(2.5); opacity: 0; }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+          }
+          @keyframes growUp {
+            from { transform: scaleY(0.92); opacity: 0; }
+            to   { transform: scaleY(1);    opacity: 1; }
+          }
         }
-        @keyframes growUp {
-          from { transform: scaleY(0); }
-          to   { transform: scaleY(1); }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes ping   { 75%, 100% { opacity: 0; } }
+          @keyframes pulse  { 50% { opacity: 0.6; } }
+          @keyframes growUp { from { opacity: 0; } to { opacity: 1; } }
         }
       `}</style>
     </main>
