@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { runPageSpeed } from '@/lib/pagespeed';
 import { detectTechStack } from '@/lib/htmlAudit';
-import { sendReportEmail, sendLeadNotification } from '@/lib/email';
-import { sendReportSms } from '@/lib/sms';
+import { checkRateLimit, checkAgencySignal } from '@/lib/rateLimiter';
+import { scoreAudit } from '@/lib/auditScorer';
+import { deliverReport } from '@/lib/reportDelivery';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,48 +14,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL and at least one delivery method are required' }, { status: 400 });
     }
 
-    // Normalize URL
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || '0.0.0.0';
 
-    // Get IP for soft flagging
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
-                req.headers.get('x-real-ip') ||
-                '0.0.0.0';
-
-    // VIP emails — no rate limit ever
-    const VIP_EMAILS = ['jim@pingclose.com', 'james.fogal@gmail.com', 'james.fogal@citywidealarms.com'];
-    const isVIP = VIP_EMAILS.includes(email.toLowerCase());
-
-    // Rate limit — max 5 audits per email per 24 hours (VIPs exempt)
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-    const { count: auditCount } = await supabase
-      .from('pingclose_audits')
-      .select('*', { count: 'exact', head: true })
-      .eq('email', email)
-      .gte('created_at', yesterday);
-
-    if (!isVIP && auditCount && auditCount >= 5) {
-      // Notify Jim that someone hit the limit
-      try {
-        const { sendLimitNotification } = await import('@/lib/email');
-        await sendLimitNotification(email, auditCount + 1);
-      } catch (e) {
-        console.error('Limit notification failed:', e);
-      }
-      return NextResponse.json({
-        limit: true,
-        message: "You've run 5 free audits today. Come back tomorrow for more!"
-      });
+    const { limited } = await checkRateLimit(email);
+    if (limited) {
+      return NextResponse.json({ limit: true, message: "You've run 5 free audits today. Come back tomorrow for more!" });
     }
 
-    // Run PageSpeed and tech stack detection in parallel
     const [speedResult, techResult] = await Promise.all([
       runPageSpeed(normalizedUrl),
       detectTechStack(normalizedUrl)
     ]);
 
-    // Enrich video details from htmlAudit
+    // Enrich video details
     if (speedResult.videoDetails.length > 0) {
       speedResult.hasAutoPlayVideo = techResult.hasAutoPlayVideo;
       speedResult.videoDetails = speedResult.videoDetails.map(v => ({
@@ -64,74 +37,14 @@ export async function POST(req: NextRequest) {
       }));
     }
 
-    // Enrich image alt text from htmlAudit
+    // Enrich image alt text
     speedResult.nonWebpImageList = speedResult.nonWebpImageList.map(img => ({
       ...img,
       hasAltText: !techResult.imagesWithoutAlt.some(u => u.includes(img.url))
     }));
 
-    // ── Build scored issues list (severity 1-10, sorted red → green) ──
-    interface ScoredIssue { score: number; text: string; }
-    const scoredIssues: ScoredIssue[] = [];
-    const issue = (score: number, text: string) => scoredIssues.push({ score, text });
+    const { topIssues, topFixes } = scoreAudit(speedResult, techResult);
 
-    // 🔴 CRITICAL (9-10) — business-threatening
-    if (!techResult.isHttps) issue(10, '🔴 No HTTPS — Google shows a security warning to every visitor and applies a ranking penalty');
-    if (!techResult.hasBackup && techResult.cms === 'WordPress') issue(4, '🟢 Backup status unverifiable from outside — confirm UpdraftPlus, Jetpack Backup, or host-level snapshots are active in your WP admin');
-    if (techResult.hostingVerdict === 'dead-zone') issue(10, `🔴 ${techResult.hosting} hosting detected — this host cannot achieve under 1 second load time regardless of what else is fixed`);
-    if (!speedResult.passesOneSecond) issue(9, `🔴 Mobile score ${speedResult.mobileScore}/100 — failing Google's 1-second hurdle`);
-    if (speedResult.lcp > 4000) issue(9, `🔴 LCP is ${(speedResult.lcp/1000).toFixed(1)}s — catastrophically slow, costing you Google rankings and visitors`);
-    if (!techResult.hasGA4 && !techResult.hasGTM) issue(9, '🔴 No analytics installed — you cannot know which marketing is working, which pages convert, or where visitors drop off');
-    if (speedResult.mobileDesktopGap >= 25) issue(9, `🔴 ${speedResult.mobileDesktopGap}-point gap between mobile and desktop — your real customers are getting a dramatically worse experience`);
-
-    // 🟠 SERIOUS (7-8) — significant revenue impact
-    if (techResult.hostingVerdict === 'speed-limiter') issue(8, `🟠 ${techResult.cms} platform detected — server-level speed optimizations are locked out`);
-    if (speedResult.renderBlockingScripts > 0) issue(8, `🟠 ${speedResult.renderBlockingScripts} render-blocking scripts freezing page before any content loads — ~${Math.round(speedResult.renderBlockingDetails.reduce((s, r) => s + r.savingsMs, 0))}ms wasted`);
-    if (!techResult.hasH1) issue(8, '🟠 No H1 tag found — primary keyword signal is completely missing from this page');
-    if (!techResult.hasTitle) issue(8, '🟠 No title tag — critical SEO signal missing, Google will generate its own title');
-    if (speedResult.ttfb > 800) issue(8, `🟠 Server response time ${speedResult.ttfb}ms — host is responding too slowly before a single byte loads`);
-    if (speedResult.lcp > 2500 && speedResult.lcp <= 4000) issue(8, `🟠 LCP is ${(speedResult.lcp/1000).toFixed(1)}s — failing Google's Core Web Vitals threshold`);
-    if (!techResult.hasFacebookPixel) issue(7, '🟠 No Facebook Pixel — Facebook and Instagram ad spend cannot be tracked or optimized');
-    if (speedResult.unusedJsKb > 100) issue(7, `🟠 ${speedResult.unusedJsKb}KB of unused JavaScript loading on every visit — pure waste slowing every page load`);
-    if (!techResult.hasMetaDescription) issue(7, '🟠 No meta description — Google pulls random text for your search result snippet');
-    if (speedResult.hasRocketLoaderConflict) issue(7, '🟠 Cloudflare Rocket Loader conflict — adding load time instead of reducing it, should be disabled');
-    if (speedResult.hasAutoPlayVideo) issue(7, '🟠 Autoplay video detected — significantly increases mobile data usage and delays page load');
-    if (techResult.multipleH1s) issue(7, '🟠 Multiple H1 tags — confuses Google about which topic this page is targeting');
-
-    // 🟡 MODERATE (5-6) — meaningful SEO and conversion impact
-    if (speedResult.nonWebpImages > 0) issue(6, `🟡 ${speedResult.nonWebpImages} of ${speedResult.totalImages} images not WebP — estimated ${speedResult.estimatedWebPSavingKb}KB savings available`);
-    if (!techResult.hasLocalBusinessSchema) issue(6, '🟡 No LocalBusiness schema — Google has reduced confidence in your local signals');
-    if (!techResult.hasFAQSchema) issue(6, '🟡 No FAQ page with schema — missing free Google rich result opportunity your competitors may already have');
-    if (!techResult.hasPricingSchema) issue(6, '🟡 No pricing page with schema — competitors with pricing schema rank higher for buying-intent searches');
-    if (speedResult.unusedJsKb > 50 && speedResult.unusedJsKb <= 100) issue(6, `🟡 ${speedResult.unusedJsKb}KB unused JavaScript loading on every visit`);
-    if (speedResult.unusedCssKb > 30) issue(5, `🟡 ${speedResult.unusedCssKb}KB unused CSS loading on every page`);
-    if (speedResult.noBrowserCaching) issue(5, '🟡 No browser caching — repeat visitors re-download the same files on every single visit');
-    if (speedResult.hasFontDisplayIssue) issue(5, '🟡 Font loading issue — text is invisible to visitors until fonts fully download');
-    if (!techResult.hasCanonical) issue(5, '🟡 No canonical tag — risk of duplicate content issues hurting rankings');
-    if (!techResult.hasSitemap) issue(5, '🟡 No XML sitemap — Google may not discover all your pages');
-    if (speedResult.largestImageKb > 500) issue(5, `🟡 Largest image is ${speedResult.largestImageKb}KB — oversized images are the #1 cause of slow mobile loads`);
-    if (speedResult.hasAboveFoldEmbed) issue(5, '🟡 Video embed above the fold — blocks page rendering until iframe fully loads');
-    if (speedResult.ttfb > 600 && speedResult.ttfb <= 800) issue(5, `🟡 Server response time ${speedResult.ttfb}ms — slightly above the recommended 600ms threshold`);
-
-    // 🟢 MINOR (3-4) — polish and optimization
-    if (!speedResult.imagesLazyLoaded) issue(4, '🟢 Lazy loading not enabled — off-screen images load immediately, wasting bandwidth');
-    if (speedResult.imagesMissingAltText > 0) issue(4, `🟢 ${speedResult.imagesMissingAltText} images missing alt text — hurting SEO and accessibility scores`);
-    if (techResult.titleLength > 60) issue(4, `🟢 Title tag is ${techResult.titleLength} characters — Google truncates at 60, cutting off your message`);
-    if (!techResult.hasReviewSchema) issue(3, '🟢 No review/rating schema — missing opportunity to show star ratings in search results');
-    if (!techResult.hasTikTokPixel) issue(3, '🟢 No TikTok Pixel — TikTok ad conversions cannot be tracked');
-    if (speedResult.hasGTMBloat) issue(3, '🟢 Google Tag Manager detected — verify all tags are active and necessary');
-
-    // WordPress specifics
-    techResult.wordpressPluginIssues.forEach(p => issue(6, `🟠 ${p}`));
-
-    // Sort by score descending (10 → 1)
-    scoredIssues.sort((a, b) => b.score - a.score);
-    const topIssues = scoredIssues.map(i => `[${i.score}] ${i.text}`);
-
-    // Top fixes (from opportunities)
-    const topFixes = speedResult.opportunities.map(o => `${o.title}${o.savings ? ` — ${o.savings}` : ''}`);
-
-    // ── Save to Supabase ─────────────────────────────────────────
     const { data: audit, error } = await supabase
       .from('pingclose_audits')
       .insert({
@@ -159,66 +72,25 @@ export async function POST(req: NextRequest) {
         render_blocking_scripts: speedResult.renderBlockingScripts,
         top_issues: topIssues.slice(0, 15),
         top_fixes: topFixes,
-        full_report: {
-          speed: speedResult,
-          tech: techResult
-        }
+        full_report: { speed: speedResult, tech: techResult }
       })
       .select('id')
       .single();
 
     if (error) throw error;
 
-    // ── Agency signal check ──────────────────────────────────────
-    let agencySignal = false;
-    const { count: ipCount } = await supabase
-      .from('pingclose_audits')
-      .select('*', { count: 'exact', head: true })
-      .eq('ip_address', ip)
-      .gte('created_at', yesterday);
+    const agencySignal = await checkAgencySignal(ip, audit.id);
 
-    if (ipCount && ipCount >= 3) {
-      agencySignal = true;
-      await supabase
-        .from('pingclose_audits')
-        .update({ agency_signal: true })
-        .eq('id', audit.id);
-    }
-
-    // ── Send SMS + email — non-blocking so failures never kill the audit ──
-    const hostname = (() => { try { return new URL(normalizedUrl).hostname; } catch { return normalizedUrl; } })();
-    const deliveryTasks: Promise<unknown>[] = [];
-
-    if (deliverySms && phone) {
-      deliveryTasks.push(sendReportSms(phone, audit.id, hostname, speedResult.mobileScore, speedResult.passesOneSecond));
-    }
-    if (deliveryEmail && email) {
-      console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
-      deliveryTasks.push(sendReportEmail(email, audit.id, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond));
-    }
-    deliveryTasks.push(sendLeadNotification({
+    await deliverReport({
       reportId: audit.id,
-      url: normalizedUrl,
+      normalizedUrl,
       email: email || null,
-      mobileScore: speedResult.mobileScore,
-      desktopScore: speedResult.desktopScore,
-      passesOneSecond: speedResult.passesOneSecond,
-      cms: techResult.cms,
-      hosting: techResult.hosting,
-      hostingVerdictLabel: techResult.hostingVerdictLabel,
+      phone: phone || null,
+      deliveryEmail,
+      deliverySms,
       agencySignal,
-      primaryKeyword: techResult.primaryKeyword
-    }));
-
-    const deliveryResults = await Promise.allSettled(deliveryTasks);
-
-    // Log any failures — never surface to user
-    deliveryResults.forEach((r, i) => {
-      if (r.status === 'rejected') {
-        console.error(`DELIVERY FAILED [${i}]:`, r.reason);
-      } else {
-        console.log(`DELIVERY OK [${i}]`);
-      }
+      speedResult,
+      techResult
     });
 
     return NextResponse.json({ success: true, reportId: audit.id });
