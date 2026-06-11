@@ -143,7 +143,7 @@ export async function sendLimitNotification(email: string, attemptNumber: number
 export async function sendLeadNotification(params: {
   reportId: string;
   url: string;
-  email: string;
+  email: string | null | undefined;
   mobileScore: number;
   desktopScore: number;
   passesOneSecond: boolean;
