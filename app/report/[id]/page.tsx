@@ -122,7 +122,7 @@ const SECTION_LABEL: React.CSSProperties = { fontSize: 16, fontWeight: 700, colo
 function ScoreRing({ score, label }: { score: number; label: string }) {
   const color = score >= 70 ? "#10D9A0" : score >= 50 ? "#FBBF24" : "#F87171";
   return (
-    <div style={{ textAlign: "center" }}>
+    <div style={{ textAlign: "center", animation: "scoreReveal 400ms cubic-bezier(0.23,1,0.32,1) both" }}>
       <div style={{ width: 90, height: 90, borderRadius: "50%", border: `5px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px", background: color + "15" }}>
         <span style={{ fontSize: 26, fontWeight: 800, color }}>{score}</span>
       </div>
@@ -142,9 +142,9 @@ function Metric({ label, value, unit, good, na }: { label: string; value: string
   );
 }
 
-function CheckRow({ label, pass, detail }: { label: string; pass: boolean; detail?: string }) {
+function CheckRow({ label, pass, detail, index = 0 }: { label: string; pass: boolean; detail?: string; index?: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12, animation: `checkRowIn 300ms cubic-bezier(0.23,1,0.32,1) ${index * 40}ms both` }}>
       <span style={{ color: pass ? "#10D9A0" : "#F87171", fontSize: 18, flexShrink: 0, fontWeight: 700, marginTop: 1 }}>{pass ? "✓" : "✗"}</span>
       <div>
         <span style={{ fontSize: 17, color: pass ? "#94A3B8" : "#F1F5F9" }}>{label}</span>
@@ -168,7 +168,7 @@ export default function ReportPage() {
 
   if (loading) return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#CBD5E1", fontFamily: "system-ui, sans-serif", fontSize: 18 }}>
-      Loading your report...
+      <span style={{ animation: "pulse 1.8s ease-in-out infinite" }}>Loading your report…</span>
     </main>
   );
 
@@ -602,8 +602,13 @@ export default function ReportPage() {
                     display: "flex", alignItems: "flex-start", gap: 12,
                     background: scoreBg(issue.score),
                     border: `1px solid ${scoreBorder(issue.score)}`,
-                    borderRadius: 8, padding: "12px 14px"
-                  }}>
+                    borderRadius: 8, padding: "12px 14px",
+                    transition: "background 150ms cubic-bezier(0.23,1,0.32,1)",
+                    animation: `checkRowIn 300ms cubic-bezier(0.23,1,0.32,1) ${i * 30}ms both`,
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = scoreColor(issue.score) + "18"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = scoreBg(issue.score); }}
+                  >
                     {/* Score badge */}
                     <div style={{
                       flexShrink: 0, width: 36, height: 36,
@@ -653,11 +658,23 @@ export default function ReportPage() {
                       &ldquo;{keyword}&rdquo;
                     </div>
                     {rankCheckUrl && (
-                      <a href={rankCheckUrl} target="_blank" rel="noreferrer" style={{ fontSize: 16, color: "#60A5FA", textDecoration: "none", padding: "8px 14px", border: "1px solid #60A5FA30", borderRadius: 8 }}>
+                      <a href={rankCheckUrl} target="_blank" rel="noreferrer"
+                        style={{ fontSize: 16, color: "#60A5FA", textDecoration: "none", padding: "8px 14px", border: "1px solid #60A5FA30", borderRadius: 8, transition: "border-color 160ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#60A5FA80"; }}
+                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#60A5FA30"; el.style.transform = ""; }}
+                        onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+                        onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+                      >
                         Check Google Rankings →
                       </a>
                     )}
-                    <a href={googleSearchUrl} target="_blank" rel="noreferrer" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", borderRadius: 8 }}>
+                    <a href={googleSearchUrl} target="_blank" rel="noreferrer"
+                      style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", borderRadius: 8, transition: "border-color 160ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#374151"; }}
+                      onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#1E3050"; el.style.transform = ""; }}
+                      onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+                      onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+                    >
                       Site: Index Check →
                     </a>
                   </div>
@@ -743,18 +760,36 @@ export default function ReportPage() {
 
           {/* Three contact options — LocalSEOAEOPro first, full width */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 16 }}>
-            <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A060", borderRadius: 12, textDecoration: "none" }}>
+            <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer"
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A060", borderRadius: 12, textDecoration: "none", transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1), border-color 160ms cubic-bezier(0.23,1,0.32,1)" }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = "0 12px 32px #10D9A030"; el.style.borderColor = "#10D9A0"; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; el.style.borderColor = "#10D9A060"; }}
+              onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+              onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+            >
               <span style={{ fontSize: 32 }}>🚀</span>
               <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", textAlign: "center", lineHeight: 1.3 }}>Fix These Problems at LocalSEOAEOPro.com →</span>
               <span style={{ fontSize: 17, color: "#CBD5E1", textAlign: "center", lineHeight: 1.6 }}>PingClose found them. LocalSEOAEOPro fixes them.</span>
             </a>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-              <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none" }}>
+              <a href="tel:+13145172533"
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none", transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1), opacity 160ms" }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = "0 10px 28px #10D9A050"; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; }}
+                onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+                onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+              >
                 <span style={{ fontSize: 28 }}>📞</span>
                 <span style={{ fontSize: 18, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
                 <span style={{ fontSize: 17, color: "#0B0E16", opacity: 0.85, fontWeight: 600 }}>(314) 517-2533</span>
               </a>
-              <a href="mailto:jim@pingclose.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
+              <a href="mailto:jim@pingclose.com?subject=PingClose%20Report%20Follow-Up"
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none", transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1), border-color 160ms" }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = "0 10px 28px #1E305060"; el.style.borderColor = "#3D6A90"; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; el.style.borderColor = "#2D4A70"; }}
+                onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+                onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+              >
                 <span style={{ fontSize: 28 }}>✉️</span>
                 <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
                 <span style={{ fontSize: 16, color: "#94A3B8" }}>jim@pingclose.com</span>
@@ -764,10 +799,38 @@ export default function ReportPage() {
         </div>
 
         <div style={{ textAlign: "center", marginTop: 24 }}>
-          <a href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>← Run another audit at PingClose.com</a>
+          <a href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#94A3B8"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#475569"; }}
+          >← Run another audit at PingClose.com</a>
         </div>
 
       </div>
+
+      <style>{`
+        @media (prefers-reduced-motion: no-preference) {
+          @keyframes scoreReveal {
+            from { opacity: 0; transform: scale(0.9); }
+            to   { opacity: 1; transform: scale(1); }
+          }
+          @keyframes checkRowIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes scoreReveal { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes checkRowIn  { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes pulse       { 50% { opacity: 0.6; } }
+        }
+        @media (hover: hover) and (pointer: fine) {
+          a:active { opacity: 0.85; }
+        }
+      `}</style>
     </main>
   );
 }
