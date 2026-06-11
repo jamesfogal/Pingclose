@@ -45,6 +45,14 @@ interface Audit {
   top_issues: string[];
   top_fixes: string[];
   full_report?: {
+    sitemap?: {
+      pageCount: number;
+      landingPageCount: number;
+      cityPageCount: number;
+      landingPageUrls: string[];
+      cityPageUrls: string[];
+      hasSitemapIndex: boolean;
+    };
     speed?: {
       mobileDesktopGap: number;
       gapExplanation: string;
@@ -123,12 +131,12 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
   );
 }
 
-function Metric({ label, value, unit, good }: { label: string; value: string | number; unit?: string; good: boolean }) {
+function Metric({ label, value, unit, good, na }: { label: string; value: string | number; unit?: string; good: boolean; na?: boolean }) {
   return (
     <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 8, padding: "14px 16px" }}>
       <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: good ? "#10D9A0" : "#F87171" }}>
-        {value}{unit && <span style={{ fontSize: 16, color: "#64748B", marginLeft: 3 }}>{unit}</span>}
+      <div style={{ fontSize: 20, fontWeight: 700, color: na ? "#475569" : good ? "#10D9A0" : "#F87171" }}>
+        {na ? <span style={{ fontSize: 16 }}>No field data</span> : <>{value}{unit && <span style={{ fontSize: 16, color: "#64748B", marginLeft: 3 }}>{unit}</span>}</>}
       </div>
     </div>
   );
@@ -237,6 +245,7 @@ export default function ReportPage() {
             <Metric label="LCP" value={(audit.lcp / 1000).toFixed(1)} unit="s" good={audit.lcp < 2500} />
             <Metric label="FCP" value={(audit.fcp / 1000).toFixed(1)} unit="s" good={audit.fcp < 1800} />
             <Metric label="CLS" value={audit.cls} good={audit.cls < 0.1} />
+            <Metric label="INP" value={audit.inp} unit="ms" good={audit.inp < 200} na={!audit.inp} />
             {speed && <Metric label="TBT" value={speed.tbt} unit="ms" good={speed.tbt < 200} />}
             <Metric label="Page Size" value={audit.total_page_size} unit="KB" good={audit.total_page_size < 1500} />
             <Metric label="Requests" value={audit.total_requests} good={audit.total_requests < 50} />
@@ -392,16 +401,16 @@ export default function ReportPage() {
           <div style={SECTION_LABEL}>🔧 Tech Stack Identified</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {([
-              ["CMS / Platform", audit.cms],
-              ["Hosting Provider", audit.hosting],
-              ["CDN", audit.cdn],
-              ["HTTP Version", audit.http_version],
-              ["Page Builder", tech?.pageBuilder || "None detected"],
-              ["E-commerce", tech?.ecommerce || "None detected"],
+              ["CMS / Platform", audit.cms && audit.cms !== "Custom / Unknown" ? audit.cms : "Custom / No CMS"],
+              ["Hosting Provider", audit.hosting && audit.hosting !== "Unknown" ? audit.hosting : "Identifying…"],
+              ["CDN", audit.cdn && audit.cdn !== "None detected" ? audit.cdn : "No CDN in use"],
+              ["HTTP Version", audit.http_version || "HTTP/1.1"],
+              ["Page Builder", tech?.pageBuilder && tech.pageBuilder !== "None detected" ? tech.pageBuilder : "No page builder"],
+              ["E-commerce", tech?.ecommerce && tech.ecommerce !== "None detected" ? tech.ecommerce : "Not an e-commerce site"],
             ] as [string, string][]).map(([label, value]) => (
               <div key={label}>
                 <div style={{ fontSize: 16, color: "#64748B", marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-                <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9" }}>{value || "Unknown"}</div>
+                <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9" }}>{value}</div>
               </div>
             ))}
           </div>
@@ -449,6 +458,71 @@ export default function ReportPage() {
             )}
           </div>
         )}
+
+        {/* 12b. SITE STRUCTURE */}
+        {(() => {
+          const sm = audit.full_report?.sitemap;
+          if (!sm || sm.pageCount === 0) return null;
+          return (
+            <div style={DARK_CARD}>
+              <div style={SECTION_LABEL}>🗺️ Site Structure</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{sm.pageCount.toLocaleString()}</div>
+                  <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Pages</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: sm.landingPageCount > 0 ? "#10D9A0" : "#475569" }}>{sm.landingPageCount}</div>
+                  <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Landing Pages</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: sm.cityPageCount > 0 ? "#10D9A0" : "#F87171" }}>{sm.cityPageCount}</div>
+                  <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>City Pages</div>
+                </div>
+              </div>
+
+              {sm.cityPageCount === 0 && (
+                <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px", marginBottom: 12 }}>
+                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>❌ No city pages detected</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>City pages targeting specific service areas are one of the highest-ROI pages a local business can build. Each city page ranks independently for "[service] in [city]" searches.</div>
+                </div>
+              )}
+
+              {sm.cityPageUrls.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8, fontWeight: 600, letterSpacing: "0.06em" }}>CITY / LOCATION PAGES DETECTED:</div>
+                  {sm.cityPageUrls.slice(0, 8).map((u, i) => {
+                    let path = u;
+                    try { path = new URL(u).pathname; } catch { /* use full url */ }
+                    return (
+                      <div key={i} style={{ fontSize: 16, color: "#94A3B8", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #1E3050" }}>
+                        {path}
+                      </div>
+                    );
+                  })}
+                  {sm.cityPageCount > 8 && (
+                    <div style={{ fontSize: 16, color: "#475569", marginTop: 6 }}>…and {sm.cityPageCount - 8} more</div>
+                  )}
+                </div>
+              )}
+
+              {sm.landingPageUrls.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8, fontWeight: 600, letterSpacing: "0.06em" }}>LANDING PAGES DETECTED:</div>
+                  {sm.landingPageUrls.slice(0, 5).map((u, i) => {
+                    let path = u;
+                    try { path = new URL(u).pathname; } catch { /* use full url */ }
+                    return (
+                      <div key={i} style={{ fontSize: 16, color: "#94A3B8", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #1E3050" }}>
+                        {path}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* 13. SCHEMA CHECK */}
         {tech && (

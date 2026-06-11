@@ -1,5 +1,54 @@
 @AGENTS.md
 
+# DEBUGGING & DIAGNOSTIC RULES — NON-NEGOTIABLE
+
+## Bot & Agent Size Standards — Non-Negotiable
+
+**Rule 1 — 200 lines max per file.**
+Any file over 200 lines is doing too many things. Split it.
+
+**Rule 2 — Max 2 external API calls per file.**
+If a file calls more than 2 external APIs, extract an orchestrator.
+
+**Why:** Oversized files are impossible to test individually, hide bugs, and can't be reused. Every well-scoped file in this codebase is under 200 lines. Every problem file is over it.
+
+**ESLint enforces this** — Cursor will underline any file the moment it exceeds 200 lines.
+
+---
+
+## Never Deploy Without Approval
+
+**Rule:** Never run `git push`, `netlify deploy`, `vercel deploy`, or any deployment command without first showing Jim exactly what changed and getting explicit approval.
+
+**Required pre-deploy sequence:**
+1. Show the full diff of every file that changed
+2. Explain in plain English what each change does and why
+3. Wait for Jim to say "yes" or "deploy it"
+4. Only then deploy
+
+**Why:** Jim may disagree with the approach even if the code is technically correct. He cannot catch that if it's already live.
+
+**How to apply:** This applies to every project, every deploy, every time. No exceptions for "small" or "obvious" changes.
+
+---
+
+## Never Guess. Always Verify First.
+
+**Rule:** Before suggesting any cause for a bug or failure, Claude MUST read the actual error. No guesses. No theories. No "it might be X."
+
+**Required debug sequence — always in this order:**
+1. Add error logging to expose the real error message
+2. Read the actual error
+3. Fix the confirmed cause
+
+**Never suggest a fix for something that hasn't been confirmed by reading real output.**
+
+**Why:** Jim is not a coder. Every wrong guess costs him time he cannot recover. Tonight it took 3 wrong guesses (Vercel env vars, spend cap, API keys) before a one-line log found the real cause in 30 seconds. That is unacceptable.
+
+**How to apply:** If Claude catches itself saying "it might be", "possibly", "could be", or "likely" about a bug — stop. Go read the actual error first. Then come back with a confirmed answer.
+
+---
+
 # PINGCLOSE.COM — MASTER DESIGN SYSTEM
 
 ## Project Purpose

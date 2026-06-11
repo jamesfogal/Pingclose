@@ -81,6 +81,9 @@ export async function runPageSpeed(url: string): Promise<PageSpeedResult> {
   const audits = lhr?.audits || {};
   const categories = lhr?.categories || {};
 
+  // Chrome UX Report field data (real user measurements, not lab simulation)
+  const crux = mobile.loadingExperience?.metrics || {};
+
   const mobileScore = Math.round((categories?.performance?.score || 0) * 100);
   const desktopScore = Math.round(((desktop.lighthouseResult?.categories?.performance?.score) || 0) * 100);
   const mobileDesktopGap = desktopScore - mobileScore;
@@ -89,8 +92,9 @@ export async function runPageSpeed(url: string): Promise<PageSpeedResult> {
   const lcp = audits['largest-contentful-paint']?.numericValue || 0;
   const fcp = audits['first-contentful-paint']?.numericValue || 0;
   const cls = audits['cumulative-layout-shift']?.numericValue || 0;
-  const inp = audits['interaction-to-next-paint']?.numericValue || 0;
   const tbt = audits['total-blocking-time']?.numericValue || 0;
+  // INP requires real user interaction — pull from Chrome UX Report field data (75th percentile)
+  const inp = crux['INTERACTION_TO_NEXT_PAINT']?.percentile || 0;
 
   const totalPageSize = audits['total-byte-weight']?.numericValue || 0;
   const totalRequests = audits['network-requests']?.details?.items?.length || 0;

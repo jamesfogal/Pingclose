@@ -13,6 +13,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Bot/agent size rule — no file over 200 lines
+      // Files that exceed this are doing too many things and must be split
+      "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
+    },
+  },
 ]);
 
 export default eslintConfig;
