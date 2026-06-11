@@ -214,27 +214,45 @@ export default function FAQPage() {
       />
 
       {/* Header */}
-      <div style={{ background: NAVY, borderBottom: `1px solid ${BORDER}`, padding: "48px 24px 40px" }}>
+      <div style={{ background: NAVY, borderBottom: `1px solid ${BORDER}`, padding: "48px 24px 48px" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
           <Link href="/" style={{ fontSize: 24, fontWeight: 800, color: TEAL, textDecoration: "none", letterSpacing: "-0.5px" }}>
             Ping<span style={{ color: "#F1F5F9" }}>Close</span>
           </Link>
-          <h1 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, margin: "20px 0 12px", letterSpacing: "-1px" }}>
-            Website Speed & SEO Questions
-          </h1>
-          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 16px", lineHeight: 1.6 }}>
-            30 of the most common questions local business owners ask about website speed, Google rankings, and local SEO.
-          </p>
+
+          {/* Hero H1 box */}
           <div style={{
-            display: "inline-block",
-            fontSize: 16,
-            color: TEAL,
-            background: TEAL + "15",
-            border: `1px solid ${TEAL}30`,
-            borderRadius: 6,
-            padding: "6px 16px"
+            margin: "28px 0 0",
+            padding: "36px 32px 32px",
+            background: "linear-gradient(135deg, #10D9A012 0%, #0D1528 100%)",
+            border: `2px solid ${TEAL}50`,
+            borderRadius: 16,
+            boxShadow: `0 0 40px ${TEAL}15`
           }}>
-            ✓ Updated June 2026 — reviewed and updated monthly to reflect the latest changes in SEO, AEO, and Google ranking signals
+            <h1 style={{ fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1.5px", lineHeight: 1.15, color: "#F9FAFB" }}>
+              Frequently Asked Questions<br />
+              <span style={{ color: TEAL }}>About Website Speed</span>
+            </h1>
+            <p style={{ fontSize: 19, color: "#CBD5E1", margin: "0 0 24px", lineHeight: 1.6 }}>
+              30 questions local business owners ask about page speed, Google rankings, Core Web Vitals, and local SEO — answered straight.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 20 }}>
+              <div style={{ fontSize: 16, color: TEAL, background: TEAL + "15", border: `1px solid ${TEAL}30`, borderRadius: 6, padding: "6px 16px" }}>
+                ✓ Updated June 2026
+              </div>
+              <div style={{ fontSize: 16, color: "#94A3B8", background: "#ffffff08", border: "1px solid #1E3050", borderRadius: 6, padding: "6px 16px" }}>
+                30 questions answered
+              </div>
+            </div>
+            <Link href="/" style={{
+              display: "inline-block",
+              background: TEAL, color: "#0B0E16",
+              fontSize: 17, fontWeight: 700,
+              padding: "14px 32px", borderRadius: 10,
+              textDecoration: "none"
+            }}>
+              Ping My Site Free — See My Score →
+            </Link>
           </div>
         </div>
       </div>

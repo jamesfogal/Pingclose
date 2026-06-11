@@ -112,12 +112,25 @@ export default function Home() {
 
         {/* Logo + Nav */}
         <div style={{ marginBottom: 48, textAlign: "center", position: "relative" }}>
-          <div style={{ fontSize: "clamp(52px, 8vw, 80px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", marginBottom: 16, lineHeight: 1 }}>
+          <div style={{ fontSize: "clamp(52px, 8vw, 80px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", marginBottom: 20, lineHeight: 1 }}>
             Ping<span style={{ color: "#F1F5F9" }}>Close</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
-            <a href="/faq" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none" }}>FAQ</a>
-            <a href="/pricing" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none" }}>Pricing</a>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            <a href="/faq" style={{
+              fontSize: 17, fontWeight: 600, color: "#F1F5F9", textDecoration: "none",
+              background: "#10D9A015", border: "1px solid #10D9A040",
+              borderRadius: 8, padding: "10px 22px",
+              transition: "background 0.2s"
+            }}>
+              Website Speed FAQ
+            </a>
+            <a href="/pricing" style={{
+              fontSize: 17, fontWeight: 600, color: "#10D9A0", textDecoration: "none",
+              background: "#10D9A015", border: "1px solid #10D9A060",
+              borderRadius: 8, padding: "10px 22px"
+            }}>
+              See Pricing →
+            </a>
           </div>
         </div>
 
