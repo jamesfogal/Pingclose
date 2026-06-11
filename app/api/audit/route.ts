@@ -225,9 +225,7 @@ export async function POST(req: NextRequest) {
 
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
-    const stack = err instanceof Error ? err.stack : '';
     console.error('AUDIT_FAIL:', msg);
-    console.error('AUDIT_STACK:', stack);
-    return NextResponse.json({ error: 'Audit failed. Please try again.', debug: msg }, { status: 500 });
+    return NextResponse.json({ error: 'Audit failed. Please try again.' }, { status: 500 });
   }
 }
