@@ -178,8 +178,14 @@ function CTAButton() {
         color: TEAL,
         fontSize: 17,
         fontWeight: 600,
-        textDecoration: "none"
-      }}>
+        textDecoration: "none",
+        transition: `background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)`,
+      }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = TEAL + "15"; }}
+        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = "transparent"; el.style.transform = ""; }}
+        onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+        onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+      >
         Have you Pinged your site yet? →
       </Link>
     </div>
@@ -249,8 +255,14 @@ export default function FAQPage() {
               background: TEAL, color: "#0B0E16",
               fontSize: 17, fontWeight: 700,
               padding: "14px 32px", borderRadius: 10,
-              textDecoration: "none"
-            }}>
+              textDecoration: "none",
+              transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)",
+            }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 10px 28px ${TEAL}40`; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; }}
+            onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+            onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+            >
               Ping My Site Free — See My Score →
             </Link>
           </div>
@@ -273,22 +285,28 @@ export default function FAQPage() {
                 style={{
                   width: "100%", background: "none", border: "none",
                   display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-                  gap: 16, padding: "16px 0", cursor: "pointer", textAlign: "left"
+                  gap: 16, padding: "16px 0", cursor: "pointer", textAlign: "left",
+                  borderRadius: 8,
+                  transition: "background 150ms cubic-bezier(0.23,1,0.32,1)",
                 }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A008"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "none"; }}
+                onMouseDown={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A012"; }}
+                onMouseUp={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A008"; }}
               >
                 <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4 }}>
                   {faq.q}
                 </span>
                 <span style={{
                   fontSize: 22, color: TEAL, flexShrink: 0, marginTop: 2,
-                  transform: open === i ? "rotate(45deg)" : "none",
-                  transition: "transform 0.2s"
+                  transform: open === i ? "rotate(45deg)" : "rotate(0deg)",
+                  transition: "transform 200ms cubic-bezier(0.23,1,0.32,1)",
                 }}>+</span>
               </button>
 
               {/* Answer */}
               {open === i && (
-                <div style={{ paddingBottom: 20 }}>
+                <div style={{ paddingBottom: 20, animation: "answerReveal 220ms cubic-bezier(0.23,1,0.32,1) both" }}>
                   {/* Schema answer — direct box */}
                   <div style={{
                     borderLeft: `3px solid ${TEAL}`,
@@ -341,18 +359,46 @@ export default function FAQPage() {
             fontWeight: 700,
             padding: "16px 40px",
             borderRadius: 10,
-            textDecoration: "none"
-          }}>
+            textDecoration: "none",
+            transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)",
+          }}
+          onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 10px 28px ${TEAL}40`; }}
+          onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; }}
+          onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+          onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+          >
             Ping My Site — It&apos;s Free →
           </Link>
           <div style={{ marginTop: 16 }}>
-            <a href="https://localseoaeopro.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
+            <a href="https://localseoaeopro.com" target="_blank" rel="noopener noreferrer"
+              style={{ fontSize: 16, color: "#475569", textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#94A3B8"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#475569"; }}
+            >
               LocalSEOAEOPro fixes every problem PingClose finds →
             </a>
           </div>
         </div>
 
       </div>
+
+      <style>{`
+        @media (prefers-reduced-motion: no-preference) {
+          @keyframes answerReveal {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes answerReveal {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+          }
+        }
+        @media (hover: hover) and (pointer: fine) {
+          button:focus-visible { outline: 2px solid #10D9A0; outline-offset: 2px; }
+        }
+      `}</style>
     </main>
   );
 }
