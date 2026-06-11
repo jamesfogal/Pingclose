@@ -154,7 +154,7 @@ export default function Home() {
               <>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#10D9A010", border: "1px solid #10D9A030", borderRadius: 20, padding: "6px 14px", marginBottom: 24 }}>
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "pulse 2s ease-in-out infinite" }} />
-                  <span style={{ fontSize: 15, color: "#10D9A0", fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
+                  <span style={{ fontSize: 16, color: "#10D9A0", fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
                 </div>
                 <h1 style={{ fontSize: "clamp(34px, 4.5vw, 56px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 20px", letterSpacing: "-1.5px", color: "#F9FAFB" }}>
                   Does Your Website Load<br />
@@ -180,7 +180,7 @@ export default function Home() {
                 </form>
                 <div style={{ display: "flex", gap: 20, marginTop: 18, flexWrap: "wrap" }}>
                   {["No account needed", "No credit card", "Results in 60 seconds"].map(t => (
-                    <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 15, color: "#64748B" }}>
+                    <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 16, color: "#64748B" }}>
                       <span style={{ color: "#10D9A0" }}>✓</span> {t}
                     </span>
                   ))}
@@ -234,7 +234,7 @@ export default function Home() {
           {/* RIGHT — sample report preview (desktop only) */}
           {stage === "form" && (
             <div className="preview-card" style={{ position: "relative" }}>
-              <div style={{ fontSize: 12, color: "#374151", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", textAlign: "center", marginBottom: 10 }}>
+              <div style={{ fontSize: 16, color: "#374151", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", textAlign: "center", marginBottom: 10 }}>
                 Sample Report Preview
               </div>
               <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, overflow: "hidden", boxShadow: "0 24px 60px #00000050, 0 0 0 1px #10D9A010" }}>
@@ -243,20 +243,20 @@ export default function Home() {
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#F87171" }} />
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FBBF24" }} />
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#34D399" }} />
-                  <span style={{ fontSize: 13, color: "#374151", marginLeft: 6, fontFamily: "monospace" }}>pingclose.com/report/abc123</span>
+                  <span style={{ fontSize: 16, color: "#374151", marginLeft: 6, fontFamily: "monospace" }}>pingclose.com/report/abc123</span>
                 </div>
                 {/* Scores */}
                 <div style={{ padding: "18px 20px", borderBottom: "1px solid #1E3050" }}>
-                  <div style={{ fontSize: 12, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Performance Scores</div>
+                  <div style={{ fontSize: 16, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Performance Scores</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     {[
                       { label: "📱 Mobile", score: mobileScore, color: "#FBBF24" },
                       { label: "🖥️ Desktop", score: desktopScore, color: "#10D9A0" },
                     ].map(({ label, score, color }) => (
                       <div key={label} style={{ background: "#0B0E16", borderRadius: 10, padding: "14px 10px", textAlign: "center" }}>
-                        <div style={{ fontSize: 13, color: "#64748B", marginBottom: 6 }}>{label}</div>
+                        <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6 }}>{label}</div>
                         <div style={{ fontSize: 42, fontWeight: 800, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{score}</div>
-                        <div style={{ fontSize: 13, color: "#475569", marginTop: 2 }}>/100</div>
+                        <div style={{ fontSize: 16, color: "#475569", marginTop: 2 }}>/100</div>
                       </div>
                     ))}
                   </div>
@@ -264,25 +264,25 @@ export default function Home() {
                 {/* Verdict */}
                 <div style={{ padding: "12px 20px", borderBottom: "1px solid #1E3050", display: "flex", alignItems: "center", gap: 8, background: "#F8717108" }}>
                   <span>❌</span>
-                  <span style={{ fontSize: 15, color: "#F87171", fontWeight: 600 }}>Failing Google&apos;s 1-second test</span>
+                  <span style={{ fontSize: 16, color: "#F87171", fontWeight: 600 }}>Failing Google&apos;s 1-second test</span>
                 </div>
                 {/* Top issues */}
                 <div style={{ padding: "14px 20px" }}>
-                  <div style={{ fontSize: 12, color: "#F87171", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Top Issues Found</div>
+                  <div style={{ fontSize: 16, color: "#F87171", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Top Issues Found</div>
                   {[
                     "🔴 Images not in WebP format (4 files)",
                     "🔴 TTFB over 800ms — hosting is slow",
                     "🟠 Render-blocking JavaScript detected",
                     "🟡 No CDN — single-origin delivery",
                   ].map((issue, i) => (
-                    <div key={i} style={{ fontSize: 14, color: "#CBD5E1", lineHeight: 1.5, marginBottom: 6, paddingLeft: 8, borderLeft: "2px solid #F8717140" }}>
+                    <div key={i} style={{ fontSize: 16, color: "#CBD5E1", lineHeight: 1.5, marginBottom: 6, paddingLeft: 8, borderLeft: "2px solid #F8717140" }}>
                       {issue}
                     </div>
                   ))}
                 </div>
                 {/* Footer */}
                 <div style={{ padding: "12px 20px", background: "#10D9A008", borderTop: "1px solid #1E3050" }}>
-                  <span style={{ fontSize: 14, color: "#10D9A0", fontWeight: 600 }}>⚡ 74 signals analyzed · Report emailed instantly</span>
+                  <span style={{ fontSize: 16, color: "#10D9A0", fontWeight: 600 }}>⚡ 74 signals analyzed · Report emailed instantly</span>
                 </div>
               </div>
               <div style={{ position: "absolute", inset: -24, background: "radial-gradient(ellipse at center, #10D9A006 0%, transparent 70%)", pointerEvents: "none" }} />
@@ -301,7 +301,7 @@ export default function Home() {
           ].map(([stat, label], i) => (
             <div key={stat} style={{ padding: "20px 24px", borderRight: i < 2 ? "1px solid #1E2A40" : "none" }}>
               <div style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px", lineHeight: 1 }}>{stat}</div>
-              <div style={{ fontSize: 15, color: "#64748B", marginTop: 8, lineHeight: 1.5 }}>{label}</div>
+              <div style={{ fontSize: 16, color: "#64748B", marginTop: 8, lineHeight: 1.5 }}>{label}</div>
             </div>
           ))}
         </div>
@@ -336,7 +336,7 @@ export default function Home() {
                       boxShadow: `0 0 20px ${color}40`,
                     }} />
                   </div>
-                  <div style={{ fontSize: 15, color: "#64748B" }}>{verdict}</div>
+                  <div style={{ fontSize: 16, color: "#64748B" }}>{verdict}</div>
                 </div>
               ))}
             </div>
@@ -353,7 +353,7 @@ export default function Home() {
 
           {/* What We Check */}
           <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, padding: "32px 24px", textAlign: "left", maxWidth: 560, margin: "0 auto 48px" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.08em", marginBottom: 24, textTransform: "uppercase" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.08em", marginBottom: 24, textTransform: "uppercase" }}>
               What We Check in 60 Seconds
             </div>
             {[

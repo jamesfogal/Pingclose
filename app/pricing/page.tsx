@@ -73,7 +73,7 @@ export default function PricingPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
             {/* Free audit column */}
             <div style={{ background: TEAL + "08", border: `2px solid ${TEAL}40`, borderRadius: 12, padding: "28px 24px" }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: TEAL, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>Free — PingClose Audit</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: TEAL, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>Free — PingClose Audit</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above-the-Fold Speed Test</div>
               <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>Goal: load in under 1 second</div>
               {[
@@ -102,7 +102,7 @@ export default function PricingPage() {
 
             {/* Fix column — LocalSEOAEOPro */}
             <div style={{ background: "#A78BFA10", border: "2px solid #A78BFA40", borderRadius: 12, padding: "28px 24px" }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>LocalSEOAEOPro — Full Fix</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>LocalSEOAEOPro — Full Fix</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above + Below the Fold</div>
               <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>Everything PingClose finds — and everything below it</div>
               {[
