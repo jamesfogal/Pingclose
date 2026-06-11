@@ -67,7 +67,7 @@ export default function PricingPage() {
             Pricing to Test Your Website for Speed
           </h2>
           <p style={{ fontSize: 18, color: "#64748B", textAlign: "center", margin: "0 0 32px", lineHeight: 1.6 }}>
-            The free audit tells you your above-the-fold score. The cleanup makes it pass.
+            PingClose tells you your above-the-fold score. LocalSEOAEOPro makes it pass.
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
@@ -169,7 +169,7 @@ export default function PricingPage() {
                 "Your above-the-fold score",
                 "Pass / fail vs. 1-second benchmark",
                 "Every issue ranked by severity",
-                "Your top 3 fixes to clear the hurdle",
+                "Your top 3 recommendations to clear the hurdle",
               ].map((item, i) => (
                 <div key={i} style={{ fontSize: 16, color: "#94A3B8", marginBottom: 10, display: "flex", gap: 10 }}>
                   <span style={{ color: TEAL, flexShrink: 0 }}>✓</span>{item}

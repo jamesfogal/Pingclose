@@ -287,7 +287,7 @@ export default function Home() {
               ["🔧", "Tech Stack", "Who hosts it, what CMS, CDN, HTTP version"],
               ["📜", "Code Analysis", "Render-blocking scripts, unused JS/CSS, minification"],
               ["📱", "4G Mobile Test", "Real-world load speed on a mobile connection"],
-              ["🏆", "The Verdict", "Pass/fail with your top 3 fixes to win the race"],
+              ["🏆", "The Verdict", "Pass/fail with your top 3 recommendations to win the race"],
             ].map(([icon, title, desc]) => (
               <div key={title} style={{ display: "flex", gap: 16, marginBottom: 18 }}>
                 <div style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{icon}</div>

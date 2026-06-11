@@ -651,14 +651,15 @@ export default function ReportPage() {
               </div>
             </>
           ) : (
-            // FAILING — fix pitch
+            // FAILING — send to LocalSEOAEOPro
             <>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
-                We know exactly what it takes to fix every issue on this report.
+                We can have 49 of these problems fixed in 24 hours.
               </div>
               <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
-                Speed. Local SEO. Google Business Profile. Conversion tracking. All of it.<br />
-                We&apos;ve done it for dozens of local businesses in St. Louis.
+                98% of the changes on this report are done within 48 hours.<br />
+                Citations take longer — but everything else moves fast.<br />
+                <strong style={{ color: "#F1F5F9" }}>Click the link below to get started at LocalSEOAEOPro.com.</strong>
               </div>
             </>
           )}
@@ -667,8 +668,8 @@ export default function ReportPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 16 }}>
             <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A060", borderRadius: 12, textDecoration: "none" }}>
               <span style={{ fontSize: 32 }}>🚀</span>
-              <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", textAlign: "center", lineHeight: 1.3 }}>Get the Free Report from LocalSEOAEOPro.com</span>
-              <span style={{ fontSize: 17, color: "#CBD5E1", textAlign: "center", lineHeight: 1.6 }}>We don&apos;t just tell you what&apos;s wrong — we fix it. 98% fixed in 24 hours.</span>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", textAlign: "center", lineHeight: 1.3 }}>Fix These Problems at LocalSEOAEOPro.com →</span>
+              <span style={{ fontSize: 17, color: "#CBD5E1", textAlign: "center", lineHeight: 1.6 }}>PingClose found them. LocalSEOAEOPro fixes them.</span>
             </a>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
               <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none" }}>
