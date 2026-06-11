@@ -394,7 +394,7 @@ function ReadyScreen({ id }: { id: string }) {
         background: "#0D1528", border: "1px solid #1E3050",
         borderRadius: 12, padding: "20px 24px", textAlign: "left", marginBottom: 32,
       }}>
-        <div style={{ fontSize: 13, color: "#64748B", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 14, textTransform: "uppercase" }}>
+        <div style={{ fontSize: 16, color: "#64748B", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 14, textTransform: "uppercase" }}>
           Your report includes
         </div>
         {[

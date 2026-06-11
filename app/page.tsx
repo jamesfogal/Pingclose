@@ -154,10 +154,16 @@ export default function Home() {
               <h1 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1px" }}>
                 Check Your Email
               </h1>
-              <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 8px", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 18, color: "#CBD5E1", margin: "0 0 12px", lineHeight: 1.6 }}>
+                We need to verify your email to make sure you receive your PingClose report.
+              </p>
+              <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 4px", lineHeight: 1.6 }}>
                 We sent a 6-digit code to
               </p>
-              <p style={{ fontSize: 18, color: "#10D9A0", fontWeight: 700, margin: "0 0 32px" }}>{email}</p>
+              <p style={{ fontSize: 18, color: "#10D9A0", fontWeight: 700, margin: "0 0 12px" }}>{email}</p>
+              <p style={{ fontSize: 17, color: "#64748B", margin: "0 0 28px", lineHeight: 1.6 }}>
+                Enter it below to run your audit.
+              </p>
 
               <form onSubmit={handleVerify} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <input
