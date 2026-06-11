@@ -346,9 +346,9 @@ export default function FAQPage() {
             Ping My Site — It&apos;s Free →
           </Link>
           <div style={{ marginTop: 16 }}>
-            <Link href="/pricing" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
-              See what it costs to fix it →
-            </Link>
+            <a href="https://localseoaeopro.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
+              LocalSEOAEOPro fixes every problem PingClose finds →
+            </a>
           </div>
         </div>
 
