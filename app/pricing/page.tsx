@@ -28,6 +28,51 @@ const schema = {
 export default function PricingPage() {
   return (
     <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <style>{`
+        .btn-teal {
+          transition: transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1);
+        }
+        .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 10px 28px #10D9A040; }
+        .btn-teal:active { transform: scale(0.97); box-shadow: none; }
+
+        .btn-purple {
+          transition: transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1);
+        }
+        .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 10px 28px #A78BFA40; }
+        .btn-purple:active { transform: scale(0.97); box-shadow: none; }
+
+        .card-hover {
+          transition: transform 200ms cubic-bezier(0.23,1,0.32,1), box-shadow 200ms cubic-bezier(0.23,1,0.32,1);
+        }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
+
+        .link-subtle { transition: color 160ms cubic-bezier(0.23,1,0.32,1); }
+        .link-subtle:hover { color: #94A3B8 !important; }
+
+        .link-purple { transition: color 160ms cubic-bezier(0.23,1,0.32,1); }
+        .link-purple:hover { color: #C4B5FD !important; }
+
+        @media (prefers-reduced-motion: no-preference) {
+          @keyframes featureIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          .feature-item { animation: featureIn 280ms cubic-bezier(0.23,1,0.32,1) both; }
+          .feature-item:nth-child(1) { animation-delay: 0ms; }
+          .feature-item:nth-child(2) { animation-delay: 30ms; }
+          .feature-item:nth-child(3) { animation-delay: 60ms; }
+          .feature-item:nth-child(4) { animation-delay: 90ms; }
+          .feature-item:nth-child(5) { animation-delay: 120ms; }
+          .feature-item:nth-child(6) { animation-delay: 150ms; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .btn-teal, .btn-purple, .card-hover { transition: none !important; }
+          .btn-teal:hover, .btn-purple:hover, .card-hover:hover { transform: none !important; box-shadow: none !important; }
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .btn-teal:focus-visible, .btn-purple:focus-visible { outline: 2px solid #10D9A0; outline-offset: 3px; }
+        }
+      `}</style>
 
       <script
         type="application/ld+json"
@@ -58,7 +103,7 @@ export default function PricingPage() {
               Free above-the-fold speed test. Goal: load in under 1 second.<br />
               PingClose finds the problems. LocalSEOAEOPro fixes them.
             </p>
-            <Link href="/" style={{
+            <Link href="/" className="btn-teal" style={{
               display: "inline-block",
               background: TEAL, color: "#0B0E16",
               fontSize: 17, fontWeight: 700,
@@ -84,7 +129,7 @@ export default function PricingPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
             {/* Free audit column */}
-            <div style={{ background: TEAL + "08", border: `2px solid ${TEAL}40`, borderRadius: 12, padding: "28px 24px" }}>
+            <div className="card-hover" style={{ background: TEAL + "08", border: `2px solid ${TEAL}40`, borderRadius: 12, padding: "28px 24px" }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: TEAL, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>Free — PingClose Audit</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above-the-Fold Speed Test</div>
               <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>Goal: load in under 1 second</div>
@@ -96,12 +141,12 @@ export default function PricingPage() {
                 "Render-blocking scripts detected",
                 "Pass / fail vs. 1-second benchmark",
               ].map((text, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
+                <div key={i} className="feature-item" style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
                   <span style={{ color: TEAL, flexShrink: 0, fontWeight: 700 }}>✓</span>
                   <span style={{ fontSize: 16, color: "#94A3B8" }}>{text}</span>
                 </div>
               ))}
-              <Link href="/" style={{
+              <Link href="/" className="btn-teal" style={{
                 display: "block", textAlign: "center", marginTop: 20,
                 background: TEAL, color: "#0B0E16",
                 fontSize: 16, fontWeight: 700,
@@ -113,7 +158,7 @@ export default function PricingPage() {
             </div>
 
             {/* Fix column — LocalSEOAEOPro */}
-            <div style={{ background: "#A78BFA10", border: "2px solid #A78BFA40", borderRadius: 12, padding: "28px 24px" }}>
+            <div className="card-hover" style={{ background: "#A78BFA10", border: "2px solid #A78BFA40", borderRadius: 12, padding: "28px 24px" }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>LocalSEOAEOPro — Full Fix</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above + Below the Fold</div>
               <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>Everything PingClose finds — and everything below it</div>
@@ -125,12 +170,12 @@ export default function PricingPage() {
                 "Every page — not just the homepage",
                 "Done in 24 hours — flat fee",
               ].map((text, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
+                <div key={i} className="feature-item" style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
                   <span style={{ color: "#A78BFA", flexShrink: 0, fontWeight: 700 }}>✓</span>
                   <span style={{ fontSize: 16, color: "#F1F5F9", fontWeight: 600 }}>{text}</span>
                 </div>
               ))}
-              <a href="https://localseoaeopro.com/pricing" style={{
+              <a href="https://localseoaeopro.com/pricing" className="btn-purple" style={{
                 display: "block", textAlign: "center", marginTop: 20,
                 background: "#A78BFA", color: "#0B0E16",
                 fontSize: 16, fontWeight: 700,
@@ -205,7 +250,7 @@ export default function PricingPage() {
             Ping your site. See your score. Know exactly what&apos;s holding you back.<br />
             Free. No account. No credit card. 60 seconds.
           </p>
-          <Link href="/" style={{
+          <Link href="/" className="btn-teal" style={{
             display: "inline-block",
             background: TEAL, color: "#0B0E16",
             fontSize: 18, fontWeight: 700,
@@ -215,10 +260,10 @@ export default function PricingPage() {
             Ping My Site — It&apos;s Free →
           </Link>
           <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
-            <Link href="/faq" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
+            <Link href="/faq" className="link-subtle" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
               Have questions? Read our FAQ →
             </Link>
-            <a href="https://localseoaeopro.com/pricing" style={{ fontSize: 16, color: "#A78BFA", textDecoration: "none" }}>
+            <a href="https://localseoaeopro.com/pricing" className="link-purple" style={{ fontSize: 16, color: "#A78BFA", textDecoration: "none" }}>
               See fix pricing at LocalSEOAEOPro →
             </a>
           </div>
