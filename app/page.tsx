@@ -12,6 +12,20 @@ export const metadata: Metadata = {
   },
 };
 
+const schemaOrg = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "PingClose",
+  "url": "https://pingclose.com",
+  "description": "PingClose provides free website speed audits for local businesses, measuring above-the-fold load time, Core Web Vitals, and 74 performance signals.",
+  "sameAs": [],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "jim@pingclose.com",
+    "contactType": "customer support"
+  }
+};
+
 const schemaWebSite = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -45,6 +59,7 @@ const schemaApp = {
 export default function Page() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaWebSite) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaApp) }} />
       <HomeClient />

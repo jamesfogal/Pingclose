@@ -154,6 +154,13 @@ function CheckRow({ label, pass, detail, index = 0 }: { label: string; pass: boo
   );
 }
 
+function playDone() {
+  try {
+    new Audio("/sounds/ping.mp3").play();
+    setTimeout(() => { try { new Audio("/sounds/ping.mp3").play(); } catch { /* ignore */ } }, 220);
+  } catch { /* ignore */ }
+}
+
 export default function ReportPage() {
   const params = useParams();
   const [audit, setAudit] = useState<Audit | null>(null);
@@ -162,7 +169,7 @@ export default function ReportPage() {
   useEffect(() => {
     fetch(`/api/report?id=${params.id}`)
       .then(r => r.json())
-      .then(data => { setAudit(data); setLoading(false); })
+      .then(data => { setAudit(data); setLoading(false); playDone(); })
       .catch(() => setLoading(false));
   }, [params.id]);
 

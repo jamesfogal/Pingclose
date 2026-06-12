@@ -32,26 +32,11 @@ export default function Home() {
   const [error,        setError]        = useState("");
   const [urlFocused,   setUrlFocused]   = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
-  const audioCtx = useRef<AudioContext | null>(null);
-
   const mobileScore  = useCountUp(73,  1400);
   const desktopScore = useCountUp(89, 1700);
 
   function playPing() {
-    try {
-      if (!audioCtx.current) audioCtx.current = new AudioContext();
-      const ctx = audioCtx.current;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.5);
-    } catch { /* ignore audio errors */ }
+    try { new Audio("/sounds/ping.mp3").play(); } catch { /* ignore */ }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -393,7 +378,7 @@ export default function Home() {
           </div>
 
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => { playPing(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
             style={{ background: "#10D9A0", color: "#0B0E16", fontSize: 18, fontWeight: 700, padding: "16px 40px", borderRadius: 10, border: "none", cursor: "pointer", transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 28px #10D9A040"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
