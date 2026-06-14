@@ -52,11 +52,6 @@ export async function POST(req: NextRequest) {
       ? { hosting: resolvedHosting, ...computeHostingVerdict(resolvedHosting, htmlResult.cms) }
       : hostingResult;
 
-    // Assemble backup detection (depends on hosting + cms, no extra network call)
-    const { hasBackup, backupService, backupCoveredByHost, backupMessage } = detectBackup(
-      finalHosting.hosting, htmlResult.cms, htmlResult.html
-    );
-
     // Build the unified TechStackResult
     const techResult: TechStackResult = {
       cms: htmlResult.cms,
@@ -96,10 +91,10 @@ export async function POST(req: NextRequest) {
       hasCallTracking: htmlResult.hasCallTracking,
       hasUptimeMonitoring: htmlResult.hasUptimeMonitoring,
       uptimeService: htmlResult.uptimeService,
-      hasBackup,
-      backupService,
-      backupCoveredByHost,
-      backupMessage,
+      hasBackup: false,
+      backupService: '',
+      backupCoveredByHost: false,
+      backupMessage: '',
       imagesWithoutAlt: htmlResult.imagesWithoutAlt,
       hasAutoPlayVideo: htmlResult.hasAutoPlayVideo,
       videoHasPoster: htmlResult.videoHasPoster,
@@ -172,7 +167,18 @@ export async function POST(req: NextRequest) {
       techResult
     });
 
-    return NextResponse.json({ success: true, reportId: audit.id });
+    return NextResponse.json({
+      success: true,
+      reportId: audit.id,
+      mobileScore:     speedResult.mobileScore,
+      desktopScore:    speedResult.desktopScore,
+      ttfb:            speedResult.ttfb,
+      lcp:             speedResult.lcp,
+      fcp:             speedResult.fcp,
+      cls:             speedResult.cls,
+      inp:             speedResult.inp,
+      passesOneSecond: speedResult.passesOneSecond,
+    });
 
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
@@ -181,66 +187,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Backup detection — pure logic, no network calls
-function detectBackup(hosting: string, cms: string, html: string) {
-  let hasBackup = false;
-  let backupService = '';
-  let backupCoveredByHost = false;
-  let backupMessage = '';
-
-  if (hosting === 'WP Engine') {
-    hasBackup = true; backupCoveredByHost = true;
-    backupService = 'WP Engine Daily Backups';
-    backupMessage = 'WP Engine automatically backs up your site daily and retains 40 days of backups.';
-  } else if (hosting === 'Kinsta') {
-    hasBackup = true; backupCoveredByHost = true;
-    backupService = 'Kinsta Daily Backups';
-    backupMessage = 'Kinsta automatically backs up your site daily and retains 14–30 days of backups.';
-  } else if (cms === 'Wix') {
-    hasBackup = true; backupCoveredByHost = true;
-    backupService = 'Wix Automatic Backups';
-    backupMessage = 'Wix automatically saves versions of your site that can be restored.';
-  } else if (cms === 'Squarespace') {
-    hasBackup = true; backupCoveredByHost = true;
-    backupService = 'Squarespace Automatic Backups';
-    backupMessage = 'Squarespace handles backups automatically on their infrastructure.';
-  } else if (cms === 'Shopify') {
-    hasBackup = true; backupCoveredByHost = true;
-    backupService = 'Shopify Automatic Backups';
-    backupMessage = 'Shopify maintains backups of your store data automatically.';
-  }
-
-  if (!hasBackup) {
-    if (html.includes('updraftplus') || html.includes('updraft-plus')) {
-      hasBackup = true; backupService = 'UpdraftPlus';
-      backupMessage = 'UpdraftPlus backup plugin detected — automated backups are configured.';
-    } else if (html.includes('jetpack-backup') || (html.includes('jetpack') && html.includes('backup'))) {
-      hasBackup = true; backupService = 'Jetpack Backup';
-      backupMessage = 'Jetpack Backup detected — real-time or daily backups are running.';
-    } else if (html.includes('backupbuddy') || html.includes('backup-buddy')) {
-      hasBackup = true; backupService = 'BackupBuddy';
-      backupMessage = 'BackupBuddy detected — automated backups are configured.';
-    } else if (html.includes('managewp') || html.includes('manage-wp')) {
-      hasBackup = true; backupService = 'ManageWP Backups';
-      backupMessage = 'ManageWP detected — includes automated backup management.';
-    } else if (html.includes('vaultpress')) {
-      hasBackup = true; backupService = 'VaultPress (Jetpack)';
-      backupMessage = 'VaultPress backup service detected — real-time backups are active.';
-    } else if (html.includes('duplicator')) {
-      hasBackup = true; backupService = 'Duplicator';
-      backupMessage = 'Duplicator plugin detected — manual or scheduled backups configured.';
-    }
-  }
-
-  if (!hasBackup) {
-    if (cms === 'WordPress') {
-      backupMessage = 'Backup status unverifiable from outside — backup plugins run in the WordPress admin and leave no trace in public HTML. Confirm with your host or check your WP admin for UpdraftPlus, Jetpack Backup, or host-level snapshots.';
-    } else if (cms !== 'Custom / Unknown') {
-      backupMessage = 'Backup status unverifiable from outside. Confirm your hosting provider includes automated backups in your plan.';
-    } else {
-      backupMessage = 'Backup status unverifiable from outside. Contact your hosting provider to confirm automated backups are enabled.';
-    }
-  }
-
-  return { hasBackup, backupService, backupCoveredByHost, backupMessage };
-}

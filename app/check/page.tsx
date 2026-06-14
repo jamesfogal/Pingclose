@@ -1,434 +1,363 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState, useRef, useCallback } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 
-const CHECKS = [
-  "Mobile performance score",
-  "Desktop performance score",
-  "Server response time (TTFB)",
-  "Largest Contentful Paint (LCP)",
-  "First Contentful Paint (FCP)",
-  "Cumulative Layout Shift (CLS)",
-  "Interaction to Next Paint (INP)",
-  "Total Blocking Time (TBT)",
-  "Total page size",
-  "Total network requests",
-  "1-second load test",
-  "Image count & WebP status",
-  "Lazy loading detection",
-  "Largest image size",
-  "Render-blocking scripts",
-  "Unused JavaScript",
-  "Unused CSS",
-  "Browser caching",
-  "Font display issues",
-  "Google Tag Manager bloat",
-  "Rocket Loader conflict",
-  "Video detection",
-  "Missing image alt text",
-  "Mobile vs desktop gap",
-  "Speed improvement opportunities",
-  "CMS / platform detection",
-  "Page builder detection",
-  "CDN detection",
-  "Hosting provider",
-  "Hosting speed verdict",
-  "E-commerce platform",
-  "HTTP version",
-  "HTTPS status",
-  "Title tag",
-  "Meta description",
-  "H1 tag",
-  "Canonical tag",
-  "Robots.txt",
-  "Sitemap.xml",
-  "Primary keyword",
-  "FAQ schema markup",
-  "Pricing schema markup",
-  "LocalBusiness schema",
-  "Review / rating schema",
-  "Google Analytics 4",
-  "Google Tag Manager",
-  "Facebook Pixel",
-  "TikTok Pixel",
-  "Call tracking",
-  "Uptime monitoring",
-  "Backup detection",
-  "Images missing alt text",
-  "Video autoplay",
-  "WordPress plugin issues",
-];
+// ── Types ────────────────────────────────────────────────────────────────────
 
-// Total = 54 checks
-const TOTAL = CHECKS.length;
-
-interface CountdownProps {
-  apiDone: boolean;           // flips true when API returns
-  onZero: () => void;         // called the moment counter reaches 0
+interface FastData {
+  cms: string; pageBuilder: string | null; ecommerce: string | null;
+  cdn: string | null; httpVersion: string; isHttps: boolean;
+  hosting: string; hostingVerdict: string; hostingVerdictLabel: string;
+  hasTitle: boolean; titleTag: string; titleLength: number;
+  hasMetaDescription: boolean; metaDescriptionLength: number;
+  hasH1: boolean; h1Text: string; multipleH1s: boolean;
+  hasCanonical: boolean; hasRobotsTxt: boolean; hasSitemap: boolean;
+  primaryKeyword: string;
+  hasFAQSchema: boolean; hasPricingSchema: boolean;
+  hasLocalBusinessSchema: boolean; hasReviewSchema: boolean;
+  hasGA4: boolean; hasGTM: boolean; hasFacebookPixel: boolean;
+  hasTikTokPixel: boolean; hasCallTracking: boolean;
+  imagesWithoutAlt: string[]; wordpressPluginIssues: string[];
 }
 
-function CountdownTimer({ apiDone, onZero }: CountdownProps) {
-  const [idx, setIdx] = useState(0);       // how many we've "checked off"
-  const idxRef = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onZeroRef = useRef(onZero);
-  onZeroRef.current = onZero;
+interface SpeedData {
+  mobileScore: number; desktopScore: number;
+  ttfb: number; lcp: number; fcp: number; cls: number;
+  passesOneSecond: boolean; reportId: string;
+}
 
-  const scheduleNext = useCallback((currentIdx: number, ms: number) => {
-    timerRef.current = setTimeout(() => {
-      const next = currentIdx + 1;
-      idxRef.current = next;
-      setIdx(next);
-      if (next >= TOTAL) {
-        onZeroRef.current();
-      }
-    }, ms);
-  }, []);
+interface Signal { label: string; value: string; status: "pass" | "fail" | "warn" | "info"; }
 
-  useEffect(() => {
-    // Normal pace: spread first 80% of items over 25 seconds
-    const normalMs = (25000 * 0.8) / (TOTAL * 0.8); // ~462ms per item for first ~43
-    scheduleNext(0, normalMs);
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+// ── Signal builder ────────────────────────────────────────────────────────────
 
-  // When API returns, accelerate remaining items to finish in ~1.2 seconds
-  useEffect(() => {
-    if (!apiDone) return;
-    if (idxRef.current >= TOTAL) return;
+function buildSignals(d: FastData): Signal[] {
+  const s: Signal[] = [];
+  const add = (label: string, value: string, status: Signal["status"]) => s.push({ label, value, status });
 
-    if (timerRef.current) clearTimeout(timerRef.current);
+  add("CMS / Platform",       d.cms || "Unknown",                           "info");
+  if (d.pageBuilder)  add("Page Builder",    d.pageBuilder,                 "info");
+  if (d.ecommerce)    add("E-commerce",      d.ecommerce,                   "info");
+  add("Hosting",     `${d.hosting}${d.hostingVerdictLabel ? ` — ${d.hostingVerdictLabel}` : ""}`,
+    d.hostingVerdict === "fast" ? "pass" : d.hostingVerdict === "slow" ? "fail" : "warn");
+  add("CDN",          d.cdn || "None detected",                             d.cdn ? "pass" : "warn");
+  add("HTTP Version", d.httpVersion || "HTTP/1.1",
+    (d.httpVersion === "HTTP/2" || d.httpVersion === "HTTP/3") ? "pass" : "warn");
+  add("HTTPS",        d.isHttps ? "Secure" : "Not secure — missing SSL",   d.isHttps ? "pass" : "fail");
+  add("Canonical tag",d.hasCanonical ? "Present" : "Missing",              d.hasCanonical ? "pass" : "warn");
+  add("Robots.txt",   d.hasRobotsTxt ? "Found" : "Not found",              d.hasRobotsTxt ? "pass" : "warn");
+  add("Sitemap.xml",  d.hasSitemap   ? "Found" : "Not found",              d.hasSitemap   ? "pass" : "warn");
+  add("Title tag",    d.hasTitle
+    ? `${(d.titleTag || "").slice(0, 48)}${d.titleLength > 48 ? "…" : ""} (${d.titleLength} chars)`
+    : "Missing",
+    d.hasTitle ? (d.titleLength >= 50 && d.titleLength <= 60 ? "pass" : "warn") : "fail");
+  add("Meta description", d.hasMetaDescription ? `${d.metaDescriptionLength} chars` : "Missing",
+    d.hasMetaDescription ? "pass" : "fail");
+  if (d.multipleH1s) add("H1 tag", "Multiple H1s detected", "warn");
+  else add("H1 tag", d.hasH1 ? ((d.h1Text || "").slice(0, 55) || "Present") : "Missing", d.hasH1 ? "pass" : "fail");
+  if (d.primaryKeyword) add("Primary keyword", d.primaryKeyword, "info");
+  add("LocalBusiness schema", d.hasLocalBusinessSchema ? "Detected" : "Missing", d.hasLocalBusinessSchema ? "pass" : "warn");
+  add("FAQ schema",    d.hasFAQSchema    ? "Detected" : "Not found", d.hasFAQSchema    ? "pass" : "info");
+  add("Pricing schema",d.hasPricingSchema? "Detected" : "Not found", d.hasPricingSchema? "pass" : "info");
+  add("Review schema", d.hasReviewSchema ? "Detected" : "Not found", d.hasReviewSchema ? "pass" : "info");
+  add("Google Analytics 4", d.hasGA4           ? "Detected" : "Missing", d.hasGA4           ? "pass" : "warn");
+  add("Google Tag Manager", d.hasGTM           ? "Detected" : "Not found", d.hasGTM           ? "pass" : "info");
+  add("Facebook Pixel",     d.hasFacebookPixel ? "Detected" : "Not found", d.hasFacebookPixel ? "pass" : "info");
+  add("TikTok Pixel",       d.hasTikTokPixel   ? "Detected" : "Not found", d.hasTikTokPixel   ? "pass" : "info");
+  add("Call tracking",      d.hasCallTracking  ? "Detected" : "Not found", d.hasCallTracking  ? "pass" : "info");
+  if (d.imagesWithoutAlt?.length   > 0) add("Images missing alt text",   `${d.imagesWithoutAlt.length} images`,  "warn");
+  if (d.wordpressPluginIssues?.length > 0) add("WordPress plugin issues", `${d.wordpressPluginIssues.length} found`, "warn");
+  return s;
+}
 
-    const remaining = TOTAL - idxRef.current;
-    const msEach = remaining <= 1 ? 100 : Math.min(1200 / remaining, 120);
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-    const tick = (currentIdx: number) => {
-      timerRef.current = setTimeout(() => {
-        const next = currentIdx + 1;
-        idxRef.current = next;
-        setIdx(next);
-        if (next >= TOTAL) {
-          onZeroRef.current();
-        } else {
-          tick(next);
-        }
-      }, msEach);
-    };
+function statusColor(s: Signal["status"]) {
+  return s === "pass" ? "#10D9A0" : s === "fail" ? "#F87171" : s === "warn" ? "#FBBF24" : "#475569";
+}
+function statusIcon(s: Signal["status"]) {
+  return s === "pass" ? "✓" : s === "fail" ? "✗" : s === "warn" ? "!" : "·";
+}
+function fmt(ms: number) { return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`; }
+function scoreColor(n: number) { return n >= 90 ? "#10D9A0" : n >= 50 ? "#FBBF24" : "#F87171"; }
+function metricColor(ms: number, good: number, poor: number) {
+  return ms <= good ? "#10D9A0" : ms <= poor ? "#FBBF24" : "#F87171";
+}
 
-    tick(idxRef.current);
+// ── Logo ─────────────────────────────────────────────────────────────────────
 
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiDone]);
-
-  // Also keep normal pace ticking for items NOT yet done when API hasn't returned
-  useEffect(() => {
-    if (apiDone) return;
-    if (idx >= TOTAL) return;
-
-    const normalMs = (25000 * 0.8) / (TOTAL * 0.8);
-    // Only schedule next if we just moved (prevents double-scheduling on first render)
-    if (idx > 0 && idx < TOTAL) {
-      // Slow down after 80% to make sure API has time
-      const ms = idx >= Math.floor(TOTAL * 0.8) ? 2500 : normalMs;
-      scheduleNext(idx, ms);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, apiDone]);
-
-  const count = TOTAL - idx;        // 54 → 0
-  const progress = (idx / TOTAL) * 100;
-  const currentLabel = idx >= TOTAL
-    ? "Building your report…"
-    : CHECKS[idx];
-
+function Logo({ size = 24 }: { size?: number }) {
+  const arc = size * 0.67;
   return (
-    <div style={{ textAlign: "center" }}>
-
-      {/* Big number */}
-      <div style={{
-        fontSize: "clamp(96px, 20vw, 140px)",
-        fontWeight: 800,
-        color: count === 0 ? "#10D9A0" : "#F1F5F9",
-        lineHeight: 1,
-        letterSpacing: "-4px",
-        marginBottom: 8,
-        fontVariantNumeric: "tabular-nums",
-        transition: "color 0.3s",
-      }}>
-        {count}
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 9, lineHeight: 1 }}>
+      <div style={{ position: "relative", width: arc, height: arc, flexShrink: 0 }}>
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+          {[0.58, 0.78, 1].map((scale, i) => (
+            <div key={i} style={{
+              position: "absolute",
+              width: arc * scale * 2, height: arc * scale * 2,
+              bottom: -(arc * scale), left: -(arc * scale),
+              borderRadius: "50%", border: `${1.4 + i * 0.5}px solid #10D9A0`,
+              opacity: 0.28 + i * 0.3,
+            }} />
+          ))}
+        </div>
+        <div style={{ position: "absolute", bottom: -3, left: -3, width: 6, height: 6, background: "#10D9A0", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1)" }} />
       </div>
-
-      {/* Static label */}
-      <div style={{
-        fontSize: 16,
-        color: "#475569",
-        fontWeight: 600,
-        textTransform: "uppercase",
-        letterSpacing: "0.12em",
-        marginBottom: 10,
-      }}>
-        Items Being Checked
+      <div style={{ fontSize: size, fontWeight: 800, letterSpacing: "-0.5px", fontFamily: "var(--font-geist-sans)" }}>
+        <span style={{ color: "#10D9A0" }}>Ping</span><span style={{ color: "#F1F5F9" }}>Close</span>
       </div>
-
-      {/* Current check name — teal flash */}
-      <div style={{
-        fontSize: 18,
-        color: "#10D9A0",
-        fontWeight: 600,
-        minHeight: 28,
-        marginBottom: 32,
-      }}>
-        {currentLabel}
-      </div>
-
-      {/* Progress bar */}
-      <div style={{
-        background: "#0D1528",
-        border: "1px solid #1E3050",
-        borderRadius: 8,
-        height: 8,
-        overflow: "hidden",
-        marginBottom: 8,
-      }}>
-        <div style={{
-          height: "100%",
-          width: `${progress}%`,
-          background: "linear-gradient(90deg, #10D9A0, #60A5FA)",
-          borderRadius: 8,
-          transition: "width 0.4s linear",
-        }} />
-      </div>
-
-      <div style={{ fontSize: 16, color: "#374151", textAlign: "right" }}>
-        {idx} / {TOTAL}
-      </div>
-
     </div>
   );
 }
 
+// ── Main check content ────────────────────────────────────────────────────────
+
 function CheckContent() {
-  const params = useSearchParams();
-  const duplicate = params.get("duplicate");
-  const limit     = params.get("limit");
-  const reportId  = params.get("id");
-  const pendingUrl   = params.get("url");
-  const pendingEmail = params.get("email");
-  const pendingPhone = params.get("phone");
-  const deliverySms  = params.get("sms")  === "1";
-  const deliveryEmail = params.get("mail") === "1";
+  const params       = useSearchParams();
+  const pendingUrl   = params.get("url")   || "";
+  const pendingEmail = params.get("email") || "";
+  const pendingPhone = params.get("phone") || "";
+  const duplicate    = params.get("duplicate");
+  const limit        = params.get("limit");
+  const reportId     = params.get("id");
 
-  // apiDone = true as soon as the fetch returns (success or handled error)
-  const [apiDone, setApiDone]   = useState(false);
-  const [apiResult, setApiResult] = useState<{
-    type: "ready" | "duplicate" | "limit" | "error";
-    id?: string;
-    msg?: string;
-  } | null>(null);
+  const [fastData,    setFastData]    = useState<FastData | null>(null);
+  const [speedData,   setSpeedData]   = useState<SpeedData | null>(null);
+  const [reportReady, setReportReady] = useState<string | null>(reportId || null);
+  const [error,       setError]       = useState("");
+  const [visibleCount,setVisible]     = useState(0);
 
-  // shown = true only AFTER the countdown reaches 0
-  const [shown, setShown] = useState(false);
+  const signals = fastData ? buildSignals(fastData) : [];
 
-  // If we landed here with ?id= (e.g. from email link), skip straight to ready
-  const [status] = useState<"skip" | "running">(
-    duplicate ? "skip" : limit ? "skip" : reportId ? "skip" : "running"
-  );
-
+  // Stagger signal rows appearing after fast data arrives
   useEffect(() => {
-    if (status !== "running" || !pendingUrl) return;
+    if (!fastData) return;
+    const total = buildSignals(fastData).length;
+    for (let i = 0; i < total; i++) {
+      setTimeout(() => setVisible(i + 1), i * 52);
+    }
+  }, [fastData]); // eslint-disable-line
 
-    const run = async () => {
-      try {
-        const res  = await fetch("/api/audit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: pendingUrl,
-            email: pendingEmail || null,
-            phone: pendingPhone || null,
-            deliverySms,
-            deliveryEmail,
-          }),
+  // Fire both requests simultaneously
+  useEffect(() => {
+    if (!pendingUrl || duplicate || limit || reportId) return;
+
+    // Fast scan — tech signals only (~2 seconds)
+    fetch("/api/audit/fast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: pendingUrl }),
+    })
+      .then(r => r.json())
+      .then(data => { if (!data.error) setFastData(data); })
+      .catch(() => {});
+
+    // Full audit — tech + PageSpeed + DB + email (~15-45 seconds)
+    fetch("/api/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: pendingUrl,
+        email: pendingEmail || null,
+        phone: pendingPhone || null,
+        deliveryEmail: true,
+      }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { setError(data.error); return; }
+        if (data.limit) { return; }
+        setSpeedData({
+          mobileScore: data.mobileScore, desktopScore: data.desktopScore,
+          ttfb: data.ttfb, lcp: data.lcp, fcp: data.fcp, cls: data.cls,
+          passesOneSecond: data.passesOneSecond, reportId: data.reportId,
         });
-        const data = await res.json();
+        setReportReady(data.reportId);
+      })
+      .catch(() => setError("Audit failed. Please try again."));
+  }, []); // eslint-disable-line
 
-        if (data.duplicate) { setApiResult({ type: "duplicate" }); }
-        else if (data.limit) { setApiResult({ type: "limit" }); }
-        else if (data.error) { setApiResult({ type: "error", msg: data.error }); }
-        else                 { setApiResult({ type: "ready", id: data.reportId }); }
-      } catch {
-        setApiResult({ type: "error", msg: "Something went wrong. Please try again." });
-      } finally {
-        setApiDone(true);
-      }
-    };
+  // Skip screens
+  if (duplicate) return <Shell><SkipMsg icon="📬" title="Already on its way!" body="Your report is already in your inbox." /></Shell>;
+  if (limit)     return <LimitScreen />;
 
-    run();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const hostname = (() => { try { return new URL(pendingUrl.startsWith("http") ? pendingUrl : `https://${pendingUrl}`).hostname; } catch { return pendingUrl; } })();
 
-  // When countdown hits 0, flip shown and reveal result
-  const handleZero = useCallback(() => {
-    setShown(true);
-  }, []);
-
-  // ── Skip path — direct links / legacy redirects ──────────────────
-  if (status === "skip") {
-    if (duplicate) return <DuplicateScreen />;
-    if (limit)     return <LimitScreen />;
-    if (reportId)  return <ReadyScreen id={reportId} />;
-  }
-
-  // ── Countdown path ───────────────────────────────────────────────
-  // Show result only after countdown reaches zero
-  if (shown && apiResult) {
-    if (apiResult.type === "ready" && apiResult.id) return <ReadyScreen id={apiResult.id} />;
-    if (apiResult.type === "duplicate")              return <DuplicateScreen />;
-    if (apiResult.type === "limit")                  return <LimitScreen />;
-    return <ErrorScreen msg={apiResult.msg} />;
-  }
+  const speedMetrics = [
+    { label: "Mobile",  value: speedData ? String(speedData.mobileScore)  : null, color: speedData ? scoreColor(speedData.mobileScore)  : null },
+    { label: "Desktop", value: speedData ? String(speedData.desktopScore) : null, color: speedData ? scoreColor(speedData.desktopScore) : null },
+    { label: "TTFB",    value: speedData ? fmt(speedData.ttfb) : null,            color: speedData ? metricColor(speedData.ttfb, 600, 1800) : null },
+    { label: "LCP",     value: speedData ? fmt(speedData.lcp)  : null,            color: speedData ? metricColor(speedData.lcp,  2500, 4000) : null },
+    { label: "FCP",     value: speedData ? fmt(speedData.fcp)  : null,            color: speedData ? metricColor(speedData.fcp,  1800, 3000) : null },
+    { label: "CLS",     value: speedData ? speedData.cls.toFixed(2) : null,       color: speedData ? metricColor(speedData.cls * 1000, 100, 250) : null },
+  ];
 
   return (
     <main style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)",
-      color: "#F1F5F9",
-      fontFamily: "system-ui, -apple-system, sans-serif",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "24px", position: "relative", overflow: "hidden",
+      minHeight: "100vh", background: "#0B0E16",
+      color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif",
+      fontSize: 16, padding: "40px 24px 80px",
     }}>
-      <div style={{
-        position: "absolute", inset: 0, opacity: 0.03,
-        backgroundImage: "linear-gradient(#10D9A0 1px, transparent 1px), linear-gradient(90deg, #10D9A0 1px, transparent 1px)",
-        backgroundSize: "40px 40px",
-      }} />
+      <style>{`
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shimmer { from { transform: translateX(-200%); } to { transform: translateX(200%); } }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+      `}</style>
 
-      <div style={{ maxWidth: 480, width: "100%", position: "relative" }}>
+      <div style={{ maxWidth: 700, margin: "0 auto" }}>
 
         {/* Logo */}
-        <div style={{ fontSize: 28, fontWeight: 800, color: "#10D9A0", marginBottom: 40, letterSpacing: "-1px", textAlign: "center" }}>
-          Ping<span style={{ color: "#F1F5F9" }}>Close</span>
-        </div>
+        <div style={{ marginBottom: 40 }}><Logo size={26} /></div>
 
-        {/* Heading */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h1 style={{ fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 800, margin: "0 0 10px", letterSpacing: "-0.5px" }}>
-            54 Items We&apos;re Checking.
+        {/* Scanning header */}
+        <div style={{ marginBottom: 36 }}>
+          <h1 style={{ fontSize: "clamp(22px, 4vw, 34px)", fontWeight: 800, margin: "0 0 6px", letterSpacing: "-0.5px" }}>
+            Scanning <span style={{ color: "#10D9A0" }}>{hostname}</span>
           </h1>
-          <p style={{ fontSize: 17, color: "#64748B", margin: 0 }}>
-            Let&apos;s count down to your results.
+          <p style={{ fontSize: 16, color: "#475569", margin: 0 }}>
+            {fastData
+              ? `${signals.length} signals analyzed — performance scores ${speedData ? "complete" : "loading…"}`
+              : <span style={{ animation: "blink 1.4s ease-in-out infinite", display: "inline-block" }}>Scanning signals now…</span>
+            }
           </p>
         </div>
 
-        <CountdownTimer apiDone={apiDone} onZero={handleZero} />
+        {/* ── Tech signals ─────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#374151", textTransform: "uppercase", marginBottom: 14 }}>
+            Tech Signals
+          </div>
 
-        <p style={{ fontSize: 16, color: "#475569", textAlign: "center", marginTop: 24, marginBottom: 20 }}>
-          {deliverySms && pendingPhone ? "📱 We'll text you the report link when it's ready." : "✉️ We'll email you the report link when it's ready."}
-        </p>
-        <div style={{ textAlign: "center" }}>
-          <Link href="/" style={{ fontSize: 16, color: "#374151", textDecoration: "none" }}>← Cancel</Link>
+          <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, overflow: "hidden" }}>
+            {signals.length === 0 && (
+              <div style={{ padding: "20px 20px", color: "#374151", fontSize: 15 }}>
+                <span style={{ animation: "blink 1.4s ease-in-out infinite", display: "inline-block" }}>Scanning…</span>
+              </div>
+            )}
+            {signals.slice(0, visibleCount).map((sig, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "baseline", gap: 14, padding: "10px 20px",
+                borderBottom: i < signals.length - 1 ? "1px solid #0B1020" : "none",
+                animation: "fadeSlideIn 0.18s ease-out",
+              }}>
+                <span style={{
+                  width: 18, height: 18, flexShrink: 0, marginTop: 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  background: `${statusColor(sig.status)}15`, borderRadius: 4,
+                  fontSize: 11, fontWeight: 800, color: statusColor(sig.status),
+                }}>
+                  {statusIcon(sig.status)}
+                </span>
+                <span style={{ fontSize: 14, color: "#64748B", width: 200, flexShrink: 0 }}>{sig.label}</span>
+                <span style={{ fontSize: 14, color: sig.status === "fail" ? "#F87171" : sig.status === "warn" ? "#FBBF24" : "#CBD5E1", fontWeight: 500 }}>
+                  {sig.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Performance scores ───────────────────────────────────────── */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#374151", textTransform: "uppercase" }}>
+              Performance Scores
+            </div>
+            {!speedData && (
+              <div style={{ fontSize: 12, color: "#10D9A040", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "blink 1.2s ease-in-out infinite" }} />
+                Running Google Lighthouse…
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+            {speedMetrics.map(m => (
+              <div key={m.label} style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, padding: "16px 18px" }}>
+                <div style={{ fontSize: 11, color: "#475569", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>{m.label}</div>
+                {m.value !== null ? (
+                  <div style={{ fontSize: 30, fontWeight: 800, color: m.color || "#F1F5F9", lineHeight: 1, animation: "fadeSlideIn 0.3s ease-out" }}>
+                    {m.value}
+                  </div>
+                ) : (
+                  <div style={{ height: 30, display: "flex", alignItems: "center" }}>
+                    <div style={{ width: 52, height: 5, background: "#1E3050", borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 0%, #10D9A025 50%, transparent 100%)", animation: "shimmer 1.8s linear infinite" }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {speedData && (
+            <div style={{
+              marginTop: 12, padding: "10px 16px",
+              background: speedData.passesOneSecond ? "#10D9A010" : "#F8717110",
+              border: `1px solid ${speedData.passesOneSecond ? "#10D9A030" : "#F8717130"}`,
+              borderRadius: 8, fontSize: 14,
+              color: speedData.passesOneSecond ? "#10D9A0" : "#F87171",
+              fontWeight: 600,
+              animation: "fadeSlideIn 0.3s ease-out",
+            }}>
+              {speedData.passesOneSecond ? "✓ Passes the 1-second above-the-fold test" : "✗ Fails the 1-second above-the-fold test"}
+            </div>
+          )}
+        </div>
+
+        {/* ── CTA ─────────────────────────────────────────────────────── */}
+        {reportReady ? (
+          <a href={`/report/${reportReady}`} style={{
+            display: "block", background: "#10D9A0", color: "#0B0E16",
+            fontSize: 18, fontWeight: 700, padding: "18px",
+            borderRadius: 10, textDecoration: "none", textAlign: "center",
+            animation: "fadeSlideIn 0.4s ease-out",
+          }}>
+            View Your Full Report →
+          </a>
+        ) : (
+          <div style={{ padding: "18px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, textAlign: "center", color: "#374151", fontSize: 15 }}>
+            {fastData ? "Getting performance scores from Google Lighthouse…" : "Scanning your site…"}
+          </div>
+        )}
+
+        {error && (
+          <div style={{ marginTop: 16, padding: "14px 18px", background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, color: "#F87171", fontSize: 15 }}>
+            {error}
+          </div>
+        )}
+
+        <div style={{ textAlign: "center", marginTop: 28 }}>
+          <Link href="/" style={{ fontSize: 15, color: "#374151", textDecoration: "none" }}>← Cancel</Link>
         </div>
       </div>
     </main>
   );
 }
 
-// ── Shared result screens ────────────────────────────────────────────
+// ── Helper screens ────────────────────────────────────────────────────────────
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)",
-      color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "24px", position: "relative", overflow: "hidden",
+      minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
     }}>
-      <div style={{
-        position: "absolute", inset: 0, opacity: 0.03,
-        backgroundImage: "linear-gradient(#10D9A0 1px, transparent 1px), linear-gradient(90deg, #10D9A0 1px, transparent 1px)",
-        backgroundSize: "40px 40px",
-      }} />
-      <div style={{ maxWidth: 520, width: "100%", textAlign: "center", position: "relative" }}>
-        {children}
-      </div>
+      <div style={{ maxWidth: 520, width: "100%", textAlign: "center" }}>{children}</div>
     </main>
   );
 }
 
-function ReadyScreen({ id }: { id: string }) {
+function SkipMsg({ icon, title, body }: { icon: string; title: string; body: string }) {
   return (
-    <Shell>
-      <div style={{ fontSize: 32, fontWeight: 800, color: "#10D9A0", marginBottom: 40, letterSpacing: "-1px" }}>
-        Ping<span style={{ color: "#F1F5F9" }}>Close</span>
-      </div>
-      <div style={{
-        width: 72, height: 72, borderRadius: "50%",
-        background: "#10D9A015", border: "2px solid #10D9A040",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        margin: "0 auto 28px", fontSize: 32,
-      }}>✓</div>
-      <h1 style={{ fontSize: 36, fontWeight: 800, margin: "0 0 16px", letterSpacing: "-0.5px" }}>
-        Your report is ready.
-      </h1>
-      <p style={{ fontSize: 18, color: "#94A3B8", lineHeight: 1.6, margin: "0 0 36px" }}>
-        We checked all 54 items and found everything — the good and the bad.
-      </p>
-      <a
-        href={`/report/${id}`}
-        style={{
-          display: "inline-block", background: "#10D9A0", color: "#0B0E16",
-          fontSize: 18, fontWeight: 700, padding: "16px 36px",
-          borderRadius: 10, textDecoration: "none", marginBottom: 20,
-        }}
-      >
-        View Your Full Report →
-      </a>
-      <p style={{ fontSize: 16, color: "#475569", margin: "0 0 40px" }}>
-        We also sent it to your inbox — the link is permanent and shareable.
-      </p>
-      <div style={{
-        background: "#0D1528", border: "1px solid #1E3050",
-        borderRadius: 12, padding: "20px 24px", textAlign: "left", marginBottom: 32,
-      }}>
-        <div style={{ fontSize: 16, color: "#64748B", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 14, textTransform: "uppercase" }}>
-          Your report includes
-        </div>
-        {[
-          "Mobile & desktop performance scores",
-          "Core Web Vitals — LCP, FCP, TTFB, CLS",
-          "Hosting verdict — is your host holding you back?",
-          "Every image checked for WebP & lazy loading",
-          "GA4, Facebook Pixel, TikTok Pixel status",
-          "Exactly what to fix and in what order",
-        ].map(item => (
-          <div key={item} style={{ display: "flex", gap: 12, marginBottom: 10, alignItems: "flex-start" }}>
-            <span style={{ color: "#10D9A0", fontSize: 16, flexShrink: 0, marginTop: 2 }}>✓</span>
-            <span style={{ fontSize: 16, color: "#94A3B8" }}>{item}</span>
-          </div>
-        ))}
-      </div>
+    <>
+      <div style={{ fontSize: 52, marginBottom: 16 }}>{icon}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>{title}</div>
+      <div style={{ fontSize: 18, color: "#94A3B8", marginBottom: 28 }}>{body}</div>
       <Link href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>← Back to PingClose</Link>
-    </Shell>
-  );
-}
-
-function DuplicateScreen() {
-  return (
-    <Shell>
-      <div style={{ fontSize: 32, fontWeight: 800, color: "#10D9A0", marginBottom: 40, letterSpacing: "-1px" }}>
-        Ping<span style={{ color: "#F1F5F9" }}>Close</span>
-      </div>
-      <div style={{ fontSize: 56, marginBottom: 20 }}>📬</div>
-      <h1 style={{ fontSize: 32, fontWeight: 800, margin: "0 0 16px", letterSpacing: "-0.5px" }}>Already on its way!</h1>
-      <p style={{ fontSize: 19, color: "#CBD5E1", lineHeight: 1.6, margin: "0 0 32px" }}>
-        Your report is already in your inbox — check your email.
-      </p>
-      <Link href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>← Back to PingClose</Link>
-    </Shell>
+    </>
   );
 }
 
@@ -440,47 +369,19 @@ function LimitScreen() {
       <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 24, lineHeight: 1.6 }}>
         You&apos;ve run 5 free audits today — that&apos;s the daily limit. Come back tomorrow for more.
       </div>
-      <div style={{
-        background: "#111827", border: "1px solid #1F2937", borderRadius: 12,
-        padding: 20, marginBottom: 24,
-      }}>
+      <div style={{ background: "#111827", border: "1px solid #1F2937", borderRadius: 12, padding: 20, marginBottom: 24 }}>
         <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8 }}>Need more audits right now?</div>
         <div style={{ fontSize: 16, color: "#F1F5F9" }}>
           Call or text <a href="tel:+13145172533" style={{ color: "#10D9A0", fontWeight: 700 }}>(314) 517-2533</a> — Jim Fogal
         </div>
       </div>
-      <Link href="/" style={{
-        display: "inline-block", background: "#10D9A0", color: "#0B0E16",
-        fontWeight: 700, fontSize: 16, padding: "12px 32px", borderRadius: 8, textDecoration: "none",
-      }}>
+      <Link href="/" style={{ display: "inline-block", background: "#10D9A0", color: "#0B0E16", fontWeight: 700, fontSize: 16, padding: "12px 32px", borderRadius: 8, textDecoration: "none" }}>
         Back to PingClose
       </Link>
     </Shell>
   );
 }
 
-function ErrorScreen({ msg }: { msg?: string }) {
-  return (
-    <Shell>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-      <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Something went wrong</div>
-      <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6 }}>
-        {msg || "The audit couldn't complete. Please try again."}
-      </div>
-      <Link href="/" style={{
-        display: "inline-block", background: "#10D9A0", color: "#0B0E16",
-        fontWeight: 700, fontSize: 16, padding: "14px 32px", borderRadius: 8, textDecoration: "none",
-      }}>
-        ← Try Again
-      </Link>
-    </Shell>
-  );
-}
-
 export default function CheckPage() {
-  return (
-    <Suspense>
-      <CheckContent />
-    </Suspense>
-  );
+  return <Suspense><CheckContent /></Suspense>;
 }

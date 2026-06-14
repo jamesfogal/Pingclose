@@ -119,12 +119,17 @@ export default function Home() {
 
         {/* Logo + Nav */}
         <div style={{ marginBottom: 48, textAlign: "center", position: "relative" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 20 }}>
-            <div style={{ position: "relative", width: 12, height: 12, flexShrink: 0 }}>
-              <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#10D9A0" }} />
-              <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#10D9A0", animation: "ping 1.8s cubic-bezier(0,0,0.2,1) infinite" }} />
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 14, marginBottom: 20 }}>
+            {/* CSS radar icon — zero image requests */}
+            <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+              <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+                <div style={{ position: "absolute", width: 76, height: 76, bottom: -38, left: -38, borderRadius: "50%", border: "1.5px solid #10D9A0", opacity: 0.28 }} />
+                <div style={{ position: "absolute", width: 52, height: 52, bottom: -26, left: -26, borderRadius: "50%", border: "2px solid #10D9A0", opacity: 0.58 }} />
+                <div style={{ position: "absolute", width: 30, height: 30, bottom: -15, left: -15, borderRadius: "50%", border: "2.5px solid #10D9A0", opacity: 1 }} />
+              </div>
+              <div style={{ position: "absolute", bottom: -3.5, left: -3.5, width: 7, height: 7, background: "#10D9A0", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1), 0 0 0 8px rgba(16,217,160,0.05)" }} />
             </div>
-            <div style={{ fontSize: "clamp(44px, 7vw, 70px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", lineHeight: 1 }}>
+            <div style={{ fontSize: "clamp(44px, 7vw, 70px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", lineHeight: 1, fontFamily: "var(--font-geist-sans)" }}>
               Ping<span style={{ color: "#F1F5F9" }}>Close</span>
             </div>
           </div>
