@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 
+const VIP_EMAILS = ['jim@pingclose.com', 'james.fogal@gmail.com', 'james.fogal@citywidealarms.com'];
+
 export async function POST(req: NextRequest) {
   try {
     const { email, url } = await req.json();
 
     if (!email || !url) {
       return NextResponse.json({ error: 'Email and URL are required.' }, { status: 400 });
+    }
+
+    if (VIP_EMAILS.includes(email.toLowerCase())) {
+      return NextResponse.json({ alreadyVerified: true });
     }
 
     // Basic email format check
