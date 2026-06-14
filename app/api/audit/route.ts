@@ -181,8 +181,8 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (err) {
-    const msg = err instanceof Error ? err.message : JSON.stringify(err);
-    console.error('AUDIT_FAIL:', msg);
+    const msg = err instanceof Error ? err.message + '\n' + err.stack : JSON.stringify(err);
+    console.error('AUDIT_FAIL_FULL:', msg);
     return NextResponse.json({ error: 'Audit failed. Please try again.' }, { status: 500 });
   }
 }
