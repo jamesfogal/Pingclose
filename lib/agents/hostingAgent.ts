@@ -99,7 +99,10 @@ export async function runHostingAgent(hostname: string, headers: Record<string, 
       const data = await res.json() as { isp?: string; org?: string };
       hosting = mapIspToHostName(data.isp || '', data.org || '');
     }
-  } catch { /* fall through to Unknown */ }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('AGENT_FAIL: HostingAgent —', msg);
+  }
 
   // Header signals override ASN for hosts that explicitly advertise themselves
   if (headers['x-powered-by']?.includes('WP Engine')) hosting = 'WP Engine';

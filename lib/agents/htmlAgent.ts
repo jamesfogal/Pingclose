@@ -78,7 +78,9 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
     });
     html = await res.text();
     res.headers.forEach((value, key) => { headers[key.toLowerCase()] = value; });
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('AGENT_FAIL: HtmlAgent —', msg);
     return EMPTY;
   }
 

@@ -10,16 +10,27 @@ export function isVIP(email: string): boolean {
 export async function checkRateLimit(email: string): Promise<{ limited: boolean }> {
   if (isVIP(email)) return { limited: false };
 
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { count } = await supabase
-    .from('pingclose_audits')
-    .select('*', { count: 'exact', head: true })
-    .eq('email', email)
-    .gte('created_at', yesterday);
+  try {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error } = await supabase
+      .from('pingclose_audits')
+      .select('*', { count: 'exact', head: true })
+      .eq('email', email)
+      .gte('created_at', yesterday);
 
-  if (count && count >= 5) {
-    try { await sendLimitNotification(email, count + 1); } catch { /* non-blocking */ }
-    return { limited: true };
+    if (error) {
+      console.error('RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
+      return { limited: false };
+    }
+
+    if (count && count >= 5) {
+      try { await sendLimitNotification(email, count + 1); } catch { /* non-blocking */ }
+      return { limited: true };
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('RATE_LIMIT_FAIL:', msg);
+    return { limited: false };
   }
 
   return { limited: false };

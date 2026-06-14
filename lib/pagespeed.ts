@@ -67,6 +67,7 @@ export interface PageSpeedResult {
 }
 
 export async function runPageSpeed(url: string): Promise<PageSpeedResult> {
+  try {
   const apiKey = process.env.PAGESPEED_API_KEY;
   const endpoint = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed`;
 
@@ -285,4 +286,9 @@ export async function runPageSpeed(url: string): Promise<PageSpeedResult> {
     opportunities,
     raw: mobile
   };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('AGENT_FAIL: PageSpeed —', msg);
+    throw err;
+  }
 }

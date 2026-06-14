@@ -121,7 +121,9 @@ export async function runSitemapAgent(baseUrl: string): Promise<SitemapAgentResu
       cityPageUrls,
       hasSitemapIndex,
     };
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('AGENT_FAIL: SitemapAgent —', msg);
     return empty;
   }
 }
