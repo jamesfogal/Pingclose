@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || '0.0.0.0';
 
+    console.log('STEP: checkRateLimit starting, key prefix:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 12));
+    console.log('STEP1: checkRateLimit');
     const { limited } = await checkRateLimit(email);
     if (limited) {
       return NextResponse.json({ limit: true, message: "You've run 5 free audits today. Come back tomorrow for more!" });
@@ -29,14 +31,15 @@ export async function POST(req: NextRequest) {
     const hostname = new URL(normalizedUrl).hostname;
     const baseUrl = new URL(normalizedUrl).origin;
 
-    // Fire all 5 agents simultaneously — nothing waits for anything else
+    console.log('STEP2: firing agents');
     const [speedResult, htmlResult, hostingResult, availabilityResult, sitemapResult] = await Promise.all([
-      runPageSpeed(normalizedUrl),
-      runHtmlAgent(normalizedUrl),
-      runHostingAgent(hostname),
-      runAvailabilityAgent(baseUrl),
-      runSitemapAgent(baseUrl),
+      runPageSpeed(normalizedUrl).catch(e => { throw new Error('PAGESPEED_FAIL: ' + e.message); }),
+      runHtmlAgent(normalizedUrl).catch(e => { throw new Error('HTML_FAIL: ' + e.message); }),
+      runHostingAgent(hostname).catch(e => { throw new Error('HOSTING_FAIL: ' + e.message); }),
+      runAvailabilityAgent(baseUrl).catch(e => { throw new Error('AVAILABILITY_FAIL: ' + e.message); }),
+      runSitemapAgent(baseUrl).catch(e => { throw new Error('SITEMAP_FAIL: ' + e.message); }),
     ]);
+    console.log('STEP3: agents done');
 
     // Apply header-based overrides to the hosting result (no extra network call)
     // Headers come from htmlAgent, hosting name from hostingAgent — merged here
@@ -153,25 +156,30 @@ export async function POST(req: NextRequest) {
       .select('id')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('SUPABASE_INSERT_ERROR:', JSON.stringify({ message: error.message, details: error.details, hint: error.hint, code: error.code }));
+    }
 
-    const agencySignal = await checkAgencySignal(ip, audit.id);
+    const reportId = audit?.id || null;
 
-    await deliverReport({
-      reportId: audit.id,
-      normalizedUrl,
-      email: email || null,
-      phone: phone || null,
-      deliveryEmail,
-      deliverySms,
-      agencySignal,
-      speedResult,
-      techResult
-    });
+    if (reportId) {
+      const agencySignal = await checkAgencySignal(ip, reportId);
+      await deliverReport({
+        reportId,
+        normalizedUrl,
+        email: email || null,
+        phone: phone || null,
+        deliveryEmail,
+        deliverySms,
+        agencySignal,
+        speedResult,
+        techResult
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      reportId: audit.id,
+      reportId,
       mobileScore:     speedResult.mobileScore,
       desktopScore:    speedResult.desktopScore,
       ttfb:            speedResult.ttfb,
