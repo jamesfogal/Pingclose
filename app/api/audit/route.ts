@@ -117,7 +117,9 @@ export async function POST(req: NextRequest) {
       hasAltText: !techResult.imagesWithoutAlt.some(u => u.includes(img.url))
     }));
 
+    console.log('STEP: scoreAudit starting');
     const { topIssues, topFixes } = scoreAudit(speedResult, techResult);
+    console.log('STEP: scoreAudit done, supabase insert starting');
 
     const { data: audit, error } = await supabase
       .from('pingclose_audits')
