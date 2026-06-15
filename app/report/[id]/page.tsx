@@ -116,17 +116,115 @@ interface Audit {
   };
 }
 
-const DARK_CARD: React.CSSProperties = { background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "24px", marginBottom: 20 };
-const SECTION_LABEL: React.CSSProperties = { fontSize: 16, fontWeight: 700, color: "#64748B", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 };
+const DARK_CARD: React.CSSProperties = {
+  background: "#0D1528",
+  border: "1px solid #1E3050",
+  borderRadius: 12,
+  padding: "24px",
+  marginBottom: 20,
+};
 
-function ScoreRing({ score, label }: { score: number; label: string }) {
-  const color = score >= 70 ? "#10D9A0" : score >= 50 ? "#FBBF24" : "#F87171";
+const SECTION_LABEL: React.CSSProperties = {
+  fontSize: 16,
+  fontWeight: 700,
+  color: "#CBD5E1",
+  letterSpacing: "0.10em",
+  textTransform: "uppercase",
+  marginBottom: 16,
+};
+
+function metricColor(ms: number, type: "ttfb" | "fcp" | "lcp") {
+  if (type === "ttfb") return ms < 600 ? "#10D9A0" : ms < 1800 ? "#FBBF24" : "#F87171";
+  if (type === "fcp")  return ms < 1800 ? "#10D9A0" : ms < 3000 ? "#FBBF24" : "#F87171";
+  return ms < 2500 ? "#10D9A0" : ms < 4000 ? "#FBBF24" : "#F87171";
+}
+
+function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: number }) {
+  const lcpSec = (lcp / 1000).toFixed(1);
+  const fcpSec = (fcp / 1000).toFixed(1);
+  const ttfbMs = ttfb;
+  const lcpColor = metricColor(lcp, "lcp");
+  const fcpColor = metricColor(fcp, "fcp");
+  const ttfbColor = metricColor(ttfb, "ttfb");
+
+  const ttfbPct = lcp > 0 ? Math.min((ttfb / lcp) * 100, 98) : 5;
+  const fcpPct  = lcp > 0 ? Math.min((fcp  / lcp) * 100, 98) : 50;
+
   return (
-    <div style={{ textAlign: "center", animation: "scoreReveal 400ms cubic-bezier(0.23,1,0.32,1) both" }}>
-      <div style={{ width: 90, height: 90, borderRadius: "50%", border: `5px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px", background: color + "15" }}>
-        <span style={{ fontSize: 26, fontWeight: 800, color }}>{score}</span>
+    <div style={{ marginBottom: 24, animation: "heroIn 500ms cubic-bezier(0.23,1,0.32,1) both" }}>
+      {/* Big load time number */}
+      <div style={{ textAlign: "center", padding: "40px 24px 32px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, marginBottom: 16 }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 16 }}>
+          Your site took
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 4, marginBottom: 16 }}>
+          <span style={{ fontSize: "clamp(72px, 14vw, 112px)", fontWeight: 900, color: lcpColor, letterSpacing: "-4px", lineHeight: 1, animation: "countIn 600ms cubic-bezier(0.23,1,0.32,1) 100ms both" }}>
+            {lcpSec}
+          </span>
+          <span style={{ fontSize: "clamp(32px, 6vw, 52px)", fontWeight: 700, color: lcpColor, marginBottom: 8, opacity: 0.8 }}>s</span>
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 500, color: "#94A3B8" }}>
+          to load the main content
+        </div>
+
+        {/* Milestone timeline bar */}
+        <div style={{ marginTop: 36, padding: "0 8px" }}>
+          <div style={{ position: "relative", height: 10, background: "#1E3050", borderRadius: 5 }}>
+            {/* Full bar fill — color = LCP verdict */}
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${ttfbColor} 0%, ${fcpColor} ${fcpPct}%, ${lcpColor} 100%)`, borderRadius: 5, opacity: 0.85 }} />
+
+            {/* TTFB marker */}
+            <div style={{ position: "absolute", left: `${ttfbPct}%`, top: "50%", transform: "translate(-50%, -50%)", zIndex: 2 }}>
+              <div style={{ width: 3, height: 24, background: "#fff", borderRadius: 2, opacity: 0.9 }} />
+            </div>
+
+            {/* FCP marker */}
+            <div style={{ position: "absolute", left: `${fcpPct}%`, top: "50%", transform: "translate(-50%, -50%)", zIndex: 2 }}>
+              <div style={{ width: 3, height: 24, background: "#fff", borderRadius: 2, opacity: 0.9 }} />
+            </div>
+
+            {/* LCP end dot */}
+            <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: lcpColor, border: "3px solid #0D1528", zIndex: 2 }} />
+          </div>
+
+          {/* Timeline labels */}
+          <div style={{ position: "relative", height: 48, marginTop: 8 }}>
+            {/* TTFB label */}
+            <div style={{ position: "absolute", left: `${ttfbPct}%`, transform: "translateX(-50%)", textAlign: "center", minWidth: 80 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: ttfbColor }}>{ttfbMs}ms</div>
+              <div style={{ fontSize: 14, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>SERVER</div>
+            </div>
+
+            {/* FCP label */}
+            <div style={{ position: "absolute", left: `${fcpPct}%`, transform: "translateX(-50%)", textAlign: "center", minWidth: 80 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: fcpColor }}>{fcpSec}s</div>
+              <div style={{ fontSize: 14, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>FIRST PAINT</div>
+            </div>
+
+            {/* LCP label */}
+            <div style={{ position: "absolute", right: 0, transform: "translateX(0%)", textAlign: "right", minWidth: 80 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: lcpColor }}>{lcpSec}s</div>
+              <div style={{ fontSize: 14, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>PAGE LOADED</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div style={{ fontSize: 16, color: "#94A3B8" }}>{label}</div>
+
+      {/* Three milestone pills */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+        {[
+          { label: "Server Response", sublabel: "TTFB", value: `${ttfbMs}ms`, color: ttfbColor, verdict: ttfb < 600 ? "Fast" : ttfb < 1800 ? "Slow" : "Very Slow" },
+          { label: "First Content", sublabel: "FCP", value: `${fcpSec}s`, color: fcpColor, verdict: fcp < 1800 ? "Fast" : fcp < 3000 ? "Slow" : "Very Slow" },
+          { label: "Page Loaded", sublabel: "LCP", value: `${lcpSec}s`, color: lcpColor, verdict: lcp < 2500 ? "Fast" : lcp < 4000 ? "Slow" : "Very Slow" },
+        ].map(({ label, sublabel, value, color, verdict }) => (
+          <div key={sublabel} style={{ background: "#0D1528", border: `1px solid ${color}40`, borderRadius: 10, padding: "16px 12px", textAlign: "center" }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color, marginBottom: 2 }}>{value}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.08em", textTransform: "uppercase" }}>{sublabel}</div>
+            <div style={{ fontSize: 14, color: "#64748B", marginTop: 4 }}>{label}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color, marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{verdict}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -134,9 +232,12 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
 function Metric({ label, value, unit, good, na }: { label: string; value: string | number; unit?: string; good: boolean; na?: boolean }) {
   return (
     <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 8, padding: "14px 16px" }}>
-      <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+      <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: na ? "#475569" : good ? "#10D9A0" : "#F87171" }}>
-        {na ? <span style={{ fontSize: 16 }}>No field data</span> : <>{value}{unit && <span style={{ fontSize: 16, color: "#64748B", marginLeft: 3 }}>{unit}</span>}</>}
+        {na
+          ? <span style={{ fontSize: 16 }}>No field data</span>
+          : <>{value}{unit && <span style={{ fontSize: 16, color: "#94A3B8", marginLeft: 3 }}>{unit}</span>}</>
+        }
       </div>
     </div>
   );
@@ -147,8 +248,8 @@ function CheckRow({ label, pass, detail, index = 0 }: { label: string; pass: boo
     <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12, animation: `checkRowIn 300ms cubic-bezier(0.23,1,0.32,1) ${index * 40}ms both` }}>
       <span style={{ color: pass ? "#10D9A0" : "#F87171", fontSize: 18, flexShrink: 0, fontWeight: 700, marginTop: 1 }}>{pass ? "✓" : "✗"}</span>
       <div>
-        <span style={{ fontSize: 17, color: pass ? "#94A3B8" : "#F1F5F9" }}>{label}</span>
-        {detail && <div style={{ fontSize: 16, color: "#64748B", marginTop: 3 }}>{detail}</div>}
+        <span style={{ fontSize: 17, color: pass ? "#CBD5E1" : "#F1F5F9" }}>{label}</span>
+        {detail && <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 3 }}>{detail}</div>}
       </div>
     </div>
   );
@@ -192,11 +293,11 @@ export default function ReportPage() {
 
   const hostingVerdictColor = () => {
     switch (tech?.hostingVerdict) {
-      case "dead-zone": return "#F87171";
+      case "dead-zone":     return "#F87171";
       case "speed-limiter": return "#FBBF24";
-      case "acceptable": return "#FCD34D";
-      case "race-ready": return "#10D9A0";
-      default: return "#64748B";
+      case "acceptable":    return "#FCD34D";
+      case "race-ready":    return "#10D9A0";
+      default:              return "#94A3B8";
     }
   };
 
@@ -223,18 +324,17 @@ export default function ReportPage() {
           <div style={{ fontSize: 22, fontWeight: 700, color: verdictColor }}>
             {audit.passes_one_second ? "✅ Passes the 1-second test" : "❌ Failing Google's first hurdle"}
           </div>
-          <div style={{ fontSize: 17, color: "#94A3B8", marginTop: 8, lineHeight: 1.6 }}>
+          <div style={{ fontSize: 17, color: "#CBD5E1", marginTop: 8, lineHeight: 1.6 }}>
             {audit.passes_one_second
               ? "Your site is clearing Google's first hurdle. Now let's make sure you win the full race."
               : "Your site is failing Google's most basic performance requirement. Your competitors are passing you on the very first step."}
           </div>
         </div>
 
-        {/* 2. SCORE RINGS */}
-        <div style={{ ...DARK_CARD, display: "flex", justifyContent: "center", gap: 48 }}>
-          <ScoreRing score={audit.mobile_score} label="Mobile Score" />
-          <ScoreRing score={audit.desktop_score} label="Desktop Score" />
-        </div>
+        {/* 2. LOAD TIME HERO + TIMELINE */}
+        {audit.lcp > 0 && (
+          <LoadTimeHero ttfb={audit.ttfb} fcp={audit.fcp} lcp={audit.lcp} />
+        )}
 
         {/* 3. MOBILE vs DESKTOP GAP */}
         {speed && speed.mobileDesktopGap >= 10 && (
@@ -267,40 +367,40 @@ export default function ReportPage() {
               {speed.renderBlockingScripts > 0 && (
                 <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }}>
                   <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>🚫 {speed.renderBlockingScripts} Render-Blocking Scripts</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>These scripts freeze your page before any content loads.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>These scripts freeze your page before any content loads.</div>
                   {speed.renderBlockingDetails.slice(0, 3).map((r, i) => (
-                    <div key={i} style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontFamily: "monospace" }}>→ {r.url.split("/").pop()?.substring(0, 60)} ({r.savingsMs}ms)</div>
+                    <div key={i} style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontFamily: "monospace" }}>→ {r.url.split("/").pop()?.substring(0, 60)} ({r.savingsMs}ms)</div>
                   ))}
                 </div>
               )}
               {speed.unusedJsKb > 0 && (
                 <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }}>
                   <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>🗑️ {speed.unusedJsKb}KB Unused JavaScript</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>JavaScript your visitors download but never use. Pure waste on every page load.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>JavaScript your visitors download but never use. Pure waste on every page load.</div>
                 </div>
               )}
               {speed.unusedCssKb > 0 && (
                 <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }}>
                   <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>🗑️ {speed.unusedCssKb}KB Unused CSS</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>Style rules loading on every visit that are never applied to your page.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Style rules loading on every visit that are never applied to your page.</div>
                 </div>
               )}
               {speed.noBrowserCaching && (
                 <div style={{ background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, padding: "12px 16px" }}>
                   <div style={{ fontSize: 17, color: "#FBBF24", fontWeight: 600 }}>🔄 No Browser Caching</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>Repeat visitors re-download the same files every single visit instead of loading from cache.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Repeat visitors re-download the same files every single visit instead of loading from cache.</div>
                 </div>
               )}
               {speed.hasFontDisplayIssue && (
                 <div style={{ background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, padding: "12px 16px" }}>
                   <div style={{ fontSize: 17, color: "#FBBF24", fontWeight: 600 }}>🔤 Font Loading Issue</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>Fonts blocking render — text is invisible to visitors until fonts fully download.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Fonts blocking render — text is invisible to visitors until fonts fully download.</div>
                 </div>
               )}
               {speed.hasRocketLoaderConflict && (
                 <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }}>
                   <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>⚡ Cloudflare Rocket Loader Conflict</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>Rocket Loader is adding load time instead of reducing it — a common WordPress conflict. Disable it.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Rocket Loader is adding load time instead of reducing it — a common WordPress conflict. Disable it.</div>
                 </div>
               )}
             </div>
@@ -313,22 +413,22 @@ export default function ReportPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9" }}>{speed?.totalImages ?? 0}</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Images</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Images</div>
             </div>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: "#10D9A0" }}>{speed?.webpImages ?? 0}</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>WebP ✓</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>WebP ✓</div>
             </div>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: (speed?.nonWebpImages ?? 0) > 0 ? "#F87171" : "#10D9A0" }}>{speed?.nonWebpImages ?? 0}</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Not WebP ✗</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Not WebP ✗</div>
             </div>
           </div>
 
           {(speed?.estimatedWebPSavingKb ?? 0) > 0 && (
             <div style={{ background: "#10D9A010", border: "1px solid #10D9A030", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
               <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>💡 Converting to WebP would save approximately {speed!.estimatedWebPSavingKb}KB</div>
-              <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>WebP images are 25–35% smaller than JPG/PNG with identical visual quality.</div>
+              <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>WebP images are 25–35% smaller than JPG/PNG with identical visual quality.</div>
             </div>
           )}
 
@@ -343,10 +443,10 @@ export default function ReportPage() {
 
           {(speed?.nonWebpImageList?.length ?? 0) > 0 && (
             <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8, fontWeight: 600, letterSpacing: "0.06em" }}>IMAGES THAT NEED CONVERTING TO WEBP:</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 8, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Images That Need Converting to WebP:</div>
               {speed!.nonWebpImageList.slice(0, 8).map((img, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #1E3050", fontSize: 16 }}>
-                  <span style={{ color: "#94A3B8", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
+                  <span style={{ color: "#CBD5E1", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
                     {img.url.split("/").pop()?.substring(0, 50) || img.url}
                   </span>
                   <span style={{ color: "#F87171", flexShrink: 0, marginLeft: 8 }}>
@@ -392,7 +492,7 @@ export default function ReportPage() {
                 <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600, marginBottom: 8 }}>
                   ✓ {tech.backupService}{tech.backupCoveredByHost ? " — Included with your host" : " — Plugin detected"}
                 </div>
-                <div style={{ fontSize: 17, color: "#94A3B8", lineHeight: 1.7 }}>{tech.backupMessage}</div>
+                <div style={{ fontSize: 17, color: "#CBD5E1", lineHeight: 1.7 }}>{tech.backupMessage}</div>
               </>
             ) : (
               <>
@@ -416,7 +516,7 @@ export default function ReportPage() {
               ["E-commerce", tech?.ecommerce && tech.ecommerce !== "None detected" ? tech.ecommerce : "Not an e-commerce site"],
             ] as [string, string][]).map(([label, value]) => (
               <div key={label}>
-                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                 <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9" }}>{value}</div>
               </div>
             ))}
@@ -459,7 +559,7 @@ export default function ReportPage() {
             </div>
             {tech.primaryKeyword && (
               <div style={{ marginTop: 16, padding: "12px 16px", background: "#111827", borderRadius: 8 }}>
-                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 4, fontWeight: 600, letterSpacing: "0.06em" }}>PRIMARY KEYWORD DETECTED</div>
+                <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 4, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Primary Keyword Detected</div>
                 <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>{tech.primaryKeyword}</div>
               </div>
             )}
@@ -476,51 +576,51 @@ export default function ReportPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{sm.pageCount.toLocaleString()}</div>
-                  <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Pages</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Pages</div>
                 </div>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: sm.landingPageCount > 0 ? "#10D9A0" : "#475569" }}>{sm.landingPageCount}</div>
-                  <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Landing Pages</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Landing Pages</div>
                 </div>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: sm.cityPageCount > 0 ? "#10D9A0" : "#F87171" }}>{sm.cityPageCount}</div>
-                  <div style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>City Pages</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>City Pages</div>
                 </div>
               </div>
 
               {sm.cityPageCount === 0 && (
                 <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px", marginBottom: 12 }}>
                   <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>❌ No city pages detected</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4 }}>City pages targeting specific service areas are one of the highest-ROI pages a local business can build. Each city page ranks independently for "[service] in [city]" searches.</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>City pages targeting specific service areas are one of the highest-ROI pages a local business can build. Each city page ranks independently for "[service] in [city]" searches.</div>
                 </div>
               )}
 
               {sm.cityPageUrls.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8, fontWeight: 600, letterSpacing: "0.06em" }}>CITY / LOCATION PAGES DETECTED:</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 8, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>City / Location Pages Detected:</div>
                   {sm.cityPageUrls.slice(0, 8).map((u, i) => {
                     let path = u;
                     try { path = new URL(u).pathname; } catch { /* use full url */ }
                     return (
-                      <div key={i} style={{ fontSize: 16, color: "#94A3B8", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #1E3050" }}>
+                      <div key={i} style={{ fontSize: 16, color: "#CBD5E1", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #1E3050" }}>
                         {path}
                       </div>
                     );
                   })}
                   {sm.cityPageCount > 8 && (
-                    <div style={{ fontSize: 16, color: "#475569", marginTop: 6 }}>…and {sm.cityPageCount - 8} more</div>
+                    <div style={{ fontSize: 16, color: "#64748B", marginTop: 6 }}>…and {sm.cityPageCount - 8} more</div>
                   )}
                 </div>
               )}
 
               {sm.landingPageUrls.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8, fontWeight: 600, letterSpacing: "0.06em" }}>LANDING PAGES DETECTED:</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 8, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Landing Pages Detected:</div>
                   {sm.landingPageUrls.slice(0, 5).map((u, i) => {
                     let path = u;
                     try { path = new URL(u).pathname; } catch { /* use full url */ }
                     return (
-                      <div key={i} style={{ fontSize: 16, color: "#94A3B8", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #1E3050" }}>
+                      <div key={i} style={{ fontSize: 16, color: "#CBD5E1", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #1E3050" }}>
                         {path}
                       </div>
                     );
@@ -535,7 +635,7 @@ export default function ReportPage() {
         {tech && (
           <div style={DARK_CARD}>
             <div style={SECTION_LABEL}>📋 Schema Markup</div>
-            <div style={{ fontSize: 16, color: "#64748B", marginBottom: 14, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
               Schema markup tells Google exactly what your page contains and unlocks rich results — star ratings, FAQ answers, and prices shown directly in search results. Most local businesses have none.
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -551,7 +651,7 @@ export default function ReportPage() {
         {tech && (
           <div style={DARK_CARD}>
             <div style={SECTION_LABEL}>📊 Conversion Tracking</div>
-            <div style={{ fontSize: 16, color: "#64748B", marginBottom: 14, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
               Without tracking you cannot know which ads are working, which pages are converting, or where visitors are dropping off. You are making marketing decisions completely blind.
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -566,7 +666,6 @@ export default function ReportPage() {
 
         {/* 15. ALL ISSUES — scored red to green */}
         {audit.top_issues?.length > 0 && (() => {
-          // Parse scored issues: format is "[10] 🔴 message"
           const parsed = audit.top_issues.map(raw => {
             const match = raw.match(/^\[(\d+)\]\s(.+)$/);
             if (match) return { score: parseInt(match[1]), text: match[2] };
@@ -598,7 +697,7 @@ export default function ReportPage() {
                 ].map(({ label, color, range }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 16, color: "#64748B", fontWeight: 600 }}>{label} ({range})</span>
+                    <span style={{ fontSize: 16, color: "#CBD5E1", fontWeight: 600 }}>{label} ({range})</span>
                   </div>
                 ))}
               </div>
@@ -616,7 +715,6 @@ export default function ReportPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = scoreColor(issue.score) + "18"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = scoreBg(issue.score); }}
                   >
-                    {/* Score badge */}
                     <div style={{
                       flexShrink: 0, width: 36, height: 36,
                       borderRadius: 8,
@@ -655,20 +753,20 @@ export default function ReportPage() {
           const googleSearchUrl = `https://www.google.com/search?q=site:${domain}`;
           const rankCheckUrl = keyword ? `https://www.google.com/search?q=${encodeURIComponent(keyword)}` : null;
           return (
-            <div style={{ background: "#0D152808", border: "1px solid #1E3050", borderRadius: 12, padding: "24px", marginBottom: 20 }}>
-              <div style={{ ...SECTION_LABEL }}>🔍 Keyword Visibility</div>
+            <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "24px", marginBottom: 20 }}>
+              <div style={SECTION_LABEL}>🔍 Keyword Visibility</div>
               {keyword && (
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6, fontWeight: 700, letterSpacing: "0.08em" }}>PRIMARY KEYWORD DETECTED FROM PAGE</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 6, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Primary Keyword Detected From Page</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                     <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", padding: "8px 14px", background: "#111827", border: "1px solid #1E3050", borderRadius: 8 }}>
                       &ldquo;{keyword}&rdquo;
                     </div>
                     {rankCheckUrl && (
                       <a href={rankCheckUrl} target="_blank" rel="noreferrer"
-                        style={{ fontSize: 16, color: "#60A5FA", textDecoration: "none", padding: "8px 14px", border: "1px solid #60A5FA30", borderRadius: 8, transition: "border-color 160ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
-                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#60A5FA80"; }}
-                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#60A5FA30"; el.style.transform = ""; }}
+                        style={{ fontSize: 16, color: "#F1F5F9", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", background: "#111827", borderRadius: 8, transition: "border-color 160ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#10D9A060"; el.style.color = "#10D9A0"; }}
+                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#1E3050"; el.style.color = "#F1F5F9"; el.style.transform = ""; }}
                         onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
                         onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
                       >
@@ -676,8 +774,8 @@ export default function ReportPage() {
                       </a>
                     )}
                     <a href={googleSearchUrl} target="_blank" rel="noreferrer"
-                      style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", borderRadius: 8, transition: "border-color 160ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#374151"; }}
+                      style={{ fontSize: 16, color: "#F1F5F9", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", background: "#111827", borderRadius: 8, transition: "border-color 160ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
+                      onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#374151"; }}
                       onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#1E3050"; el.style.transform = ""; }}
                       onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
                       onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
@@ -689,7 +787,7 @@ export default function ReportPage() {
               )}
               {h1 && (
                 <div style={{ marginBottom: 16, padding: "12px 16px", background: "#111827", borderRadius: 8, borderLeft: "3px solid #FBBF24" }}>
-                  <div style={{ fontSize: 16, color: "#64748B", marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em" }}>CURRENT H1 TAG</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Current H1 Tag</div>
                   <div style={{ fontSize: 16, color: "#F1F5F9", fontStyle: "italic" }}>&ldquo;{h1}&rdquo;</div>
                   {h1 && !h1.match(/[A-Z][a-z]+ (MO|Missouri|IL|Illinois|St\. Louis)/i) && (
                     <div style={{ fontSize: 16, color: "#FBBF24", marginTop: 6 }}>
@@ -700,12 +798,12 @@ export default function ReportPage() {
               )}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
                 {[
-                  { label: "LocalBusiness Schema", value: hasSchema, good: true },
-                  { label: "FAQ Schema", value: hasFAQ, good: true },
-                  { label: "Pricing Schema", value: hasPricing, good: true },
-                ].map(({ label, value, good }) => (
+                  { label: "LocalBusiness Schema", value: hasSchema },
+                  { label: "FAQ Schema", value: hasFAQ },
+                  { label: "Pricing Schema", value: hasPricing },
+                ].map(({ label, value }) => (
                   <div key={label} style={{ padding: "10px 12px", background: "#111827", borderRadius: 8, border: `1px solid ${value ? "#10D9A030" : "#F8717120"}` }}>
-                    <div style={{ fontSize: 16, color: "#64748B", marginBottom: 3, fontWeight: 700, letterSpacing: "0.06em" }}>{label}</div>
+                    <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 3, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</div>
                     <div style={{ fontSize: 16, fontWeight: 600, color: value ? "#10D9A0" : "#F87171" }}>
                       {value ? `✓ Detected` : `✗ Missing`}
                     </div>
@@ -713,7 +811,7 @@ export default function ReportPage() {
                 ))}
               </div>
               {(!hasSchema || !hasFAQ) && (
-                <div style={{ marginTop: 12, fontSize: 16, color: "#64748B", lineHeight: 1.6 }}>
+                <div style={{ marginTop: 12, fontSize: 16, color: "#CBD5E1", lineHeight: 1.6 }}>
                   {!hasSchema && <div>→ Missing LocalBusiness schema — Google has less confidence in your local signals and NAP data.</div>}
                   {!hasFAQ && <div>→ Missing FAQ schema — competitors with FAQ pages get free rich results above your listing.</div>}
                 </div>
@@ -735,29 +833,27 @@ export default function ReportPage() {
           </div>
         )}
 
-        {/* CLOSING CTA — conditional based on score */}
+        {/* CLOSING CTA */}
         <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, padding: "36px", marginBottom: 12 }}>
           <h1 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, color: "#F1F5F9", textAlign: "center", margin: "0 0 24px", letterSpacing: "-1px", lineHeight: 1.15 }}>
             We Find <span style={{ color: "#10D9A0" }}>Broken Websites</span>
           </h1>
           {audit.passes_one_second && audit.mobile_score >= 90 ? (
-            // PASSING — curiosity pitch
             <>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#10D9A0", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
                 Your site is fast — but is the rest of the story this good?
               </div>
-              <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
                 Speed is just the first hurdle. Want to see how your Local SEO, Google Business Profile,<br />
                 citations, and conversion tracking stack up against your competitors?
               </div>
             </>
           ) : (
-            // FAILING — send to LocalSEOAEOPro
             <>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4, marginBottom: 10, textAlign: "center" }}>
                 We can have 49 of these problems fixed in 24 hours.
               </div>
-              <div style={{ fontSize: 17, color: "#94A3B8", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
+              <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 28, lineHeight: 1.6, textAlign: "center" }}>
                 98% of the changes on this report are done within 48 hours.<br />
                 Citations take longer — but everything else moves fast.<br />
                 <strong style={{ color: "#F1F5F9" }}>Click the link below to get started at LocalSEOAEOPro.com.</strong>
@@ -765,7 +861,6 @@ export default function ReportPage() {
             </>
           )}
 
-          {/* Three contact options — LocalSEOAEOPro first, full width */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 16 }}>
             <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer"
               style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A060", borderRadius: 12, textDecoration: "none", transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1), border-color 160ms cubic-bezier(0.23,1,0.32,1)" }}
@@ -799,16 +894,16 @@ export default function ReportPage() {
               >
                 <span style={{ fontSize: 28 }}>✉️</span>
                 <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
-                <span style={{ fontSize: 16, color: "#94A3B8" }}>jim@pingclose.com</span>
+                <span style={{ fontSize: 16, color: "#CBD5E1" }}>jim@pingclose.com</span>
               </a>
             </div>
           </div>
         </div>
 
         <div style={{ textAlign: "center", marginTop: 24 }}>
-          <a href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
+          <a href="/" style={{ fontSize: 16, color: "#64748B", textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#94A3B8"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#475569"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#64748B"; }}
           >← Run another audit at PingClose.com</a>
         </div>
 
@@ -816,8 +911,12 @@ export default function ReportPage() {
 
       <style>{`
         @media (prefers-reduced-motion: no-preference) {
-          @keyframes scoreReveal {
-            from { opacity: 0; transform: scale(0.9); }
+          @keyframes heroIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes countIn {
+            from { opacity: 0; transform: scale(0.92); }
             to   { opacity: 1; transform: scale(1); }
           }
           @keyframes checkRowIn {
@@ -830,9 +929,10 @@ export default function ReportPage() {
           }
         }
         @media (prefers-reduced-motion: reduce) {
-          @keyframes scoreReveal { from { opacity: 0; } to { opacity: 1; } }
-          @keyframes checkRowIn  { from { opacity: 0; } to { opacity: 1; } }
-          @keyframes pulse       { 50% { opacity: 0.6; } }
+          @keyframes heroIn    { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes countIn   { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes checkRowIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes pulse     { 50% { opacity: 0.6; } }
         }
         @media (hover: hover) and (pointer: fine) {
           a:active { opacity: 0.85; }
