@@ -262,7 +262,7 @@ function scoreH1Content(h1Text: string, titleTag: string, primaryKeyword: string
 
   // Too short to mean anything
   if (words.length < 4) {
-    return { pass: false, detail: `Your H1 is only ${words.length} word${words.length === 1 ? "" : "s"} long. It is not targeting any search term. This is costing you rankings every day. Fixing your H1 is included in the $495 package.` };
+    return { pass: false, detail: `Your H1 is only ${words.length} word${words.length === 1 ? "" : "s"} long. It is not targeting any search term. This is costing you rankings every single day.` };
   }
 
   // Generic / placeholder patterns that rank for nothing
@@ -277,14 +277,14 @@ function scoreH1Content(h1Text: string, titleTag: string, primaryKeyword: string
     /^(who we are)$/i,
   ];
   if (genericPatterns.some(re => re.test(lower))) {
-    return { pass: false, detail: `Your H1 is a placeholder, not a keyword. It is not targeting any search term that a customer would actually type into Google. Fixing your H1 is included in the $495 package.` };
+    return { pass: false, detail: `Your H1 tag is a placeholder, not a keyword. It is not targeting any search term that a customer would actually type into Google.` };
   }
 
   // No location signal — biggest miss for local businesses
   const hasLocation = /\b(st\.?\s*louis|springfield|kansas city|columbia|jefferson city|chicago|peoria|rockford|aurora|naperville|joliet|\bmo\b|\bil\b|missouri|illinois|texas|california|florida|ohio|georgia|colorado|tennessee|nevada|arizona|virginia|washington|oregon|minnesota|wisconsin|indiana|massachusetts|michigan|pennsylvania|new york|north carolina|south carolina|kentucky|alabama|oklahoma|louisiana|connecticut|iowa|arkansas|kansas|utah|nebraska|new mexico|idaho|montana|wyoming|delaware|vermont|rhode island|hawaii|alaska|atlanta|dallas|houston|phoenix|denver|seattle|portland|boston|miami|orlando|tampa|nashville|charlotte|raleigh|richmond|baltimore|philadelphia|detroit|minneapolis|milwaukee|cincinnati|cleveland|pittsburgh|indianapolis|louisville|memphis|new orleans|oklahoma city|tulsa|albuquerque|las vegas|sacramento|san diego|san jose|san francisco|los angeles)\b/i.test(trimmed);
 
   if (!hasLocation) {
-    return { pass: false, detail: `Your H1 tag has no city or region in it. Google cannot tell where you serve customers. Without a location, you will not rank for local searches. Fixing your H1 is included in the $495 package.` };
+    return { pass: false, detail: `Your H1 tag has no city or region in it. Google cannot tell where you serve customers. Without a location signal, you will not rank for local searches.` };
   }
 
   // Check for at least some keyword alignment with title or detected keyword
@@ -292,7 +292,7 @@ function scoreH1Content(h1Text: string, titleTag: string, primaryKeyword: string
     const keywordWords = primaryKeyword.toLowerCase().split(/\s+/);
     const matchCount = keywordWords.filter(kw => lower.includes(kw)).length;
     if (matchCount === 0) {
-      return { pass: false, detail: `Your H1 does not appear to target your primary keyword. It has a location but is missing the service term customers search for. Fixing your H1 is included in the $495 package.` };
+      return { pass: false, detail: `Your H1 has a location but is missing the service keyword customers actually search for. Google does not know what you do.` };
     }
   }
 
