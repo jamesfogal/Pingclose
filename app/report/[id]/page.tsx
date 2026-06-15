@@ -255,6 +255,50 @@ function CheckRow({ label, pass, detail, index = 0 }: { label: string; pass: boo
   );
 }
 
+function scoreH1Content(h1Text: string, titleTag: string, primaryKeyword: string): { pass: boolean; detail: string } {
+  const trimmed = h1Text.trim();
+  const lower = trimmed.toLowerCase();
+  const words = trimmed.split(/\s+/).filter(Boolean);
+
+  // Too short to mean anything
+  if (words.length < 4) {
+    return { pass: false, detail: `Your H1 is only ${words.length} word${words.length === 1 ? "" : "s"} long. It is not targeting any search term. This is costing you rankings every day. Fixing your H1 is included in the $495 package.` };
+  }
+
+  // Generic / placeholder patterns that rank for nothing
+  const genericPatterns = [
+    /^home$/i,
+    /^welcome/i,
+    /^about(\s+us)?$/i,
+    /^(our )?services?$/i,
+    /^contact(\s+us)?$/i,
+    /^(get a )?(free )?(quote|estimate|consultation)$/i,
+    /^(what we do)$/i,
+    /^(who we are)$/i,
+  ];
+  if (genericPatterns.some(re => re.test(lower))) {
+    return { pass: false, detail: `Your H1 is a placeholder, not a keyword. It is not targeting any search term that a customer would actually type into Google. Fixing your H1 is included in the $495 package.` };
+  }
+
+  // No location signal — biggest miss for local businesses
+  const hasLocation = /\b(st\.?\s*louis|springfield|kansas city|columbia|jefferson city|chicago|peoria|rockford|aurora|naperville|joliet|\bmo\b|\bil\b|missouri|illinois|texas|california|florida|ohio|georgia|colorado|tennessee|nevada|arizona|virginia|washington|oregon|minnesota|wisconsin|indiana|massachusetts|michigan|pennsylvania|new york|north carolina|south carolina|kentucky|alabama|oklahoma|louisiana|connecticut|iowa|arkansas|kansas|utah|nebraska|new mexico|idaho|montana|wyoming|delaware|vermont|rhode island|hawaii|alaska|atlanta|dallas|houston|phoenix|denver|seattle|portland|boston|miami|orlando|tampa|nashville|charlotte|raleigh|richmond|baltimore|philadelphia|detroit|minneapolis|milwaukee|cincinnati|cleveland|pittsburgh|indianapolis|louisville|memphis|new orleans|oklahoma city|tulsa|albuquerque|las vegas|sacramento|san diego|san jose|san francisco|los angeles)\b/i.test(trimmed);
+
+  if (!hasLocation) {
+    return { pass: false, detail: `Your H1 tag has no city or region in it. Google cannot tell where you serve customers. Without a location, you will not rank for local searches. Fixing your H1 is included in the $495 package.` };
+  }
+
+  // Check for at least some keyword alignment with title or detected keyword
+  if (primaryKeyword) {
+    const keywordWords = primaryKeyword.toLowerCase().split(/\s+/);
+    const matchCount = keywordWords.filter(kw => lower.includes(kw)).length;
+    if (matchCount === 0) {
+      return { pass: false, detail: `Your H1 does not appear to target your primary keyword. It has a location but is missing the service term customers search for. Fixing your H1 is included in the $495 package.` };
+    }
+  }
+
+  return { pass: true, detail: "Contains a service keyword and location signal." };
+}
+
 function playDone() {
   try {
     new Audio("/sounds/ping.mp3").play();
@@ -552,7 +596,11 @@ export default function ReportPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               <CheckRow label={tech.hasTitle ? `Title tag (${tech.titleLength} chars): "${tech.titleTag.substring(0, 55)}${tech.titleTag.length > 55 ? "…" : ""}"` : "No title tag found"} pass={tech.hasTitle && tech.titleLength <= 60} detail={tech.titleLength > 60 ? "Google truncates titles at 60 characters" : undefined} />
               <CheckRow label={tech.hasMetaDescription ? `Meta description: ${tech.metaDescriptionLength} characters` : "No meta description"} pass={tech.hasMetaDescription} />
-              <CheckRow label={tech.hasH1 ? `H1: "${tech.h1Text.substring(0, 55)}${tech.h1Text.length > 55 ? "…" : ""}"` : "No H1 tag found"} pass={tech.hasH1 && !tech.multipleH1s} detail={tech.multipleH1s ? "Multiple H1 tags — use only one per page" : undefined} />
+              <CheckRow label={tech.hasH1 ? "H1 Tag Present" : "H1 Tag Present"} pass={tech.hasH1} detail={!tech.hasH1 ? "No H1 tag found — every page needs exactly one. This is the single strongest on-page SEO signal you control." : tech.multipleH1s ? "Multiple H1 tags detected — use only one per page" : undefined} />
+              {tech.hasH1 && !tech.multipleH1s && (() => {
+                const result = scoreH1Content(tech.h1Text, tech.titleTag, tech.primaryKeyword);
+                return <CheckRow label={`H1 Tag Content: "${tech.h1Text.substring(0, 50)}${tech.h1Text.length > 50 ? "…" : ""}"`} pass={result.pass} detail={result.pass ? undefined : result.detail} />;
+              })()}
               <CheckRow label="Canonical tag" pass={tech.hasCanonical} detail={!tech.hasCanonical ? "Missing canonical — risk of duplicate content penalty" : undefined} />
               <CheckRow label="XML Sitemap" pass={tech.hasSitemap} />
               <CheckRow label="HTTPS / SSL Security" pass={tech.isHttps} detail={!tech.isHttps ? "Google shows security warnings to all visitors on HTTP sites" : undefined} />
@@ -785,17 +833,24 @@ export default function ReportPage() {
                   </div>
                 </div>
               )}
-              {h1 && (
-                <div style={{ marginBottom: 16, padding: "12px 16px", background: "#111827", borderRadius: 8, borderLeft: "3px solid #FBBF24" }}>
-                  <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Current H1 Tag</div>
-                  <div style={{ fontSize: 16, color: "#F1F5F9", fontStyle: "italic" }}>&ldquo;{h1}&rdquo;</div>
-                  {h1 && !h1.match(/[A-Z][a-z]+ (MO|Missouri|IL|Illinois|St\. Louis)/i) && (
-                    <div style={{ fontSize: 16, color: "#FBBF24", marginTop: 6 }}>
-                      ⚠ No city or state detected in H1 — missing local keyword signal
-                    </div>
-                  )}
-                </div>
-              )}
+              {h1 && (() => {
+                const contentResult = scoreH1Content(h1, audit.full_report?.tech?.titleTag ?? "", audit.full_report?.tech?.primaryKeyword ?? "");
+                const borderColor = contentResult.pass ? "#10D9A0" : "#F87171";
+                return (
+                  <div style={{ marginBottom: 16, padding: "12px 16px", background: "#111827", borderRadius: 8, borderLeft: `3px solid ${borderColor}` }}>
+                    <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Current H1 Tag</div>
+                    <div style={{ fontSize: 16, color: "#F1F5F9", fontStyle: "italic" }}>&ldquo;{h1}&rdquo;</div>
+                    {!contentResult.pass && (
+                      <div style={{ fontSize: 16, color: "#F87171", marginTop: 8, lineHeight: 1.6 }}>
+                        ✗ {contentResult.detail}
+                      </div>
+                    )}
+                    {contentResult.pass && (
+                      <div style={{ fontSize: 16, color: "#10D9A0", marginTop: 6 }}>✓ Contains service keyword and location signal</div>
+                    )}
+                  </div>
+                );
+              })()}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
                 {[
                   { label: "LocalBusiness Schema", value: hasSchema },
