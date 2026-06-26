@@ -15,7 +15,6 @@ interface DeliveryOptions {
 
 export async function deliverReport(opts: DeliveryOptions): Promise<void> {
   const { reportId, normalizedUrl, email, deliveryEmail, agencySignal, speedResult, techResult } = opts;
-  const hostname = (() => { try { return new URL(normalizedUrl).hostname; } catch { return normalizedUrl; } })();
   const tasks: Promise<unknown>[] = [];
 
   if (deliveryEmail && email) {

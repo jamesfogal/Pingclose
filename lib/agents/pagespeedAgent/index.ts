@@ -2,7 +2,8 @@ import { fetchPageSpeed } from './fetchPageSpeed';
 import { parsePageSpeed } from './parsePageSpeed';
 import type { PageSpeedAgentResponse } from './types';
 
-export type { PageSpeedResult, PageSpeedAgentResponse, ImageDetail, VideoDetail } from './types';
+export type { PageSpeedResult, PageSpeedAgentResponse, PageSpeedStatus, ImageDetail, VideoDetail } from './types';
+export { buildFallbackResult } from './fallbackResult';
 
 /**
  * Standalone, reusable Google PageSpeed Agent.

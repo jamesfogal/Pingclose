@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { runPageSpeedAgent } from '@/lib/agents/pagespeedAgent';
+import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAgent';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
 import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgent';
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
@@ -40,11 +40,14 @@ export async function POST(req: NextRequest) {
     ]);
     console.log('STEP3: agents done');
 
+    let speedResult;
     if (!speedAgentResult.ok) {
       console.error('AGENT_FAIL: PageSpeedAgent —', speedAgentResult.error, 'quotaExceeded:', speedAgentResult.quotaExceeded);
-      throw new Error('PAGESPEED_FAIL: ' + speedAgentResult.error);
+      const isTimeout = /timed out/i.test(speedAgentResult.error);
+      speedResult = buildFallbackResult(isTimeout ? 'TIMEOUT' : 'ERROR');
+    } else {
+      speedResult = speedAgentResult.data;
     }
-    const speedResult = speedAgentResult.data;
 
     // Apply header-based overrides to the hosting result (no extra network call)
     // Headers come from htmlAgent, hosting name from hostingAgent — merged here
@@ -192,6 +195,7 @@ export async function POST(req: NextRequest) {
       cls:             speedResult.cls,
       inp:             speedResult.inp,
       passesOneSecond: speedResult.passesOneSecond,
+      pageSpeedStatus: speedResult.pageSpeedStatus,
     });
 
   } catch (err) {

@@ -130,6 +130,7 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
   const imagesMissingAltText = altItems.length;
 
   return {
+    pageSpeedStatus: 'OK',
     mobileScore, desktopScore, mobileDesktopGap, gapExplanation,
     ttfb: Math.round(ttfb), lcp: Math.round(lcp), fcp: Math.round(fcp),
     cls: Math.round(cls * 1000) / 1000, inp: Math.round(inp), tbt: Math.round(tbt),

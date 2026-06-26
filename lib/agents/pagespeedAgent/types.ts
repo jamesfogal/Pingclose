@@ -16,7 +16,10 @@ export interface VideoDetail {
   embedType: string;
 }
 
+export type PageSpeedStatus = 'OK' | 'TIMEOUT' | 'ERROR';
+
 export interface PageSpeedResult {
+  pageSpeedStatus: PageSpeedStatus;
   mobileScore: number;
   desktopScore: number;
   ttfb: number;
