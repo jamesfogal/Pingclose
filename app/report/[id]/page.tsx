@@ -55,6 +55,13 @@ interface Audit {
       hasImageSitemap: boolean;
       imageCount: number;
     };
+    lawFaq?: {
+      isLawFirm: boolean;
+      qaContentCount: number;
+      faqSchemaCount: number;
+      properUseCount: number;
+      missedOpportunityCount: number;
+    };
     speed?: {
       mobileDesktopGap: number;
       gapExplanation: string;
@@ -713,6 +720,43 @@ export default function ReportPage() {
             </div>
           </div>
         )}
+
+        {/* 13b. LAW FIRM FAQ SCHEMA */}
+        {(() => {
+          const lf = audit.full_report?.lawFaq;
+          if (!lf || !lf.isLawFirm) return null;
+          const missedPercent = lf.qaContentCount > 0 ? lf.missedOpportunityCount / lf.qaContentCount : 0;
+          const isRed = missedPercent > 0.10;
+          return (
+            <div style={DARK_CARD}>
+              <div style={SECTION_LABEL}>⚖️ Law Firm Q&A Schema</div>
+              <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
+                Law firm sites that answer legal questions should mark each one up with FAQPage/Question schema — it's free eligibility for Google's FAQ rich results, shown directly in search.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 14 }}>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: lf.properUseCount > 0 ? "#10D9A0" : "#475569" }}>{lf.properUseCount}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Questions Properly Tagged</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: isRed ? "#F87171" : lf.missedOpportunityCount > 0 ? "#FBBF24" : "#475569" }}>{lf.missedOpportunityCount}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Missed Opportunities</div>
+                </div>
+              </div>
+              {lf.missedOpportunityCount > 0 && (
+                <div style={isRed
+                  ? { background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }
+                  : { background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, padding: "12px 16px" }
+                }>
+                  <div style={{ fontSize: 17, color: isRed ? "#F87171" : "#FBBF24", fontWeight: 600 }}>
+                    {isRed ? "❌" : "⚠️"} {lf.missedOpportunityCount} question{lf.missedOpportunityCount === 1 ? "" : "s"} answered on the page without FAQ schema ({Math.round(missedPercent * 100)}% missed)
+                  </div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Each one is a missed shot at a free rich result in Google search — competitors who tag theirs win that real estate instead.</div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* 14. CONVERSION TRACKING */}
         {tech && (

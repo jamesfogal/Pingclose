@@ -5,6 +5,7 @@ import { runHtmlAgent } from '@/lib/agents/htmlAgent';
 import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgent';
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
 import { runSitemapAgent } from '@/lib/agents/sitemapAgent';
+import { analyzeLawFaqSchema } from '@/lib/agents/lawFaqAgent';
 import { checkRateLimit, checkAgencySignal } from '@/lib/rateLimiter';
 import { scoreAudit } from '@/lib/auditScorer';
 import { deliverReport } from '@/lib/reportDelivery';
@@ -128,6 +129,8 @@ export async function POST(req: NextRequest) {
       hasAltText: !techResult.imagesWithoutAlt.some(u => u.includes(img.url))
     }));
 
+    const lawFaqResult = analyzeLawFaqSchema(htmlResult.html, htmlResult.titleTag, htmlResult.h1Text);
+
     console.log('STEP: scoreAudit starting');
     const { topIssues, topFixes } = scoreAudit(speedResult, techResult);
     console.log('STEP: scoreAudit done, supabase insert starting');
@@ -159,7 +162,7 @@ export async function POST(req: NextRequest) {
         render_blocking_scripts: speedResult.renderBlockingScripts,
         top_issues: topIssues.slice(0, 15),
         top_fixes: topFixes,
-        full_report: { speed: speedResult, tech: techResult, sitemap: sitemapResult }
+        full_report: { speed: speedResult, tech: techResult, sitemap: sitemapResult, lawFaq: lawFaqResult }
       })
       .select('id')
       .single();
