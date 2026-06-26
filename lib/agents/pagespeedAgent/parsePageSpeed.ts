@@ -23,7 +23,15 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
   const totalPageSize = audits['total-byte-weight']?.numericValue || 0;
   const totalRequests = audits['network-requests']?.details?.items?.length || 0;
 
-  const passesOneSecond = lcp < 2500 && fcp < 1800 && mobileScore >= 50;
+  // Above-the-fold size: bytes for every resource that finished loading before
+  // first paint — a standard proxy for what actually renders above the fold.
+  const networkItemsForAtf: Array<Record<string, unknown>> = audits['network-requests']?.details?.items || [];
+  const aboveFoldSize = networkItemsForAtf
+    .filter(i => Number(i.endTime ?? i.startTime ?? Infinity) <= fcp)
+    .reduce((sum, i) => sum + (Number(i.transferSize) || 0), 0);
+  const belowFoldSize = Math.max(0, totalPageSize - aboveFoldSize);
+
+  const passesOneSecond = ttfb <= 6 && fcp < 30 && lcp <= 99;
 
   const webpAuditItems = audits['uses-webp-images']?.details?.items || [];
   const lazyItems = audits['offscreen-images']?.details?.items || [];
@@ -135,6 +143,8 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
     ttfb: Math.round(ttfb), lcp: Math.round(lcp), fcp: Math.round(fcp),
     cls: Math.round(cls * 1000) / 1000, inp: Math.round(inp), tbt: Math.round(tbt),
     totalPageSize: Math.round(totalPageSize / 1024), totalRequests, passesOneSecond,
+    aboveFoldSizeKb: Math.round(aboveFoldSize / 1024),
+    belowFoldSizeKb: Math.round(belowFoldSize / 1024),
     imagesLazyLoaded, imagesWebP, largestImageKb, totalImages, webpImages, nonWebpImages,
     nonWebpImageList, estimatedWebPSavingKb, imagesMissingAltText,
     totalVideos: videoDetails.length, videoDetails,

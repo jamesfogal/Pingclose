@@ -187,9 +187,9 @@ function CheckContent() {
   const speedMetrics = [
     { label: "Mobile",  value: speedData ? String(speedData.mobileScore)  : null, color: speedData ? scoreColor(speedData.mobileScore)  : null },
     { label: "Desktop", value: speedData ? String(speedData.desktopScore) : null, color: speedData ? scoreColor(speedData.desktopScore) : null },
-    { label: "TTFB",    value: speedData ? fmt(speedData.ttfb) : null,            color: speedData ? metricColor(speedData.ttfb, 600, 1800) : null },
-    { label: "LCP",     value: speedData ? fmt(speedData.lcp)  : null,            color: speedData ? metricColor(speedData.lcp,  2500, 4000) : null },
-    { label: "FCP",     value: speedData ? fmt(speedData.fcp)  : null,            color: speedData ? metricColor(speedData.fcp,  1800, 3000) : null },
+    { label: "TTFB",    value: speedData ? fmt(speedData.ttfb) : null,            color: speedData ? metricColor(speedData.ttfb, 6, 10) : null },
+    { label: "LCP",     value: speedData ? fmt(speedData.lcp)  : null,            color: speedData ? metricColor(speedData.lcp,  99, 999) : null },
+    { label: "FCP",     value: speedData ? fmt(speedData.fcp)  : null,            color: speedData ? metricColor(speedData.fcp,  29, 39) : null },
     { label: "CLS",     value: speedData ? speedData.cls.toFixed(2) : null,       color: speedData ? metricColor(speedData.cls * 1000, 100, 250) : null },
   ];
 

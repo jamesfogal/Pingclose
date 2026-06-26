@@ -52,11 +52,15 @@ interface Audit {
       landingPageUrls: string[];
       cityPageUrls: string[];
       hasSitemapIndex: boolean;
+      hasImageSitemap: boolean;
+      imageCount: number;
     };
     speed?: {
       mobileDesktopGap: number;
       gapExplanation: string;
       tbt: number;
+      aboveFoldSizeKb: number;
+      belowFoldSizeKb: number;
       totalImages: number;
       webpImages: number;
       nonWebpImages: number;
@@ -134,9 +138,9 @@ const SECTION_LABEL: React.CSSProperties = {
 };
 
 function metricColor(ms: number, type: "ttfb" | "fcp" | "lcp") {
-  if (type === "ttfb") return ms < 600 ? "#10D9A0" : ms < 1800 ? "#FBBF24" : "#F87171";
-  if (type === "fcp")  return ms < 1800 ? "#10D9A0" : ms < 3000 ? "#FBBF24" : "#F87171";
-  return ms < 2500 ? "#10D9A0" : ms < 4000 ? "#FBBF24" : "#F87171";
+  if (type === "ttfb") return ms <= 6 ? "#10D9A0" : ms <= 10 ? "#FBBF24" : "#F87171";
+  if (type === "fcp")  return ms < 30 ? "#10D9A0" : ms < 40 ? "#FBBF24" : "#F87171";
+  return ms <= 99 ? "#10D9A0" : ms < 1000 ? "#FBBF24" : "#F87171";
 }
 
 function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: number }) {
@@ -158,10 +162,16 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
           Your site took
         </div>
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 4, marginBottom: 16 }}>
+          {lcp > 5000 && (
+            <span style={{ fontSize: "clamp(40px, 8vw, 60px)", marginRight: 4, lineHeight: 1 }} aria-label="Critically slow">🔥</span>
+          )}
           <span style={{ fontSize: "clamp(72px, 14vw, 112px)", fontWeight: 900, color: lcpColor, letterSpacing: "-4px", lineHeight: 1, animation: "countIn 600ms cubic-bezier(0.23,1,0.32,1) 100ms both" }}>
             {lcpSec}
           </span>
           <span style={{ fontSize: "clamp(32px, 6vw, 52px)", fontWeight: 700, color: lcpColor, marginBottom: 8, opacity: 0.8 }}>s</span>
+          {lcp > 5000 && (
+            <span style={{ fontSize: "clamp(40px, 8vw, 60px)", marginLeft: 4, lineHeight: 1 }} aria-label="Critically slow">🔥</span>
+          )}
         </div>
         <div style={{ fontSize: 18, fontWeight: 500, color: "#94A3B8" }}>
           to load the main content
@@ -213,9 +223,9 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
       {/* Three milestone pills */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
         {[
-          { label: "Server Response", sublabel: "TTFB", value: `${ttfbMs}ms`, color: ttfbColor, verdict: ttfb < 600 ? "Fast" : ttfb < 1800 ? "Slow" : "Very Slow" },
-          { label: "First Content", sublabel: "FCP", value: `${fcpSec}s`, color: fcpColor, verdict: fcp < 1800 ? "Fast" : fcp < 3000 ? "Slow" : "Very Slow" },
-          { label: "Page Loaded", sublabel: "LCP", value: `${lcpSec}s`, color: lcpColor, verdict: lcp < 2500 ? "Fast" : lcp < 4000 ? "Slow" : "Very Slow" },
+          { label: "Server Response", sublabel: "TTFB", value: `${ttfbMs}ms`, color: ttfbColor, verdict: ttfb <= 6 ? "Fast" : ttfb <= 10 ? "Slow" : "Very Slow" },
+          { label: "First Content", sublabel: "FCP", value: `${fcpSec}s`, color: fcpColor, verdict: fcp < 30 ? "Fast" : fcp < 40 ? "Slow" : "Very Slow" },
+          { label: "Page Loaded", sublabel: "LCP", value: `${lcpSec}s`, color: lcpColor, verdict: lcp <= 99 ? "Fast" : lcp < 1000 ? "Slow" : "Very Slow" },
         ].map(({ label, sublabel, value, color, verdict }) => (
           <div key={sublabel} style={{ background: "#0D1528", border: `1px solid ${color}40`, borderRadius: 10, padding: "16px 12px", textAlign: "center" }}>
             <div style={{ fontSize: 22, fontWeight: 800, color, marginBottom: 2 }}>{value}</div>
@@ -392,12 +402,13 @@ export default function ReportPage() {
         <div style={{ marginBottom: 20 }}>
           <div style={SECTION_LABEL}>Core Web Vitals</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
-            <Metric label="TTFB" value={audit.ttfb} unit="ms" good={audit.ttfb < 600} />
-            <Metric label="LCP" value={(audit.lcp / 1000).toFixed(1)} unit="s" good={audit.lcp < 2500} />
-            <Metric label="FCP" value={(audit.fcp / 1000).toFixed(1)} unit="s" good={audit.fcp < 1800} />
-            <Metric label="CLS" value={audit.cls} good={audit.cls < 0.1} />
-            <Metric label="INP" value={audit.inp} unit="ms" good={audit.inp < 200} na={!audit.inp} />
-            {speed && <Metric label="TBT" value={speed.tbt} unit="ms" good={speed.tbt < 200} />}
+            <Metric label="TTFB" value={audit.ttfb} unit="ms" good={audit.ttfb <= 6} />
+            <Metric label="LCP" value={(audit.lcp / 1000).toFixed(1)} unit="s" good={audit.lcp <= 99} />
+            <Metric label="FCP" value={(audit.fcp / 1000).toFixed(1)} unit="s" good={audit.fcp < 30} />
+            <Metric label="CLS" value={audit.cls} good={audit.cls <= 0} />
+            {speed && <Metric label="TBT" value={speed.tbt} unit="ms" good={speed.tbt < 30} />}
+            {speed && <Metric label="Above Fold Size" value={speed.aboveFoldSizeKb} unit="KB" good={speed.aboveFoldSizeKb <= 500} />}
+            {speed && <Metric label="Below Fold Size" value={speed.belowFoldSizeKb} unit="KB" good={speed.belowFoldSizeKb <= 1500} />}
             <Metric label="Page Size" value={audit.total_page_size} unit="KB" good={audit.total_page_size < 1500} />
             <Metric label="Requests" value={audit.total_requests} good={audit.total_requests < 50} />
           </div>
@@ -634,6 +645,14 @@ export default function ReportPage() {
                   <div style={{ fontSize: 32, fontWeight: 800, color: sm.cityPageCount > 0 ? "#10D9A0" : "#F87171" }}>{sm.cityPageCount}</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>City Pages</div>
                 </div>
+              </div>
+
+              <div style={{ marginBottom: 12 }}>
+                <CheckRow
+                  label={sm.hasImageSitemap ? `Image Sitemap (${sm.imageCount.toLocaleString()} images tagged)` : "Image Sitemap"}
+                  pass={sm.hasImageSitemap}
+                  detail={!sm.hasImageSitemap ? "No image sitemap entries found — image search is a free, untapped discovery channel for local businesses with photos of work, locations, or staff." : undefined}
+                />
               </div>
 
               {sm.cityPageCount === 0 && (

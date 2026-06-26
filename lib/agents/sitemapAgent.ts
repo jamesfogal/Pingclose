@@ -5,6 +5,8 @@ export interface SitemapAgentResult {
   landingPageUrls: string[];
   cityPageUrls: string[];
   hasSitemapIndex: boolean;
+  hasImageSitemap: boolean;
+  imageCount: number;
 }
 
 const STATE_CODES = new Set([
@@ -65,28 +67,32 @@ function isCityPage(path: string): boolean {
   return false;
 }
 
-async function fetchSitemapUrls(sitemapUrl: string): Promise<string[]> {
+function countImageTags(xml: string): number {
+  return [...xml.matchAll(/<image:image>/g)].length;
+}
+
+async function fetchSitemapXml(sitemapUrl: string): Promise<string> {
   const res = await fetch(sitemapUrl, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) return [];
-  const xml = await res.text();
-  return [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].map(m => m[1]);
+  if (!res.ok) return '';
+  return res.text();
 }
 
 // Agent: parse sitemap to count pages, landing pages, and city/location pages
 export async function runSitemapAgent(baseUrl: string): Promise<SitemapAgentResult> {
   const empty: SitemapAgentResult = {
     pageCount: 0, landingPageCount: 0, cityPageCount: 0,
-    landingPageUrls: [], cityPageUrls: [], hasSitemapIndex: false
+    landingPageUrls: [], cityPageUrls: [], hasSitemapIndex: false,
+    hasImageSitemap: false, imageCount: 0,
   };
 
   try {
-    const res = await fetch(`${baseUrl}/sitemap.xml`, { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return empty;
+    const xml = await fetchSitemapXml(`${baseUrl}/sitemap.xml`);
+    if (!xml) return empty;
 
-    const xml = await res.text();
     const hasSitemapIndex = xml.includes('<sitemapindex');
 
     let allUrls: string[] = [];
+    let imageCount = countImageTags(xml);
 
     if (hasSitemapIndex) {
       // Sitemap index — fetch child sitemaps in parallel (cap at 6)
@@ -95,10 +101,13 @@ export async function runSitemapAgent(baseUrl: string): Promise<SitemapAgentResu
         .filter(u => u.endsWith('.xml'))
         .slice(0, 6);
 
-      const results = await Promise.allSettled(childUrls.map(fetchSitemapUrls));
-      allUrls = results
-        .filter((r): r is PromiseFulfilledResult<string[]> => r.status === 'fulfilled')
-        .flatMap(r => r.value);
+      const results = await Promise.allSettled(childUrls.map(fetchSitemapXml));
+      const childXmls = results
+        .filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled')
+        .map(r => r.value);
+
+      allUrls = childXmls.flatMap(childXml => [...childXml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].map(m => m[1]));
+      imageCount += childXmls.reduce((sum, childXml) => sum + countImageTags(childXml), 0);
     } else {
       allUrls = [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].map(m => m[1]);
     }
@@ -120,6 +129,8 @@ export async function runSitemapAgent(baseUrl: string): Promise<SitemapAgentResu
       landingPageUrls,
       cityPageUrls,
       hasSitemapIndex,
+      hasImageSitemap: imageCount > 0,
+      imageCount,
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);

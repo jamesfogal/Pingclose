@@ -29,6 +29,8 @@ export interface PageSpeedResult {
   inp: number;
   tbt: number;
   totalPageSize: number;
+  aboveFoldSizeKb: number;
+  belowFoldSizeKb: number;
   totalRequests: number;
   passesOneSecond: boolean;
 
