@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { runPageSpeed } from '@/lib/pagespeed';
+import { runPageSpeedAgent } from '@/lib/agents/pagespeedAgent';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
 import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgent';
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
@@ -12,7 +12,7 @@ import type { TechStackResult } from '@/lib/htmlAudit';
 
 export async function POST(req: NextRequest) {
   try {
-    const { url, email, phone, deliverySms = false, deliveryEmail = true } = await req.json();
+    const { url, email, phone, deliveryEmail = true } = await req.json();
 
     if (!url || (!email && !phone)) {
       return NextResponse.json({ error: 'URL and at least one delivery method are required' }, { status: 400 });
@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || '0.0.0.0';
 
-    console.log('STEP: checkRateLimit starting, key prefix:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 12));
     console.log('STEP1: checkRateLimit');
     const { limited } = await checkRateLimit(email);
     if (limited) {
@@ -32,14 +31,20 @@ export async function POST(req: NextRequest) {
     const baseUrl = new URL(normalizedUrl).origin;
 
     console.log('STEP2: firing agents');
-    const [speedResult, htmlResult, hostingResult, availabilityResult, sitemapResult] = await Promise.all([
-      runPageSpeed(normalizedUrl).catch(e => { throw new Error('PAGESPEED_FAIL: ' + e.message); }),
+    const [speedAgentResult, htmlResult, hostingResult, availabilityResult, sitemapResult] = await Promise.all([
+      runPageSpeedAgent(normalizedUrl),
       runHtmlAgent(normalizedUrl).catch(e => { throw new Error('HTML_FAIL: ' + e.message); }),
       runHostingAgent(hostname).catch(e => { throw new Error('HOSTING_FAIL: ' + e.message); }),
       runAvailabilityAgent(baseUrl).catch(e => { throw new Error('AVAILABILITY_FAIL: ' + e.message); }),
       runSitemapAgent(baseUrl).catch(e => { throw new Error('SITEMAP_FAIL: ' + e.message); }),
     ]);
     console.log('STEP3: agents done');
+
+    if (!speedAgentResult.ok) {
+      console.error('AGENT_FAIL: PageSpeedAgent —', speedAgentResult.error, 'quotaExceeded:', speedAgentResult.quotaExceeded);
+      throw new Error('PAGESPEED_FAIL: ' + speedAgentResult.error);
+    }
+    const speedResult = speedAgentResult.data;
 
     // Apply header-based overrides to the hosting result (no extra network call)
     // Headers come from htmlAgent, hosting name from hostingAgent — merged here
@@ -170,7 +175,6 @@ export async function POST(req: NextRequest) {
         email: email || null,
         phone: phone || null,
         deliveryEmail,
-        deliverySms,
         agencySignal,
         speedResult,
         techResult

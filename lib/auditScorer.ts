@@ -1,4 +1,4 @@
-import type { PageSpeedResult } from '@/lib/pagespeed';
+import type { PageSpeedResult } from '@/lib/agents/pagespeedAgent';
 import type { TechStackResult } from '@/lib/htmlAudit';
 
 export interface ScoredIssue { score: number; text: string; }

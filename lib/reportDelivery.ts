@@ -1,6 +1,5 @@
 import { sendReportEmail, sendLeadNotification } from '@/lib/email';
-import { sendReportSms } from '@/lib/sms';
-import type { PageSpeedResult } from '@/lib/pagespeed';
+import type { PageSpeedResult } from '@/lib/agents/pagespeedAgent';
 import type { TechStackResult } from '@/lib/htmlAudit';
 
 interface DeliveryOptions {
@@ -9,20 +8,16 @@ interface DeliveryOptions {
   email: string | null;
   phone: string | null;
   deliveryEmail: boolean;
-  deliverySms: boolean;
   agencySignal: boolean;
   speedResult: PageSpeedResult;
   techResult: TechStackResult;
 }
 
 export async function deliverReport(opts: DeliveryOptions): Promise<void> {
-  const { reportId, normalizedUrl, email, phone, deliveryEmail, deliverySms, agencySignal, speedResult, techResult } = opts;
+  const { reportId, normalizedUrl, email, deliveryEmail, agencySignal, speedResult, techResult } = opts;
   const hostname = (() => { try { return new URL(normalizedUrl).hostname; } catch { return normalizedUrl; } })();
   const tasks: Promise<unknown>[] = [];
 
-  if (deliverySms && phone) {
-    tasks.push(sendReportSms(phone, reportId, hostname, speedResult.mobileScore, speedResult.passesOneSecond));
-  }
   if (deliveryEmail && email) {
     console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
     tasks.push(sendReportEmail(email, reportId, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond));
