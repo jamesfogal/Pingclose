@@ -2,11 +2,17 @@ export interface SitemapAgentResult {
   pageCount: number;
   landingPageCount: number;
   cityPageCount: number;
+  eventPageCount: number;
+  archivePageCount: number;
+  blogPostCount: number;
+  standardPageCount: number;
   landingPageUrls: string[];
   cityPageUrls: string[];
+  blogPostUrls: string[];
   hasSitemapIndex: boolean;
   hasImageSitemap: boolean;
   imageCount: number;
+  allUrls: string[];
 }
 
 const STATE_CODES = new Set([
@@ -67,6 +73,36 @@ function isCityPage(path: string): boolean {
   return false;
 }
 
+function isEventPage(path: string): boolean {
+  return /\/events?\//.test(path.toLowerCase());
+}
+
+function isArchivePage(path: string): boolean {
+  return /\/(category|tag)\//.test(path.toLowerCase());
+}
+
+const UTILITY_SLUGS = new Set([
+  'about', 'about-us', 'contact', 'contact-us', 'privacy-policy', 'privacy',
+  'terms', 'terms-and-conditions', 'terms-of-service', 'testimonials', 'faq', 'faqs',
+  'blog', 'services', 'service', 'pricing', 'careers', 'jobs', 'job-openings',
+  'team', 'our-team', 'staff', 'free-consultation', 'consultation', 'legal-seminars',
+  'seminars', 'practice-areas', 'locations', 'reviews', 'gallery', 'portfolio',
+  'thank-you', 'sitemap',
+]);
+
+// Best-effort heuristic: a real content slug that isn't a known utility/nav page,
+// landing page, city page, event, or taxonomy archive is treated as a blog/article post.
+// This will misclassify unusual site structures — it's a v1 approximation, not exact.
+function isBlogPost(path: string): boolean {
+  const p = path.toLowerCase();
+  const segments = p.split('/').filter(Boolean);
+  if (segments.length === 0 || segments.length > 2) return false;
+  const last = segments[segments.length - 1];
+  if (UTILITY_SLUGS.has(last)) return false;
+  if (segments[0] === 'practice-areas') return false;
+  return true;
+}
+
 function countImageTags(xml: string): number {
   return [...xml.matchAll(/<image:image>/g)].length;
 }
@@ -80,9 +116,10 @@ async function fetchSitemapXml(sitemapUrl: string): Promise<string> {
 // Agent: parse sitemap to count pages, landing pages, and city/location pages
 export async function runSitemapAgent(baseUrl: string): Promise<SitemapAgentResult> {
   const empty: SitemapAgentResult = {
-    pageCount: 0, landingPageCount: 0, cityPageCount: 0,
-    landingPageUrls: [], cityPageUrls: [], hasSitemapIndex: false,
-    hasImageSitemap: false, imageCount: 0,
+    pageCount: 0, landingPageCount: 0, cityPageCount: 0, eventPageCount: 0,
+    archivePageCount: 0, blogPostCount: 0, standardPageCount: 0,
+    landingPageUrls: [], cityPageUrls: [], blogPostUrls: [], hasSitemapIndex: false,
+    hasImageSitemap: false, imageCount: 0, allUrls: [],
   };
 
   try {
@@ -114,23 +151,40 @@ export async function runSitemapAgent(baseUrl: string): Promise<SitemapAgentResu
 
     const pageCount = allUrls.length;
 
-    const landingPageUrls = allUrls
-      .filter(u => { try { return isLandingPage(new URL(u).pathname); } catch { return false; } })
-      .slice(0, 20);
+    const pathOf = (u: string): string | null => { try { return new URL(u).pathname; } catch { return null; } };
 
-    const cityPageUrls = allUrls
-      .filter(u => { try { return isCityPage(new URL(u).pathname); } catch { return false; } })
-      .slice(0, 50);
+    const allLandingUrls = allUrls.filter(u => isLandingPage(pathOf(u) || ''));
+    const allCityUrls = allUrls.filter(u => isCityPage(pathOf(u) || ''));
+    const allEventUrls = allUrls.filter(u => isEventPage(pathOf(u) || ''));
+    const allArchiveUrls = allUrls.filter(u => isArchivePage(pathOf(u) || ''));
+    const allBlogUrls = allUrls.filter(u => {
+      const p = pathOf(u);
+      if (!p || isLandingPage(p) || isCityPage(p) || isEventPage(p) || isArchivePage(p)) return false;
+      return isBlogPost(p);
+    });
+
+    const landingPageUrls = allLandingUrls.slice(0, 20);
+    const cityPageUrls = allCityUrls.slice(0, 50);
+    const blogPostUrls = allBlogUrls.slice(0, 20);
+
+    const standardPageCount = pageCount - allLandingUrls.length - allCityUrls.length
+      - allEventUrls.length - allArchiveUrls.length - allBlogUrls.length;
 
     return {
       pageCount,
-      landingPageCount: landingPageUrls.length,
-      cityPageCount: cityPageUrls.length,
+      landingPageCount: allLandingUrls.length,
+      cityPageCount: allCityUrls.length,
+      eventPageCount: allEventUrls.length,
+      archivePageCount: allArchiveUrls.length,
+      blogPostCount: allBlogUrls.length,
+      standardPageCount,
       landingPageUrls,
       cityPageUrls,
+      blogPostUrls,
       hasSitemapIndex,
       hasImageSitemap: imageCount > 0,
       imageCount,
+      allUrls,
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);

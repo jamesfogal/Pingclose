@@ -49,18 +49,44 @@ interface Audit {
       pageCount: number;
       landingPageCount: number;
       cityPageCount: number;
+      eventPageCount: number;
+      archivePageCount: number;
+      blogPostCount: number;
+      standardPageCount: number;
       landingPageUrls: string[];
       cityPageUrls: string[];
+      blogPostUrls: string[];
       hasSitemapIndex: boolean;
       hasImageSitemap: boolean;
       imageCount: number;
+    };
+    contentQuality?: {
+      pagesSampled: number;
+      avgWordCount: number;
+      avgInternalLinks: number;
+      recommendedLinksPerPost: number;
+      qaPageCount: number;
     };
     lawFaq?: {
       isLawFirm: boolean;
       qaContentCount: number;
       faqSchemaCount: number;
+      visibleFaqSchemaCount: number;
+      hiddenFaqSchemaCount: number;
       properUseCount: number;
       missedOpportunityCount: number;
+    };
+    lawyerSchema?: {
+      isLawFirm: boolean;
+      opportunityCount: number;
+      usedCount: number;
+      pagesChecked: number;
+    };
+    schemaOpportunities?: {
+      breakdown: { type: string; opportunities: number; used: number; missed: number }[];
+      totalOpportunities: number;
+      totalUsed: number;
+      totalMissed: number;
     };
     speed?: {
       mobileDesktopGap: number;
@@ -654,6 +680,13 @@ export default function ReportPage() {
                 </div>
               </div>
 
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, fontSize: 16, color: "#CBD5E1" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #1E3050" }}><span>Standard / nav pages</span><span style={{ fontWeight: 700 }}>{sm.standardPageCount}</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #1E3050" }}><span>Blog / article posts</span><span style={{ fontWeight: 700 }}>{sm.blogPostCount}</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #1E3050" }}><span>Event pages</span><span style={{ fontWeight: 700 }}>{sm.eventPageCount}</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}><span>Category / tag archive pages</span><span style={{ fontWeight: 700 }}>{sm.archivePageCount}</span></div>
+              </div>
+
               <div style={{ marginBottom: 12 }}>
                 <CheckRow
                   label={sm.hasImageSitemap ? `Image Sitemap (${sm.imageCount.toLocaleString()} images tagged)` : "Image Sitemap"}
@@ -705,6 +738,89 @@ export default function ReportPage() {
           );
         })()}
 
+        {/* 12b2. CONTENT QUALITY */}
+        {(() => {
+          const cq = audit.full_report?.contentQuality;
+          if (!cq || cq.pagesSampled === 0) return null;
+          const isRed = cq.avgInternalLinks < cq.recommendedLinksPerPost * 0.5;
+          const isYellow = !isRed && cq.avgInternalLinks < cq.recommendedLinksPerPost;
+          return (
+            <div style={DARK_CARD}>
+              <div style={SECTION_LABEL}>🔗 Content Quality (sampled {cq.pagesSampled} posts)</div>
+              <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
+                Internal links spread authority across the site and give Google a path to crawl. Rule of thumb: about 1 internal link per 150 words of content.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{cq.avgWordCount.toLocaleString()}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Avg Words / Post</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: isRed ? "#F87171" : isYellow ? "#FBBF24" : "#10D9A0" }}>{cq.avgInternalLinks}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Avg Internal Links</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#94A3B8" }}>{cq.recommendedLinksPerPost}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Recommended</div>
+                </div>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <CheckRow
+                  label={`Q&A content found on ${cq.qaPageCount} of ${cq.pagesSampled} sampled posts`}
+                  pass={cq.qaPageCount > 0}
+                />
+              </div>
+              {(isRed || isYellow) && (
+                <div style={isRed
+                  ? { background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }
+                  : { background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, padding: "12px 16px" }
+                }>
+                  <div style={{ fontSize: 17, color: isRed ? "#F87171" : "#FBBF24", fontWeight: 600 }}>
+                    {isRed ? "❌" : "⚠️"} Averaging {cq.avgInternalLinks} internal link{cq.avgInternalLinks === 1 ? "" : "s"} per post — recommended is {cq.recommendedLinksPerPost} for ~{cq.avgWordCount}-word content
+                  </div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Posts with no internal links are dead ends for both readers and Google's crawler — no path to related pages, practice areas, or a conversion page.</div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* 12c. SCHEMA OPPORTUNITIES OVERVIEW */}
+        {(() => {
+          const so = audit.full_report?.schemaOpportunities;
+          if (!so || so.totalOpportunities === 0) return null;
+          return (
+            <div style={DARK_CARD}>
+              <div style={SECTION_LABEL}>🧩 Schema Opportunities</div>
+              <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
+                Every schema type this site is eligible for, rolled up into one number — opportunities found across LocalBusiness, Review, Pricing, FAQ, and (for law firms) Attorney/LegalService schema.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{so.totalOpportunities}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Opportunities</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#10D9A0" }}>{so.totalUsed}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Used</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: so.totalMissed > 0 ? "#F87171" : "#475569" }}>{so.totalMissed}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Missed</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {so.breakdown.map((b, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < so.breakdown.length - 1 ? "1px solid #1E3050" : "none" }}>
+                    <div style={{ fontSize: 16, color: "#CBD5E1" }}>{b.type}</div>
+                    <div style={{ fontSize: 16, color: b.missed > 0 ? "#F87171" : "#10D9A0", fontWeight: 600 }}>{b.used} / {b.opportunities} used</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* 13. SCHEMA CHECK */}
         {tech && (
           <div style={DARK_CARD}>
@@ -733,6 +849,12 @@ export default function ReportPage() {
               <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
                 Law firm sites that answer legal questions should mark each one up with FAQPage/Question schema — it's free eligibility for Google's FAQ rich results, shown directly in search.
               </div>
+              {lf.hiddenFaqSchemaCount > 0 && (
+                <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
+                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>❌ {lf.hiddenFaqSchemaCount} question{lf.hiddenFaqSchemaCount === 1 ? "" : "s"} tagged with FAQ schema but not visible anywhere on the page</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Google requires FAQ rich-result content to actually be visible to visitors. Hidden schema like this risks the rich result being suppressed — or a manual penalty for spammy structured data.</div>
+                </div>
+              )}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 14 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: lf.properUseCount > 0 ? "#10D9A0" : "#475569" }}>{lf.properUseCount}</div>
@@ -752,6 +874,38 @@ export default function ReportPage() {
                     {isRed ? "❌" : "⚠️"} {lf.missedOpportunityCount} question{lf.missedOpportunityCount === 1 ? "" : "s"} answered on the page without FAQ schema ({Math.round(missedPercent * 100)}% missed)
                   </div>
                   <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Each one is a missed shot at a free rich result in Google search — competitors who tag theirs win that real estate instead.</div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* 13c. LAWYER SCHEMA */}
+        {(() => {
+          const ls = audit.full_report?.lawyerSchema;
+          if (!ls || !ls.isLawFirm) return null;
+          const missingCount = ls.opportunityCount - ls.usedCount;
+          const isRed = missingCount > 0;
+          return (
+            <div style={DARK_CARD}>
+              <div style={SECTION_LABEL}>⚖️ Lawyer Schema</div>
+              <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
+                Attorney / LegalService schema is what actually tells Google this is a law firm — separate from FAQ schema above. Every practice-area page, plus the homepage, is an opportunity to use it.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 14 }}>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{ls.opportunityCount}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Opportunities to Use It</div>
+                </div>
+                <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: ls.usedCount > 0 ? "#10D9A0" : "#F87171" }}>{ls.usedCount}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Times Actually Used</div>
+                </div>
+              </div>
+              {isRed && (
+                <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }}>
+                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600 }}>❌ Attorney / LegalService schema missing on {missingCount} of {ls.opportunityCount} eligible page{ls.opportunityCount === 1 ? "" : "s"}</div>
+                  <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Without this schema type, Google has no structured signal that this is a law firm — generic LocalBusiness schema doesn't carry that meaning.</div>
                 </div>
               )}
             </div>

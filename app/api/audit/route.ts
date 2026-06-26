@@ -6,6 +6,9 @@ import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgen
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
 import { runSitemapAgent } from '@/lib/agents/sitemapAgent';
 import { analyzeLawFaqSchema } from '@/lib/agents/lawFaqAgent';
+import { analyzeLawyerSchema } from '@/lib/agents/lawyerSchemaAgent';
+import { buildSchemaOpportunities } from '@/lib/schemaOpportunities';
+import { analyzeContentQuality } from '@/lib/agents/contentQualityAgent';
 import { checkRateLimit, checkAgencySignal } from '@/lib/rateLimiter';
 import { scoreAudit } from '@/lib/auditScorer';
 import { deliverReport } from '@/lib/reportDelivery';
@@ -130,6 +133,9 @@ export async function POST(req: NextRequest) {
     }));
 
     const lawFaqResult = analyzeLawFaqSchema(htmlResult.html, htmlResult.titleTag, htmlResult.h1Text);
+    const lawyerSchemaResult = await analyzeLawyerSchema(htmlResult.html, lawFaqResult.isLawFirm, sitemapResult.allUrls);
+    const schemaOpportunitiesResult = buildSchemaOpportunities(techResult, lawFaqResult, lawyerSchemaResult);
+    const contentQualityResult = await analyzeContentQuality(sitemapResult.blogPostUrls, hostname);
 
     console.log('STEP: scoreAudit starting');
     const { topIssues, topFixes } = scoreAudit(speedResult, techResult);
@@ -162,7 +168,7 @@ export async function POST(req: NextRequest) {
         render_blocking_scripts: speedResult.renderBlockingScripts,
         top_issues: topIssues.slice(0, 15),
         top_fixes: topFixes,
-        full_report: { speed: speedResult, tech: techResult, sitemap: sitemapResult, lawFaq: lawFaqResult }
+        full_report: { speed: speedResult, tech: techResult, sitemap: sitemapResult, lawFaq: lawFaqResult, lawyerSchema: lawyerSchemaResult, schemaOpportunities: schemaOpportunitiesResult, contentQuality: contentQualityResult }
       })
       .select('id')
       .single();
