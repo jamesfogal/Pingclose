@@ -36,10 +36,6 @@ export interface HtmlAgentResult {
   hasTikTokPixel: boolean;
   hasCallTracking: boolean;
 
-  // Uptime
-  hasUptimeMonitoring: boolean;
-  uptimeService: string;
-
   // Images / video
   imagesWithoutAlt: string[];
   hasAutoPlayVideo: boolean;
@@ -63,7 +59,6 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
     hasCanonical: false, primaryKeyword: '',
     hasFAQSchema: false, hasPricingSchema: false, hasLocalBusinessSchema: false, hasReviewSchema: false,
     hasGA4: false, hasGTM: false, hasFacebookPixel: false, hasTikTokPixel: false, hasCallTracking: false,
-    hasUptimeMonitoring: false, uptimeService: '',
     imagesWithoutAlt: [], hasAutoPlayVideo: false, videoHasPoster: false,
     wordpressPluginIssues: [],
   };
@@ -166,13 +161,6 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
   const hasTikTokPixel = html.includes('analytics.tiktok.com') || html.includes('ttq.');
   const hasCallTracking = html.includes('callrail.com') || html.includes('calltracking') || html.includes('callfire.com') || html.includes('ctm.js') || html.includes('whatconverts') || html.includes('calltrackingmetrics');
 
-  // Uptime
-  let hasUptimeMonitoring = false;
-  let uptimeService = '';
-  if (html.includes('datadoghq.com')) { hasUptimeMonitoring = true; uptimeService = 'Datadog'; }
-  else if (html.includes('newrelic.com') || html.includes('nr-data.net')) { hasUptimeMonitoring = true; uptimeService = 'New Relic'; }
-  else if (html.includes('managewp') || html.includes('manage-wp')) { hasUptimeMonitoring = true; uptimeService = 'ManageWP'; }
-
   // Images without alt text
   const imgTags = html.match(/<img[^>]+>/gi) || [];
   const imagesWithoutAlt = imgTags
@@ -204,7 +192,6 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
     hasH1, h1Text, multipleH1s, hasCanonical, primaryKeyword,
     hasFAQSchema, hasPricingSchema, hasLocalBusinessSchema, hasReviewSchema,
     hasGA4, hasGTM, hasFacebookPixel, hasTikTokPixel, hasCallTracking,
-    hasUptimeMonitoring, uptimeService,
     imagesWithoutAlt, hasAutoPlayVideo, videoHasPoster,
     wordpressPluginIssues,
   };

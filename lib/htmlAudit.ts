@@ -45,16 +45,6 @@ export interface TechStackResult {
   hasTikTokPixel: boolean;
   hasCallTracking: boolean;
 
-  // Uptime monitoring
-  hasUptimeMonitoring: boolean;
-  uptimeService: string;
-
-  // Backup
-  hasBackup: boolean;
-  backupService: string;
-  backupCoveredByHost: boolean;
-  backupMessage: string;
-
   // Images / video
   imagesWithoutAlt: string[];
   hasAutoPlayVideo: boolean;

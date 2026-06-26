@@ -12,7 +12,6 @@ export function scoreAudit(speedResult: PageSpeedResult, techResult: TechStackRe
 
   // 🔴 CRITICAL (9-10) — business-threatening
   if (!techResult.isHttps) issue(10, '🔴 No HTTPS — Google shows a security warning to every visitor and applies a ranking penalty');
-  if (!techResult.hasBackup && techResult.cms === 'WordPress') issue(4, '🟢 Backup status unverifiable from outside — confirm UpdraftPlus, Jetpack Backup, or host-level snapshots are active in your WP admin');
   if (techResult.hostingVerdict === 'dead-zone') issue(10, `🔴 ${techResult.hosting} hosting detected — this host cannot achieve under 1 second load time regardless of what else is fixed`);
   if (!speedResult.passesOneSecond) issue(9, `🔴 Mobile score ${speedResult.mobileScore}/100 — failing Google's 1-second hurdle`);
   if (speedResult.lcp > 4000) issue(9, `🔴 LCP is ${(speedResult.lcp/1000).toFixed(1)}s — catastrophically slow, costing you Google rankings and visitors`);

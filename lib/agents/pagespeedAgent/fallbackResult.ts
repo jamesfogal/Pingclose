@@ -14,8 +14,6 @@ export function buildFallbackResult(status: Exclude<PageSpeedStatus, 'OK'>): Pag
     inp: 0,
     tbt: 0,
     totalPageSize: 0,
-    aboveFoldSizeKb: 0,
-    belowFoldSizeKb: 0,
     totalRequests: 0,
     passesOneSecond: false,
     imagesLazyLoaded: false,

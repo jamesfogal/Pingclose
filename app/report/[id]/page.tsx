@@ -92,8 +92,6 @@ interface Audit {
       mobileDesktopGap: number;
       gapExplanation: string;
       tbt: number;
-      aboveFoldSizeKb: number;
-      belowFoldSizeKb: number;
       totalImages: number;
       webpImages: number;
       nonWebpImages: number;
@@ -141,12 +139,6 @@ interface Audit {
       hasFacebookPixel: boolean;
       hasTikTokPixel: boolean;
       hasCallTracking: boolean;
-      hasUptimeMonitoring: boolean;
-      uptimeService: string;
-      hasBackup: boolean;
-      backupService: string;
-      backupCoveredByHost: boolean;
-      backupMessage: string;
       imagesWithoutAlt: string[];
       wordpressPluginIssues: string[];
     };
@@ -440,8 +432,6 @@ export default function ReportPage() {
             <Metric label="FCP" value={(audit.fcp / 1000).toFixed(1)} unit="s" good={audit.fcp < 30} />
             <Metric label="CLS" value={audit.cls} good={audit.cls <= 0} />
             {speed && <Metric label="TBT" value={speed.tbt} unit="ms" good={speed.tbt < 30} />}
-            {speed && <Metric label="Above Fold Size" value={speed.aboveFoldSizeKb} unit="KB" good={speed.aboveFoldSizeKb <= 500} />}
-            {speed && <Metric label="Below Fold Size" value={speed.belowFoldSizeKb} unit="KB" good={speed.belowFoldSizeKb <= 1500} />}
             <Metric label="Page Size" value={audit.total_page_size} unit="KB" good={audit.total_page_size < 1500} />
             <Metric label="Requests" value={audit.total_requests} good={audit.total_requests < 50} />
           </div>
@@ -553,41 +543,6 @@ export default function ReportPage() {
             <CheckRow label={`${speed!.totalVideos} video${speed!.totalVideos > 1 ? "s" : ""} found on page`} pass={true} />
             {speed?.hasAutoPlayVideo && <CheckRow label="Autoplay video detected" pass={false} detail="Autoplay increases mobile data usage and delays page load significantly" />}
             {speed?.hasAboveFoldEmbed && <CheckRow label="Video embed above the fold" pass={false} detail="YouTube/Vimeo iframes block page rendering — use a facade/thumbnail until user clicks play" />}
-          </div>
-        )}
-
-        {/* 8. UPTIME MONITORING */}
-        <div style={{ background: tech?.hasUptimeMonitoring ? "#10D9A010" : "#FBBF2410", border: `1px solid ${tech?.hasUptimeMonitoring ? "#10D9A040" : "#FBBF2440"}`, borderRadius: 12, padding: "20px 24px", marginBottom: 20 }}>
-          <div style={SECTION_LABEL}>🔔 Uptime Monitoring</div>
-          {tech?.hasUptimeMonitoring ? (
-            <div style={{ fontSize: 17, color: "#10D9A0" }}>✓ {tech.uptimeService} detected — you will be notified if your site goes down</div>
-          ) : (
-            <>
-              <div style={{ fontSize: 17, color: "#FBBF24", fontWeight: 600, marginBottom: 8 }}>❓ Cannot verify uptime monitoring</div>
-              <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.7 }}>
-                External monitoring tools like UptimeRobot and Pingdom ping your site from outside — they leave no detectable code on your page. If you do not have any monitoring set up, your site could go down without you knowing for hours. Free tools like UptimeRobot take 2 minutes to configure and send an email the moment your site goes offline.
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* 8b. BACKUP DETECTION */}
-        {tech && (
-          <div style={{ background: tech.hasBackup ? "#10D9A010" : "#F8717110", border: `1px solid ${tech.hasBackup ? "#10D9A040" : "#F8717140"}`, borderRadius: 12, padding: "20px 24px", marginBottom: 20 }}>
-            <div style={SECTION_LABEL}>💾 Backup Status</div>
-            {tech.hasBackup ? (
-              <>
-                <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600, marginBottom: 8 }}>
-                  ✓ {tech.backupService}{tech.backupCoveredByHost ? " — Included with your host" : " — Plugin detected"}
-                </div>
-                <div style={{ fontSize: 17, color: "#CBD5E1", lineHeight: 1.7 }}>{tech.backupMessage}</div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: 17, color: "#F87171", fontWeight: 600, marginBottom: 8 }}>☠️ No backup software detected</div>
-                <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.7 }}>{tech.backupMessage}</div>
-              </>
-            )}
           </div>
         )}
 
@@ -833,6 +788,15 @@ export default function ReportPage() {
               <CheckRow label="FAQ page with FAQPage schema" pass={tech.hasFAQSchema} detail={!tech.hasFAQSchema ? "Unlocks free FAQ rich results in Google search" : undefined} />
               <CheckRow label="Pricing page with PriceSpecification schema" pass={tech.hasPricingSchema} detail={!tech.hasPricingSchema ? "Can show your prices directly in search results" : undefined} />
               <CheckRow label="Review / Rating schema" pass={tech.hasReviewSchema} />
+              {audit.full_report?.lawyerSchema?.isLawFirm && (
+                <CheckRow
+                  label="Attorney / LegalService schema"
+                  pass={audit.full_report.lawyerSchema.usedCount >= audit.full_report.lawyerSchema.opportunityCount}
+                  detail={audit.full_report.lawyerSchema.usedCount < audit.full_report.lawyerSchema.opportunityCount
+                    ? `Found on ${audit.full_report.lawyerSchema.usedCount} of ${audit.full_report.lawyerSchema.opportunityCount} eligible pages — see Lawyer Schema below for detail`
+                    : undefined}
+                />
+              )}
             </div>
           </div>
         )}

@@ -73,7 +73,6 @@ export async function sendReportEmail(
                 'Every image checked — WebP status & savings estimate',
                 'Hosting verdict — is your host holding you back?',
                 'Google ranking for your primary keyword',
-                'Uptime monitoring — are you even notified when your site goes down?',
                 'Conversion tracking — GA4, Facebook Pixel, TikTok Pixel',
                 'What it would take to fix every issue found'
               ].map(item => `
