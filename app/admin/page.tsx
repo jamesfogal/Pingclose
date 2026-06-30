@@ -104,13 +104,13 @@ export default function AdminPage() {
       <div style={{ maxWidth: 360, width: "100%", padding: 24 }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: "#10D9A0", textAlign: "center", marginBottom: 32 }}>
           Ping<span style={{ color: "#F1F5F9" }}>Close</span>
-          <div style={{ fontSize: 12, color: "#475569", fontWeight: 400, marginTop: 4 }}>Admin Dashboard</div>
+          <div style={{ fontSize: 16, color: "#475569", fontWeight: 400, marginTop: 4 }}>Admin Dashboard</div>
         </div>
         <form onSubmit={login} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <input type="password" placeholder="Admin password" value={password} onChange={e => setPassword(e.target.value)}
-            style={{ padding: "12px 16px", background: "#111827", border: "1px solid #1F2937", borderRadius: 8, color: "#F1F5F9", fontSize: 14, outline: "none" }} />
-          {authErr && <div style={{ fontSize: 12, color: "#F87171" }}>{authErr}</div>}
-          <button type="submit" style={{ padding: 12, background: "#10D9A0", border: "none", borderRadius: 8, color: "#0B0E16", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+            style={{ padding: "12px 16px", background: "#111827", border: "1px solid #1F2937", borderRadius: 8, color: "#F1F5F9", fontSize: 16, outline: "none" }} />
+          {authErr && <div style={{ fontSize: 16, color: "#F87171" }}>{authErr}</div>}
+          <button type="submit" style={{ padding: 12, background: "#10D9A0", border: "none", borderRadius: 8, color: "#0B0E16", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
             Sign In →
           </button>
         </form>
@@ -126,11 +126,11 @@ export default function AdminPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 20, fontWeight: 800, color: "#10D9A0" }}>PingClose Admin</div>
-            <div style={{ fontSize: 12, color: "#475569" }}>{totalAll} total leads</div>
+            <div style={{ fontSize: 16, color: "#475569" }}>{totalAll} total leads</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setView("list")} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid", borderColor: view === "list" ? "#10D9A0" : "#1F2937", background: view === "list" ? "#10D9A015" : "transparent", color: view === "list" ? "#10D9A0" : "#64748B", fontSize: 12, cursor: "pointer" }}>List</button>
-            <button onClick={() => setView("pipeline")} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid", borderColor: view === "pipeline" ? "#10D9A0" : "#1F2937", background: view === "pipeline" ? "#10D9A015" : "transparent", color: view === "pipeline" ? "#10D9A0" : "#64748B", fontSize: 12, cursor: "pointer" }}>Pipeline</button>
+            <button onClick={() => setView("list")} style={{ padding: "8px 16px", borderRadius: 6, border: "1px solid", borderColor: view === "list" ? "#10D9A0" : "#1F2937", background: view === "list" ? "#10D9A015" : "transparent", color: view === "list" ? "#10D9A0" : "#64748B", fontSize: 16, cursor: "pointer" }}>List</button>
+            <button onClick={() => setView("pipeline")} style={{ padding: "8px 16px", borderRadius: 6, border: "1px solid", borderColor: view === "pipeline" ? "#10D9A0" : "#1F2937", background: view === "pipeline" ? "#10D9A015" : "transparent", color: view === "pipeline" ? "#10D9A0" : "#64748B", fontSize: 16, cursor: "pointer" }}>Pipeline</button>
           </div>
         </div>
 
@@ -139,7 +139,7 @@ export default function AdminPage() {
           {STAGES.map(s => (
             <button key={s.id} onClick={() => { setFilter(s.id); setView("list"); }} style={{ padding: "10px 8px", borderRadius: 8, border: `1px solid ${s.color}30`, background: filter === s.id ? s.bg : "#111827", cursor: "pointer", textAlign: "center" }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{stageCounts[s.id] || 0}</div>
-              <div style={{ fontSize: 10, color: "#64748B", marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 16, color: "#64748B", marginTop: 2 }}>{s.label}</div>
             </button>
           ))}
         </div>
@@ -148,7 +148,7 @@ export default function AdminPage() {
         {view === "list" && (
           <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
             {[{ id: "all", label: "All" }, { id: "failing", label: "🔴 Failing" }, { id: "agency", label: "🏢 Agency" }, ...STAGES.map(s => ({ id: s.id, label: s.label }))].map(f => (
-              <button key={f.id} onClick={() => setFilter(f.id)} style={{ padding: "5px 10px", borderRadius: 5, border: "1px solid", borderColor: filter === f.id ? "#10D9A0" : "#1F2937", background: filter === f.id ? "#10D9A015" : "transparent", color: filter === f.id ? "#10D9A0" : "#64748B", fontSize: 11, cursor: "pointer" }}>
+              <button key={f.id} onClick={() => setFilter(f.id)} style={{ padding: "7px 12px", borderRadius: 5, border: "1px solid", borderColor: filter === f.id ? "#10D9A0" : "#1F2937", background: filter === f.id ? "#10D9A015" : "transparent", color: filter === f.id ? "#10D9A0" : "#64748B", fontSize: 16, cursor: "pointer" }}>
                 {f.label}
               </button>
             ))}
@@ -166,21 +166,21 @@ export default function AdminPage() {
               return (
                 <div key={stage.id} style={{ background: "#111827", border: `1px solid ${stage.color}30`, borderRadius: 10, overflow: "hidden" }}>
                   <div style={{ padding: "10px 14px", borderBottom: `1px solid ${stage.color}20`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: stage.color }}>{stage.label}</span>
-                    <span style={{ fontSize: 11, color: "#475569" }}>{stageAudits.length}</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: stage.color }}>{stage.label}</span>
+                    <span style={{ fontSize: 16, color: "#475569" }}>{stageAudits.length}</span>
                   </div>
                   <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 6, maxHeight: 400, overflowY: "auto" }}>
-                    {stageAudits.length === 0 && <div style={{ fontSize: 11, color: "#374151", textAlign: "center", padding: 16 }}>Empty</div>}
+                    {stageAudits.length === 0 && <div style={{ fontSize: 16, color: "#374151", textAlign: "center", padding: 16 }}>Empty</div>}
                     {stageAudits.map(audit => (
                       <div key={audit.id} onClick={() => { setSelected(audit); setNotes(audit.notes || ""); }} style={{ padding: "10px 12px", background: "#0B0E16", borderRadius: 7, cursor: "pointer", border: selected?.id === audit.id ? `1px solid ${stage.color}60` : "1px solid transparent" }}>
-                        <div style={{ fontSize: 12, color: "#F1F5F9", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <div style={{ fontSize: 16, color: "#F1F5F9", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {audit.url.replace(/^https?:\/\//, "")}
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: 10, color: "#64748B" }}>{audit.email.split("@")[1]}</span>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: scoreColor(audit.mobile_score) }}>{audit.mobile_score}</span>
+                          <span style={{ fontSize: 16, color: "#64748B" }}>{audit.email.split("@")[1]}</span>
+                          <span style={{ fontSize: 16, fontWeight: 700, color: scoreColor(audit.mobile_score) }}>{audit.mobile_score}</span>
                         </div>
-                        {audit.agency_signal && <div style={{ fontSize: 9, color: "#FBBF24", marginTop: 2 }}>🏢 Agency</div>}
+                        {audit.agency_signal && <div style={{ fontSize: 16, color: "#FBBF24", marginTop: 2 }}>🏢 Agency</div>}
                       </div>
                     ))}
                   </div>
@@ -193,9 +193,9 @@ export default function AdminPage() {
 
           /* ── List view ────────────────────────────────────────── */
           <div style={{ border: "1px solid #1F2937", borderRadius: 12, overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 70px 80px 110px 80px 110px", gap: 8, padding: "10px 16px", background: "#111827", borderBottom: "1px solid #1F2937" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "2.5fr 2.5fr 90px 110px 140px 100px 140px", gap: 8, padding: "10px 16px", background: "#111827", borderBottom: "1px solid #1F2937" }}>
               {["URL", "Email", "Score", "CMS", "Hosting", "Agency", "Stage"].map(h => (
-                <div key={h} style={{ fontSize: 10, fontWeight: 700, color: "#475569" }}>{h}</div>
+                <div key={h} style={{ fontSize: 16, fontWeight: 700, color: "#475569" }}>{h}</div>
               ))}
             </div>
             {audits.length === 0 && <div style={{ textAlign: "center", padding: 40, color: "#475569" }}>No audits yet.</div>}
@@ -203,15 +203,15 @@ export default function AdminPage() {
               const stage = stageInfo(audit.pipeline_stage || "new");
               return (
                 <div key={audit.id} onClick={() => { setSelected(audit); setNotes(audit.notes || ""); }}
-                  style={{ display: "grid", gridTemplateColumns: "2fr 2fr 70px 80px 110px 80px 110px", gap: 8, padding: "11px 16px", cursor: "pointer", borderBottom: i < audits.length - 1 ? "1px solid #1F2937" : "none", background: selected?.id === audit.id ? "#111827" : "transparent", transition: "background 0.15s" }}>
-                  <div style={{ fontSize: 12, color: "#F1F5F9", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{audit.url.replace(/^https?:\/\//, "")}</div>
-                  <div style={{ fontSize: 12, color: "#94A3B8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{audit.email}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: scoreColor(audit.mobile_score) }}>{audit.mobile_score}</div>
-                  <div style={{ fontSize: 11, color: "#64748B" }}>{audit.cms || "—"}</div>
-                  <div style={{ fontSize: 11, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{audit.hosting || "—"}</div>
-                  <div style={{ fontSize: 11, color: audit.agency_signal ? "#FBBF24" : "#374151" }}>{audit.agency_signal ? "🏢 Yes" : "—"}</div>
+                  style={{ display: "grid", gridTemplateColumns: "2.5fr 2.5fr 90px 110px 140px 100px 140px", gap: 8, padding: "13px 16px", cursor: "pointer", borderBottom: i < audits.length - 1 ? "1px solid #1F2937" : "none", background: selected?.id === audit.id ? "#111827" : "transparent", transition: "background 0.15s" }}>
+                  <div style={{ fontSize: 16, color: "#F1F5F9", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{audit.url.replace(/^https?:\/\//, "")}</div>
+                  <div style={{ fontSize: 16, color: "#94A3B8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{audit.email}</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: scoreColor(audit.mobile_score) }}>{audit.mobile_score}</div>
+                  <div style={{ fontSize: 16, color: "#64748B" }}>{audit.cms || "—"}</div>
+                  <div style={{ fontSize: 16, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{audit.hosting || "—"}</div>
+                  <div style={{ fontSize: 16, color: audit.agency_signal ? "#FBBF24" : "#374151" }}>{audit.agency_signal ? "🏢 Yes" : "—"}</div>
                   <div>
-                    <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 4, background: stage.bg, color: stage.color, border: `1px solid ${stage.color}30`, whiteSpace: "nowrap" }}>
+                    <span style={{ fontSize: 16, padding: "4px 10px", borderRadius: 4, background: stage.bg, color: stage.color, border: `1px solid ${stage.color}30`, whiteSpace: "nowrap" }}>
                       {stage.label}
                     </span>
                   </div>
@@ -223,11 +223,11 @@ export default function AdminPage() {
 
         {/* ── Detail panel ──────────────────────────────────────── */}
         {selected && (
-          <div style={{ position: "fixed", right: 0, top: 0, bottom: 0, width: 400, background: "#111827", borderLeft: "1px solid #1F2937", padding: 24, overflowY: "auto", zIndex: 50 }}>
+          <div style={{ position: "fixed", right: 0, top: 0, bottom: 0, width: 460, background: "#111827", borderLeft: "1px solid #1F2937", padding: 24, overflowY: "auto", zIndex: 50 }}>
             <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", fontSize: 20, marginBottom: 16 }}>×</button>
 
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#F1F5F9", marginBottom: 2, wordBreak: "break-all" }}>{selected.url}</div>
-            <div style={{ fontSize: 12, color: "#64748B", marginBottom: 20 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9", marginBottom: 2, wordBreak: "break-all" }}>{selected.url}</div>
+            <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>
               {selected.email} · {new Date(selected.created_at).toLocaleDateString()}
               {selected.agency_signal && <span style={{ color: "#FBBF24", marginLeft: 8 }}>🏢 Agency</span>}
             </div>
@@ -236,22 +236,22 @@ export default function AdminPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
               <div style={{ background: "#0B0E16", borderRadius: 8, padding: 12, textAlign: "center" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: scoreColor(selected.mobile_score) }}>{selected.mobile_score}</div>
-                <div style={{ fontSize: 10, color: "#475569" }}>Mobile Score</div>
+                <div style={{ fontSize: 16, color: "#475569" }}>Mobile Score</div>
               </div>
               <div style={{ background: "#0B0E16", borderRadius: 8, padding: 12, textAlign: "center" }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: selected.passes_one_second ? "#10D9A0" : "#F87171" }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: selected.passes_one_second ? "#10D9A0" : "#F87171" }}>
                   {selected.passes_one_second ? "✅ PASS" : "❌ FAIL"}
                 </div>
-                <div style={{ fontSize: 10, color: "#475569" }}>1-Second Test</div>
+                <div style={{ fontSize: 16, color: "#475569" }}>1-Second Test</div>
               </div>
             </div>
 
             {/* Pipeline stage selector */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", marginBottom: 8 }}>PIPELINE STAGE</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#475569", marginBottom: 8 }}>PIPELINE STAGE</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {STAGES.map(s => (
-                  <button key={s.id} onClick={() => updateStage(selected, s.id)} style={{ padding: "8px 10px", borderRadius: 6, border: `1px solid ${s.color}${(selected.pipeline_stage || "new") === s.id ? "80" : "30"}`, background: (selected.pipeline_stage || "new") === s.id ? s.bg : "transparent", color: s.color, fontSize: 11, fontWeight: (selected.pipeline_stage || "new") === s.id ? 700 : 400, cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
+                  <button key={s.id} onClick={() => updateStage(selected, s.id)} style={{ padding: "10px 10px", borderRadius: 6, border: `1px solid ${s.color}${(selected.pipeline_stage || "new") === s.id ? "80" : "30"}`, background: (selected.pipeline_stage || "new") === s.id ? s.bg : "transparent", color: s.color, fontSize: 16, fontWeight: (selected.pipeline_stage || "new") === s.id ? 700 : 400, cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
                     {s.label}
                   </button>
                 ))}
@@ -261,9 +261,9 @@ export default function AdminPage() {
             {/* Top issues */}
             {selected.top_issues?.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", marginBottom: 8 }}>TOP ISSUES</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#475569", marginBottom: 8 }}>TOP ISSUES</div>
                 {selected.top_issues.slice(0, 5).map((issue, i) => (
-                  <div key={i} style={{ fontSize: 11, color: "#94A3B8", marginBottom: 5, display: "flex", gap: 6 }}>
+                  <div key={i} style={{ fontSize: 16, color: "#94A3B8", marginBottom: 5, display: "flex", gap: 6 }}>
                     <span style={{ color: "#F87171", flexShrink: 0 }}>→</span>{issue.replace(/^\[\d+\]\s*/, "")}
                   </div>
                 ))}
@@ -272,20 +272,20 @@ export default function AdminPage() {
 
             {/* Notes */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", marginBottom: 6 }}>NOTES</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#475569", marginBottom: 6 }}>NOTES</div>
               <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add notes about this prospect..."
-                style={{ width: "100%", height: 80, background: "#0B0E16", border: "1px solid #1F2937", borderRadius: 6, color: "#F1F5F9", fontSize: 12, padding: 10, resize: "vertical", outline: "none", boxSizing: "border-box" }} />
-              <button onClick={() => saveNotes(selected)} disabled={saving} style={{ marginTop: 6, padding: "6px 12px", background: "transparent", border: "1px solid #1F2937", borderRadius: 5, color: "#64748B", fontSize: 11, cursor: "pointer" }}>
+                style={{ width: "100%", height: 90, background: "#0B0E16", border: "1px solid #1F2937", borderRadius: 6, color: "#F1F5F9", fontSize: 16, padding: 10, resize: "vertical", outline: "none", boxSizing: "border-box" }} />
+              <button onClick={() => saveNotes(selected)} disabled={saving} style={{ marginTop: 6, padding: "8px 14px", background: "transparent", border: "1px solid #1F2937", borderRadius: 5, color: "#64748B", fontSize: 16, cursor: "pointer" }}>
                 {saving ? "Saving..." : "Save Notes"}
               </button>
             </div>
 
             {/* Action buttons */}
             <div style={{ display: "flex", gap: 8 }}>
-              <a href={`/report/${selected.id}`} target="_blank" style={{ flex: 1, padding: 10, background: "transparent", border: "1px solid #1F2937", borderRadius: 6, color: "#94A3B8", fontSize: 12, fontWeight: 600, textDecoration: "none", textAlign: "center" }}>
+              <a href={`/report/${selected.id}`} target="_blank" style={{ flex: 1, padding: 10, background: "transparent", border: "1px solid #1F2937", borderRadius: 6, color: "#94A3B8", fontSize: 16, fontWeight: 600, textDecoration: "none", textAlign: "center" }}>
                 View Report →
               </a>
-              <a href={`mailto:${selected.email}`} style={{ flex: 1, padding: 10, background: "#10D9A0", border: "none", borderRadius: 6, color: "#0B0E16", fontSize: 12, fontWeight: 700, textDecoration: "none", textAlign: "center" }}>
+              <a href={`mailto:${selected.email}`} style={{ flex: 1, padding: 10, background: "#10D9A0", border: "none", borderRadius: 6, color: "#0B0E16", fontSize: 16, fontWeight: 700, textDecoration: "none", textAlign: "center" }}>
                 Email Lead →
               </a>
             </div>

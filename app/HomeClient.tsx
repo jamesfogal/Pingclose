@@ -71,10 +71,10 @@ export default function Home() {
 
   function inputStyle(focused: boolean) {
     return {
-      width: "100%", padding: "16px 20px",
+      width: "100%", padding: "18px 22px",
       background: "#111827",
       border: `2px solid ${focused ? "#10D9A0" : "#374151"}`,
-      borderRadius: 10, color: "#F1F5F9", fontSize: 18,
+      borderRadius: 10, color: "#F1F5F9", fontSize: 19,
       outline: "none", boxSizing: "border-box" as const,
       transition: "border-color 180ms cubic-bezier(0.23,1,0.32,1), box-shadow 180ms cubic-bezier(0.23,1,0.32,1)",
       boxShadow: focused ? "0 0 0 3px #10D9A015" : "none",
@@ -83,11 +83,11 @@ export default function Home() {
 
   const canSubmit = !loading;
   const btnStyle = {
-    width: "100%", padding: "18px",
+    width: "100%", padding: "20px",
     background: canSubmit ? "#10D9A0" : "#0D1528",
     border: "2px solid #10D9A0", borderRadius: 10,
     color: canSubmit ? "#0B0E16" : "#10D9A0",
-    fontSize: 18, fontWeight: 700,
+    fontSize: 20, fontWeight: 700,
     cursor: canSubmit ? "pointer" : "not-allowed" as const,
     transition: "background 180ms cubic-bezier(0.23,1,0.32,1), box-shadow 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)",
   };
@@ -121,15 +121,15 @@ export default function Home() {
         <div style={{ marginBottom: 48, textAlign: "center", position: "relative" }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 14, marginBottom: 20 }}>
             {/* CSS radar icon — zero image requests */}
-            <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+            <div style={{ position: "relative", width: 56, height: 56, flexShrink: 0 }}>
               <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-                <div style={{ position: "absolute", width: 76, height: 76, bottom: -38, left: -38, borderRadius: "50%", border: "1.5px solid #10D9A0", opacity: 0.28 }} />
-                <div style={{ position: "absolute", width: 52, height: 52, bottom: -26, left: -26, borderRadius: "50%", border: "2px solid #10D9A0", opacity: 0.58 }} />
-                <div style={{ position: "absolute", width: 30, height: 30, bottom: -15, left: -15, borderRadius: "50%", border: "2.5px solid #10D9A0", opacity: 1 }} />
+                <div style={{ position: "absolute", width: 88, height: 88, bottom: -44, left: -44, borderRadius: "50%", border: "1.5px solid #10D9A0", opacity: 0.28 }} />
+                <div style={{ position: "absolute", width: 60, height: 60, bottom: -30, left: -30, borderRadius: "50%", border: "2px solid #10D9A0", opacity: 0.58 }} />
+                <div style={{ position: "absolute", width: 34, height: 34, bottom: -17, left: -17, borderRadius: "50%", border: "2.5px solid #10D9A0", opacity: 1 }} />
               </div>
-              <div style={{ position: "absolute", bottom: -3.5, left: -3.5, width: 7, height: 7, background: "#10D9A0", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1), 0 0 0 8px rgba(16,217,160,0.05)" }} />
+              <div style={{ position: "absolute", bottom: -4, left: -4, width: 8, height: 8, background: "#10D9A0", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1), 0 0 0 8px rgba(16,217,160,0.05)" }} />
             </div>
-            <div style={{ fontSize: "clamp(44px, 7vw, 70px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", lineHeight: 1, fontFamily: "var(--font-geist-sans)" }}>
+            <div style={{ fontSize: "clamp(48px, 8vw, 84px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", lineHeight: 1, fontFamily: "var(--font-geist-sans)" }}>
               Ping<span style={{ color: "#F1F5F9" }}>Close</span>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function Home() {
         </div>
 
         {/* Hero grid: form left, preview right */}
-        <div className="hero-grid" style={{ width: "100%", maxWidth: 1080, display: "grid", gap: 56, alignItems: "center", position: "relative" }}>
+        <div className="hero-grid" style={{ width: "100%", maxWidth: 1280, display: "grid", gap: 72, alignItems: "center", position: "relative" }}>
 
           {/* LEFT — headline + form */}
           <div>
@@ -158,11 +158,11 @@ export default function Home() {
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "pulse 2s ease-in-out infinite" }} />
                   <span style={{ fontSize: 16, color: "#10D9A0", fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
                 </div>
-                <h1 style={{ fontSize: "clamp(34px, 4.5vw, 56px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 20px", letterSpacing: "-1.5px", color: "#F9FAFB" }}>
+                <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: "#F9FAFB" }}>
                   Want the Fastest Website<br />
                   <span style={{ color: "#10D9A0" }}>on Your Block?</span>
                 </h1>
-                <p style={{ fontSize: 20, color: "#CBD5E1", margin: "0 0 28px", lineHeight: 1.6 }}>
+                <p style={{ fontSize: 22, color: "#CBD5E1", margin: "0 0 32px", lineHeight: 1.6 }}>
                   Ping your site and find out right now. We check 74 signals and tell you exactly what&apos;s slowing you down.
                 </p>
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -297,14 +297,14 @@ export default function Home() {
 
       {/* ── STATS BAR ───────────────────────────────────────────── */}
       <section style={{ padding: "36px 24px", background: "#080F1C", borderTop: "1px solid #1E2A40", borderBottom: "1px solid #1E2A40" }}>
-        <div className="stats-grid" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gap: 0, textAlign: "center" }}>
+        <div className="stats-grid" style={{ maxWidth: 1040, margin: "0 auto", display: "grid", gap: 0, textAlign: "center" }}>
           {[
             ["53%", "of visitors leave if your page takes over 3 seconds"],
             ["74", "signals checked on every free audit"],
             ["<1s", "Google's target for above-the-fold load time"],
           ].map(([stat, label], i) => (
             <div key={stat} style={{ padding: "20px 24px", borderRight: i < 2 ? "1px solid #1E2A40" : "none" }}>
-              <div style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px", lineHeight: 1 }}>{stat}</div>
+              <div style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px", lineHeight: 1 }}>{stat}</div>
               <div style={{ fontSize: 16, color: "#64748B", marginTop: 8, lineHeight: 1.5 }}>{label}</div>
             </div>
           ))}
@@ -312,13 +312,13 @@ export default function Home() {
       </section>
 
       {/* ── HURDLE SECTION ──────────────────────────────────────── */}
-      <section id="hurdles" style={{ padding: "80px 24px", background: "#080F1C", textAlign: "center" }}>
-        <div style={{ maxWidth: 800, margin: "0 auto" }}>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, margin: "0 0 20px", letterSpacing: "-1px" }}>
+      <section id="hurdles" style={{ padding: "90px 24px", background: "#080F1C", textAlign: "center" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <h2 style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, margin: "0 0 20px", letterSpacing: "-1px" }}>
             If You Can&apos;t Clear the First Hurdle,<br />
             <span style={{ color: "#F87171" }}>You Can&apos;t Win the Race</span>
           </h2>
-          <p style={{ fontSize: 20, color: "#94A3B8", margin: "0 0 56px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 22, color: "#94A3B8", margin: "0 0 56px", lineHeight: 1.6 }}>
             Google&apos;s first hurdle is loading your website in under 1 second on a 4G phone.<br />
             Most local businesses fail it before the race even begins.
           </p>

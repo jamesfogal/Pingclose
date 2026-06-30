@@ -149,7 +149,7 @@ const DARK_CARD: React.CSSProperties = {
   background: "#0D1528",
   border: "1px solid #1E3050",
   borderRadius: 12,
-  padding: "24px",
+  padding: "var(--card-pad, 24px)",
   marginBottom: 20,
 };
 
@@ -227,26 +227,26 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
             {/* TTFB label */}
             <div style={{ position: "absolute", left: `${ttfbPct}%`, transform: "translateX(-50%)", textAlign: "center", minWidth: 80 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: ttfbColor }}>{ttfbMs}ms</div>
-              <div style={{ fontSize: 14, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>SERVER</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>SERVER</div>
             </div>
 
             {/* FCP label */}
             <div style={{ position: "absolute", left: `${fcpPct}%`, transform: "translateX(-50%)", textAlign: "center", minWidth: 80 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: fcpColor }}>{fcpSec}s</div>
-              <div style={{ fontSize: 14, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>FIRST PAINT</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>FIRST PAINT</div>
             </div>
 
             {/* LCP label */}
             <div style={{ position: "absolute", right: 0, transform: "translateX(0%)", textAlign: "right", minWidth: 80 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: lcpColor }}>{lcpSec}s</div>
-              <div style={{ fontSize: 14, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>PAGE LOADED</div>
+              <div style={{ fontSize: 16, color: "#94A3B8", fontWeight: 600, letterSpacing: "0.06em" }}>PAGE LOADED</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Three milestone pills */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 10 }}>
         {[
           { label: "Server Response", sublabel: "TTFB", value: `${ttfbMs}ms`, color: ttfbColor, verdict: ttfb <= 6 ? "Fast" : ttfb <= 10 ? "Slow" : "Very Slow" },
           { label: "First Content", sublabel: "FCP", value: `${fcpSec}s`, color: fcpColor, verdict: fcp < 30 ? "Fast" : fcp < 40 ? "Slow" : "Very Slow" },
@@ -254,9 +254,9 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
         ].map(({ label, sublabel, value, color, verdict }) => (
           <div key={sublabel} style={{ background: "#0D1528", border: `1px solid ${color}40`, borderRadius: 10, padding: "16px 12px", textAlign: "center" }}>
             <div style={{ fontSize: 22, fontWeight: 800, color, marginBottom: 2 }}>{value}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.08em", textTransform: "uppercase" }}>{sublabel}</div>
-            <div style={{ fontSize: 14, color: "#64748B", marginTop: 4 }}>{label}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color, marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{verdict}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.06em", textTransform: "uppercase" }}>{sublabel}</div>
+            <div style={{ fontSize: 16, color: "#64748B", marginTop: 4 }}>{label}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color, marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{verdict}</div>
           </div>
         ))}
       </div>
@@ -381,8 +381,8 @@ export default function ReportPage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
-      <div style={{ maxWidth: 740, margin: "0 auto", padding: "40px 24px 80px" }}>
+    <main className="report-shell" style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
+      <div style={{ maxWidth: 740, margin: "0 auto", padding: "40px var(--page-pad, 24px) 80px" }}>
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
@@ -488,7 +488,7 @@ export default function ReportPage() {
         {/* 6. IMAGE AUDIT */}
         <div style={DARK_CARD}>
           <div style={SECTION_LABEL}>🖼️ Image Audit</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 12, marginBottom: 16 }}>
             <div style={{ background: "#111827", borderRadius: 8, padding: "14px", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9" }}>{speed?.totalImages ?? 0}</div>
               <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Images</div>
@@ -620,7 +620,7 @@ export default function ReportPage() {
           return (
             <div style={DARK_CARD}>
               <div style={SECTION_LABEL}>🗺️ Site Structure</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 12, marginBottom: 20 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{sm.pageCount.toLocaleString()}</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Pages</div>
@@ -705,7 +705,7 @@ export default function ReportPage() {
               <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
                 Internal links spread authority across the site and give Google a path to crawl. Rule of thumb: about 1 internal link per 150 words of content.
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 12, marginBottom: 14 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{cq.avgWordCount.toLocaleString()}</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Avg Words / Post</div>
@@ -750,7 +750,7 @@ export default function ReportPage() {
               <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
                 Every schema type this site is eligible for, rolled up into one number — opportunities found across LocalBusiness, Review, Pricing, FAQ, and (for law firms) Attorney/LegalService schema.
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 12, marginBottom: 16 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{so.totalOpportunities}</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Opportunities</div>
@@ -819,7 +819,7 @@ export default function ReportPage() {
                   <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Google requires FAQ rich-result content to actually be visible to visitors. Hidden schema like this risks the rich result being suppressed — or a manual penalty for spammy structured data.</div>
                 </div>
               )}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 14 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: lf.properUseCount > 0 ? "#10D9A0" : "#475569" }}>{lf.properUseCount}</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Questions Properly Tagged</div>
@@ -856,7 +856,7 @@ export default function ReportPage() {
               <div style={{ fontSize: 16, color: "#CBD5E1", marginBottom: 14, lineHeight: 1.6 }}>
                 Attorney / LegalService schema is what actually tells Google this is a law firm — separate from FAQ schema above. Every practice-area page, plus the homepage, is an opportunity to use it.
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 14 }}>
                 <div style={{ background: "#111827", borderRadius: 8, padding: "16px", textAlign: "center" }}>
                   <div style={{ fontSize: 32, fontWeight: 800, color: "#F1F5F9" }}>{ls.opportunityCount}</div>
                   <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Opportunities to Use It</div>
@@ -1146,6 +1146,9 @@ export default function ReportPage() {
       </div>
 
       <style>{`
+        @media (max-width: 480px) {
+          .report-shell { --page-pad: 12px; --card-pad: 16px; }
+        }
         @media (prefers-reduced-motion: no-preference) {
           @keyframes heroIn {
             from { opacity: 0; transform: translateY(12px); }

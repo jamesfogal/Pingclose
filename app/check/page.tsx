@@ -225,13 +225,13 @@ function CheckContent() {
 
         {/* ── Tech signals ─────────────────────────────────────────────── */}
         <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#374151", textTransform: "uppercase", marginBottom: 14 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", color: "#374151", textTransform: "uppercase", marginBottom: 14 }}>
             Tech Signals
           </div>
 
           <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, overflow: "hidden" }}>
             {signals.length === 0 && (
-              <div style={{ padding: "20px 20px", color: "#374151", fontSize: 15 }}>
+              <div style={{ padding: "20px 20px", color: "#374151", fontSize: 16 }}>
                 <span style={{ animation: "blink 1.4s ease-in-out infinite", display: "inline-block" }}>Scanning…</span>
               </div>
             )}
@@ -242,15 +242,15 @@ function CheckContent() {
                 animation: "fadeSlideIn 0.18s ease-out",
               }}>
                 <span style={{
-                  width: 18, height: 18, flexShrink: 0, marginTop: 1,
+                  width: 22, height: 22, flexShrink: 0, marginTop: 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   background: `${statusColor(sig.status)}15`, borderRadius: 4,
-                  fontSize: 11, fontWeight: 800, color: statusColor(sig.status),
+                  fontSize: 16, fontWeight: 800, color: statusColor(sig.status),
                 }}>
                   {statusIcon(sig.status)}
                 </span>
-                <span style={{ fontSize: 14, color: "#64748B", width: 200, flexShrink: 0 }}>{sig.label}</span>
-                <span style={{ fontSize: 14, color: sig.status === "fail" ? "#F87171" : sig.status === "warn" ? "#FBBF24" : "#CBD5E1", fontWeight: 500 }}>
+                <span style={{ fontSize: 16, color: "#64748B", width: 200, flexShrink: 0 }}>{sig.label}</span>
+                <span style={{ fontSize: 16, color: sig.status === "fail" ? "#F87171" : sig.status === "warn" ? "#FBBF24" : "#CBD5E1", fontWeight: 500 }}>
                   {sig.value}
                 </span>
               </div>
@@ -261,11 +261,11 @@ function CheckContent() {
         {/* ── Performance scores ───────────────────────────────────────── */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#374151", textTransform: "uppercase" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", color: "#374151", textTransform: "uppercase" }}>
               Performance Scores
             </div>
             {!speedData && (
-              <div style={{ fontSize: 12, color: "#10D9A040", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ fontSize: 16, color: "#10D9A040", display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "blink 1.2s ease-in-out infinite" }} />
                 Running Google Lighthouse…
               </div>
@@ -275,7 +275,7 @@ function CheckContent() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {speedMetrics.map(m => (
               <div key={m.label} style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, padding: "16px 18px" }}>
-                <div style={{ fontSize: 11, color: "#475569", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>{m.label}</div>
+                <div style={{ fontSize: 16, color: "#475569", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>{m.label}</div>
                 {m.value !== null ? (
                   <div style={{ fontSize: 30, fontWeight: 800, color: m.color || "#F1F5F9", lineHeight: 1, animation: "fadeSlideIn 0.3s ease-out" }}>
                     {m.value}
@@ -296,7 +296,7 @@ function CheckContent() {
               marginTop: 12, padding: "10px 16px",
               background: speedData.passesOneSecond ? "#10D9A010" : "#F8717110",
               border: `1px solid ${speedData.passesOneSecond ? "#10D9A030" : "#F8717130"}`,
-              borderRadius: 8, fontSize: 14,
+              borderRadius: 8, fontSize: 16,
               color: speedData.passesOneSecond ? "#10D9A0" : "#F87171",
               fontWeight: 600,
               animation: "fadeSlideIn 0.3s ease-out",
@@ -317,19 +317,19 @@ function CheckContent() {
             View Your Full Report →
           </a>
         ) : (
-          <div style={{ padding: "18px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, textAlign: "center", color: "#374151", fontSize: 15 }}>
+          <div style={{ padding: "18px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, textAlign: "center", color: "#374151", fontSize: 16 }}>
             {fastData ? "Getting performance scores from Google Lighthouse…" : "Scanning your site…"}
           </div>
         )}
 
         {error && (
-          <div style={{ marginTop: 16, padding: "14px 18px", background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, color: "#F87171", fontSize: 15 }}>
+          <div style={{ marginTop: 16, padding: "14px 18px", background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, color: "#F87171", fontSize: 16 }}>
             {error}
           </div>
         )}
 
         <div style={{ textAlign: "center", marginTop: 28 }}>
-          <Link href="/" style={{ fontSize: 15, color: "#374151", textDecoration: "none" }}>← Cancel</Link>
+          <Link href="/" style={{ fontSize: 16, color: "#374151", textDecoration: "none" }}>← Cancel</Link>
         </div>
       </div>
     </main>
