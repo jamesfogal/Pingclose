@@ -17,9 +17,11 @@ export async function deliverReport(opts: DeliveryOptions): Promise<void> {
   const { reportId, normalizedUrl, email, deliveryEmail, agencySignal, speedResult, techResult } = opts;
   const tasks: Promise<unknown>[] = [];
 
+  const speedPending = speedResult.pageSpeedStatus === 'PENDING';
+
   if (deliveryEmail && email) {
     console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
-    tasks.push(sendReportEmail(email, reportId, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond));
+    tasks.push(sendReportEmail(email, reportId, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond, speedPending));
   }
   tasks.push(sendLeadNotification({
     reportId,
@@ -32,7 +34,8 @@ export async function deliverReport(opts: DeliveryOptions): Promise<void> {
     hosting: techResult.hosting,
     hostingVerdictLabel: techResult.hostingVerdictLabel,
     agencySignal,
-    primaryKeyword: techResult.primaryKeyword
+    primaryKeyword: techResult.primaryKeyword,
+    speedPending,
   }));
 
   const results = await Promise.allSettled(tasks);

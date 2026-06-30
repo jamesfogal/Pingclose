@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAgent';
+import { buildFallbackResult } from '@/lib/agents/pagespeedAgent';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
 import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgent';
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
@@ -34,24 +34,16 @@ export async function POST(req: NextRequest) {
     const hostname = new URL(normalizedUrl).hostname;
     const baseUrl = new URL(normalizedUrl).origin;
 
-    console.log('STEP2: firing agents');
-    const [speedAgentResult, htmlResult, hostingResult, availabilityResult, sitemapResult] = await Promise.all([
-      runPageSpeedAgent(normalizedUrl),
+    console.log('STEP2: firing fast agents');
+    const [htmlResult, hostingResult, availabilityResult, sitemapResult] = await Promise.all([
       runHtmlAgent(normalizedUrl).catch(e => { throw new Error('HTML_FAIL: ' + e.message); }),
       runHostingAgent(hostname).catch(e => { throw new Error('HOSTING_FAIL: ' + e.message); }),
       runAvailabilityAgent(baseUrl).catch(e => { throw new Error('AVAILABILITY_FAIL: ' + e.message); }),
       runSitemapAgent(baseUrl).catch(e => { throw new Error('SITEMAP_FAIL: ' + e.message); }),
     ]);
-    console.log('STEP3: agents done');
+    console.log('STEP3: fast agents done');
 
-    let speedResult;
-    if (!speedAgentResult.ok) {
-      console.error('AGENT_FAIL: PageSpeedAgent —', speedAgentResult.error, 'quotaExceeded:', speedAgentResult.quotaExceeded);
-      const isTimeout = /timed out/i.test(speedAgentResult.error);
-      speedResult = buildFallbackResult(isTimeout ? 'TIMEOUT' : 'ERROR');
-    } else {
-      speedResult = speedAgentResult.data;
-    }
+    const speedResult = buildFallbackResult('PENDING');
 
     // Apply header-based overrides to the hosting result (no extra network call)
     // Headers come from htmlAgent, hosting name from hostingAgent — merged here
@@ -160,6 +152,7 @@ export async function POST(req: NextRequest) {
         images_webp: speedResult.imagesWebP,
         largest_image_kb: speedResult.largestImageKb,
         render_blocking_scripts: speedResult.renderBlockingScripts,
+        pagespeed_status: 'pending',
         top_issues: topIssues.slice(0, 15),
         top_fixes: topFixes,
         full_report: { speed: speedResult, tech: techResult, sitemap: sitemapResult, lawFaq: lawFaqResult, lawyerSchema: lawyerSchemaResult, schemaOpportunities: schemaOpportunitiesResult, contentQuality: contentQualityResult }
@@ -184,6 +177,22 @@ export async function POST(req: NextRequest) {
         agencySignal,
         speedResult,
         techResult
+      });
+
+      after(async () => {
+        console.log('AUDIT_AFTER: launching pagespeed-agent for', reportId);
+        const agentUrl = new URL('/api/pagespeed-agent', req.url).toString();
+        try {
+          const res = await fetch(agentUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reportId, url: normalizedUrl }),
+          });
+          console.log('AUDIT_AFTER: pagespeed-agent responded', res.status);
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : String(e);
+          console.error('AUDIT_AFTER: pagespeed-agent call failed', msg);
+        }
       });
     }
 

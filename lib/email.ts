@@ -24,7 +24,8 @@ export async function sendReportEmail(
   reportId: string,
   url: string,
   mobileScore: number,
-  passesOneSecond: boolean
+  passesOneSecond: boolean,
+  speedPending = false
 ) {
   const reportUrl = `${siteUrl}/report/${reportId}`;
   const scoreColor = mobileScore >= 70 ? '#10D9A0' : mobileScore >= 50 ? '#FBBF24' : '#F87171';
@@ -53,8 +54,12 @@ export async function sendReportEmail(
 
             <div style="background:#111827;border:1px solid #1F2937;border-radius:12px;padding:28px;margin-bottom:24px;text-align:center;">
               <div style="font-size:14px;color:#64748B;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">Mobile Performance Score</div>
-              <div style="font-size:72px;font-weight:800;color:${scoreColor};line-height:1;">${mobileScore}</div>
-              <div style="font-size:16px;color:#94A3B8;margin-top:8px;">${verdict}</div>
+              ${speedPending
+                ? `<div style="font-size:36px;font-weight:800;color:#64748B;line-height:1;">Calculating…</div>
+              <div style="font-size:16px;color:#64748B;margin-top:8px;">Speed score ready in under 60 seconds — refresh your report</div>`
+                : `<div style="font-size:72px;font-weight:800;color:${scoreColor};line-height:1;">${mobileScore}</div>
+              <div style="font-size:16px;color:#94A3B8;margin-top:8px;">${verdict}</div>`
+              }
               <div style="font-size:14px;color:#475569;margin-top:6px;">${hostname}</div>
             </div>
 
@@ -151,11 +156,12 @@ export async function sendLeadNotification(params: {
   hostingVerdictLabel: string;
   agencySignal: boolean;
   primaryKeyword: string;
+  speedPending?: boolean;
 }) {
   const {
     reportId, url, email, mobileScore, desktopScore,
     passesOneSecond, cms, hosting, hostingVerdictLabel,
-    agencySignal, primaryKeyword
+    agencySignal, primaryKeyword, speedPending = false
   } = params;
 
   const reportUrl = `${siteUrl}/report/${reportId}`;
@@ -163,16 +169,16 @@ export async function sendLeadNotification(params: {
   const hostname = (() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })();
 
   const scoreColor = mobileScore >= 70 ? '#10D9A0' : mobileScore >= 50 ? '#FBBF24' : '#F87171';
-  const verdictBg = passesOneSecond ? '#10D9A015' : '#F8717115';
-  const verdictBorder = passesOneSecond ? '#10D9A040' : '#F8717140';
-  const verdictText = passesOneSecond ? '✅ Passing Google\'s 1-second test' : '❌ FAILING Google\'s first hurdle';
-  const urgency = !passesOneSecond ? '🔥 HOT LEAD — Site is failing. Call them now.' : '📋 New audit submitted.';
+  const verdictBg = speedPending ? '#1E305015' : passesOneSecond ? '#10D9A015' : '#F8717115';
+  const verdictBorder = speedPending ? '#1E305040' : passesOneSecond ? '#10D9A040' : '#F8717140';
+  const verdictText = speedPending ? '⏳ Speed score calculating — check back shortly' : passesOneSecond ? '✅ Passing Google\'s 1-second test' : '❌ FAILING Google\'s first hurdle';
+  const urgency = speedPending ? '📋 New audit submitted — speed score calculating' : !passesOneSecond ? '🔥 HOT LEAD — Site is failing. Call them now.' : '📋 New audit submitted.';
 
   const resend = await getResend();
   await resend.emails.send({
     from: `PingClose Leads <${fromEmail}>`,
     to: NOTIFY_EMAIL,
-    subject: `${agencySignal ? '🕵️ AGENCY — ' : ''}🚨 New Lead — ${hostname} — Score: ${mobileScore}`,
+    subject: `${agencySignal ? '🕵️ AGENCY — ' : ''}🚨 New Lead — ${hostname} — Score: ${speedPending ? 'Calculating…' : mobileScore}`,
     html: `
       <!DOCTYPE html>
       <html>

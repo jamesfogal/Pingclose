@@ -16,7 +16,7 @@ export interface VideoDetail {
   embedType: string;
 }
 
-export type PageSpeedStatus = 'OK' | 'TIMEOUT' | 'ERROR';
+export type PageSpeedStatus = 'OK' | 'PENDING' | 'TIMEOUT' | 'ERROR';
 
 export interface PageSpeedResult {
   pageSpeedStatus: PageSpeedStatus;

@@ -39,7 +39,9 @@ export function buildFallbackResult(status: Exclude<PageSpeedStatus, 'OK'>): Pag
     hasRocketLoaderConflict: false,
     opportunities: [],
     mobileDesktopGap: 0,
-    gapExplanation: status === 'TIMEOUT'
+    gapExplanation: status === 'PENDING'
+      ? 'PageSpeed analysis is running in the background — scores will appear shortly.'
+      : status === 'TIMEOUT'
       ? 'PageSpeed analysis timed out — the site may be slow to respond. Other audit data is still accurate.'
       : 'PageSpeed analysis failed — other audit data is still accurate.',
     raw: {},
