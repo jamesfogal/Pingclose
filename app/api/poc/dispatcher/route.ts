@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   // Insert test row — url='poc-test' marks it as a POC row, easy to find/delete
   const { data, error } = await supabase
     .from('pingclose_audits')
-    .insert({ url: 'poc-test', status: 'pending' })
+    .insert({ url: 'poc-test' })
     .select('id')
     .single();
 
