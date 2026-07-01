@@ -27,11 +27,23 @@ export async function POST(req: NextRequest) {
 
   const techResult = (existing.full_report as Record<string, unknown>)?.tech as TechStackResult;
 
+  // Record start time before the PageSpeed API call
+  const startedAt = new Date().toISOString();
+  const startMs   = Date.now();
+
+  await supabase
+    .from('pingclose_audits')
+    .update({ pagespeed_started_at: startedAt, pagespeed_timeout_seconds: 75 })
+    .eq('id', reportId);
+
+  console.log('PAGESPEED_AGENT: started_at written', startedAt);
+
   // Run PageSpeed — never throws, has internal 50s AbortController timeout
   const agentResult = await runPageSpeedAgent(url);
 
   let speedResult;
   let pagespeedStatus: 'ok' | 'timeout' | 'error';
+  let pagespeedErrorReason: string | null = null;
 
   if (agentResult.ok) {
     speedResult = agentResult.data;
@@ -39,7 +51,8 @@ export async function POST(req: NextRequest) {
   } else {
     console.error('PAGESPEED_AGENT: failed —', agentResult.error);
     const isTimeout = /timed out/i.test(agentResult.error);
-    pagespeedStatus = isTimeout ? 'timeout' : 'error';
+    pagespeedStatus        = isTimeout ? 'timeout' : 'error';
+    pagespeedErrorReason   = isTimeout ? 'TIMEOUT' : agentResult.error.slice(0, 500);
     speedResult = buildFallbackResult(isTimeout ? 'TIMEOUT' : 'ERROR');
   }
 
@@ -70,10 +83,16 @@ export async function POST(req: NextRequest) {
     speed: speedResult,
   };
 
+  const completedAt  = new Date().toISOString();
+  const durationMs   = Date.now() - startMs;
+
   const { error: updateError } = await supabase
     .from('pingclose_audits')
     .update({
-      pagespeed_status: pagespeedStatus,
+      pagespeed_status:        pagespeedStatus,
+      pagespeed_completed_at:  completedAt,
+      pagespeed_duration_ms:   durationMs,
+      pagespeed_error_reason:  pagespeedErrorReason,
       mobile_score: speedResult.mobileScore,
       desktop_score: speedResult.desktopScore,
       ttfb: speedResult.ttfb,
@@ -99,6 +118,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'update failed', detail: updateError.message }, { status: 500 });
   }
 
-  console.log('PAGESPEED_AGENT: done', reportId, 'status=', pagespeedStatus);
-  return NextResponse.json({ ok: true, reportId, pagespeedStatus });
+  console.log('PAGESPEED_AGENT: done', reportId, 'status=', pagespeedStatus, 'duration_ms=', durationMs);
+  return NextResponse.json({ ok: true, reportId, pagespeedStatus, durationMs });
 }

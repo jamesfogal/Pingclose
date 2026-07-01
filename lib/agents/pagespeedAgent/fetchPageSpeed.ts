@@ -1,6 +1,6 @@
 // Only external API surface for this agent: Google PageSpeed Insights v5 (mobile + desktop = 2 calls)
 const ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
-const TIMEOUT_MS = 50_000;
+const TIMEOUT_MS = 75_000;
 
 interface RawFetchResult {
   ok: boolean;

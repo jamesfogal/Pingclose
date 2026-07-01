@@ -123,11 +123,12 @@ function CheckContent() {
   const limit        = params.get("limit");
   const reportId     = params.get("id");
 
-  const [fastData,    setFastData]    = useState<FastData | null>(null);
-  const [speedData,   setSpeedData]   = useState<SpeedData | null>(null);
-  const [reportReady, setReportReady] = useState<string | null>(reportId || null);
-  const [error,       setError]       = useState("");
-  const [visibleCount,setVisible]     = useState(0);
+  const [fastData,      setFastData]      = useState<FastData | null>(null);
+  const [speedData,     setSpeedData]     = useState<SpeedData | null>(null);
+  const [reportReady,   setReportReady]   = useState<string | null>(reportId || null);
+  const [error,         setError]         = useState("");
+  const [visibleCount,  setVisible]       = useState(0);
+  const [elapsedSeconds,setElapsedSeconds]= useState(0);
 
   const signals = fastData ? buildSignals(fastData) : [];
 
@@ -139,6 +140,14 @@ function CheckContent() {
       setTimeout(() => setVisible(i + 1), i * 52);
     }
   }, [fastData]); // eslint-disable-line
+
+  // Elapsed-time tracker for pending PageSpeed state
+  useEffect(() => {
+    if (!reportReady || speedData) return;
+    setElapsedSeconds(0);
+    const id = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [reportReady, speedData]); // eslint-disable-line
 
   // Fire both requests simultaneously
   useEffect(() => {
@@ -268,10 +277,35 @@ function CheckContent() {
             <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", color: "#374151", textTransform: "uppercase" }}>
               Performance Scores
             </div>
-            {!speedData && (
-              <div style={{ fontSize: 16, color: "#10D9A040", display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "blink 1.2s ease-in-out infinite" }} />
-                Running Google PageSpeed Analysis…
+            {!speedData && (() => {
+              const msg = elapsedSeconds < 10
+                ? "Waiting on Google for your performance data..."
+                : elapsedSeconds < 30
+                ? "We're almost done analyzing your website..."
+                : "Google is taking longer than usual today. Your report is still being prepared.";
+              return (
+                <div style={{ fontSize: 16, color: "#94A3B8", display: "flex", alignItems: "center", gap: 6, animation: "blink 1.6s ease-in-out infinite" }}>
+                  <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#FBBF24", flexShrink: 0 }} />
+                  {msg}
+                </div>
+              );
+            })()}
+            {speedData && speedData.pageSpeedStatus === 'OK' && (
+              <div style={{ fontSize: 16, color: "#10D9A0", display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#10D9A0", flexShrink: 0 }} />
+                Performance analysis complete.
+              </div>
+            )}
+            {speedData && speedData.pageSpeedStatus === 'TIMEOUT' && (
+              <div style={{ fontSize: 16, color: "#FBBF24", display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
+                {"Google's performance service timed out. Your report is still available."}
+              </div>
+            )}
+            {speedData && speedData.pageSpeedStatus === 'ERROR' && (
+              <div style={{ fontSize: 16, color: "#F87171", display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
+                Performance analysis unavailable. Your report is still available.
               </div>
             )}
           </div>
@@ -322,14 +356,30 @@ function CheckContent() {
 
         {/* ── CTA ─────────────────────────────────────────────────────── */}
         {reportReady ? (
-          <a href={`/report/${reportReady}`} style={{
-            display: "block", background: "#10D9A0", color: "#0B0E16",
-            fontSize: 18, fontWeight: 700, padding: "18px",
-            borderRadius: 10, textDecoration: "none", textAlign: "center",
-            animation: "fadeSlideIn 0.4s ease-out",
-          }}>
-            View Your Full Report →
-          </a>
+          <div>
+            <a href={`/report/${reportReady}`} style={{
+              display: "block", background: "#10D9A0", color: "#0B0E16",
+              fontSize: 18, fontWeight: 700, padding: "18px",
+              borderRadius: 10, textDecoration: "none", textAlign: "center",
+              animation: "fadeSlideIn 0.4s ease-out",
+            }}>
+              View Your Full Report →
+            </a>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10, fontSize: 16, color: "#64748B" }}>
+              {!speedData && (
+                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#FBBF24", flexShrink: 0, animation: "blink 1.6s ease-in-out infinite" }} />
+                Waiting on Google...</>
+              )}
+              {speedData && speedData.pageSpeedStatus === 'OK' && (
+                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#10D9A0", flexShrink: 0 }} />
+                <span style={{ color: "#10D9A0" }}>Performance analysis complete</span></>
+              )}
+              {speedData && (speedData.pageSpeedStatus === 'TIMEOUT' || speedData.pageSpeedStatus === 'ERROR') && (
+                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
+                <span style={{ color: "#F87171" }}>Performance analysis unavailable</span></>
+              )}
+            </div>
+          </div>
         ) : (
           <div style={{ padding: "18px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, textAlign: "center", color: "#374151", fontSize: 16 }}>
             {fastData ? "Getting performance scores from Google Lighthouse…" : "Scanning your site…"}
