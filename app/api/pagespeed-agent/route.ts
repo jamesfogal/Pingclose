@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export const maxDuration = 300;
+export const maxDuration = 90;
 import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAgent';
 import { runPreflightCheck } from '@/lib/agents/pagespeedAgent/preflightCheck';
 import { scoreAudit } from '@/lib/auditScorer';
