@@ -34,6 +34,8 @@ interface Audit {
   total_page_size: number;
   total_requests: number;
   passes_one_second: boolean;
+  pagespeed_duration_ms?: number;
+  pagespeed_status?: string;
   cms: string;
   hosting: string;
   cdn: string;
@@ -434,6 +436,9 @@ export default function ReportPage() {
             {speed && <Metric label="TBT" value={speed.tbt} unit="ms" good={speed.tbt < 30} />}
             <Metric label="Page Size" value={audit.total_page_size} unit="KB" good={audit.total_page_size < 1500} />
             <Metric label="Requests" value={audit.total_requests} good={audit.total_requests < 50} />
+            {audit.pagespeed_duration_ms != null && audit.pagespeed_status === 'ok' && (
+              <Metric label="PS API" value={(audit.pagespeed_duration_ms / 1000).toFixed(1)} unit="s" good={audit.pagespeed_duration_ms < 30000} />
+            )}
           </div>
         </div>
 

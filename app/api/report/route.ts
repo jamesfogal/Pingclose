@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
       id, created_at, url,
       mobile_score, desktop_score, ttfb, lcp, fcp, cls, inp,
       total_page_size, total_requests, passes_one_second,
+      pagespeed_duration_ms, pagespeed_status,
       cms, hosting, cdn, http_version, server_location,
       images_lazy_loaded, images_webp, largest_image_kb, render_blocking_scripts,
       top_issues, top_fixes, full_report
