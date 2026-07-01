@@ -149,6 +149,29 @@ function CheckContent() {
     return () => clearInterval(id);
   }, [reportReady, speedData]); // eslint-disable-line
 
+  // Poll Supabase every 3s until pagespeed_status leaves 'pending'
+  useEffect(() => {
+    if (!reportReady || speedData) return;
+    const id = setInterval(async () => {
+      try {
+        const r = await fetch(`/api/report?id=${reportReady}`);
+        const data = await r.json();
+        if (data.pagespeed_status && data.pagespeed_status !== 'pending') {
+          setSpeedData({
+            mobileScore: data.mobile_score ?? 0,
+            desktopScore: data.desktop_score ?? 0,
+            ttfb: data.ttfb ?? 0, lcp: data.lcp ?? 0,
+            fcp: data.fcp ?? 0, cls: data.cls ?? 0,
+            passesOneSecond: data.passes_one_second ?? false,
+            reportId: reportReady,
+            pageSpeedStatus: (data.pagespeed_status as string).toUpperCase(),
+          });
+        }
+      } catch { /* ignore network blips */ }
+    }, 3000);
+    return () => clearInterval(id);
+  }, [reportReady, speedData]); // eslint-disable-line
+
   // Fire both requests simultaneously
   useEffect(() => {
     if (!pendingUrl || duplicate || limit || reportId) return;
@@ -358,12 +381,15 @@ function CheckContent() {
         {reportReady ? (
           <div>
             <a href={`/report/${reportReady}`} style={{
-              display: "block", background: "#10D9A0", color: "#0B0E16",
+              display: "block",
+              background: speedData ? "#10D9A0" : "#0D9E75",
+              color: "#0B0E16",
               fontSize: 18, fontWeight: 700, padding: "18px",
               borderRadius: 10, textDecoration: "none", textAlign: "center",
               animation: "fadeSlideIn 0.4s ease-out",
+              border: speedData ? "2px solid #10D9A0" : "2px solid transparent",
             }}>
-              View Your Full Report →
+              {speedData ? "PageSpeed Complete — View Full Report →" : "View Your Full Report →"}
             </a>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10, fontSize: 16, color: "#64748B" }}>
               {!speedData && (
