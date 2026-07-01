@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { lookup } from 'dns/promises';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
 import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgent';
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
@@ -11,6 +12,15 @@ export async function POST(req: NextRequest) {
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
     const hostname = new URL(normalizedUrl).hostname;
     const baseUrl = new URL(normalizedUrl).origin;
+
+    try {
+      await lookup(hostname);
+    } catch {
+      return NextResponse.json(
+        { error: 'Site could not be reached. Please check the spelling and try again.' },
+        { status: 422 }
+      );
+    }
 
     const [htmlResult, hostingResult, availabilityResult] = await Promise.all([
       runHtmlAgent(normalizedUrl),
