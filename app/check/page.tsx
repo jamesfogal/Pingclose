@@ -25,6 +25,7 @@ interface SpeedData {
   mobileScore: number; desktopScore: number;
   ttfb: number; lcp: number; fcp: number; cls: number;
   passesOneSecond: boolean; reportId: string;
+  pageSpeedStatus: string;
 }
 
 interface Signal { label: string; value: string; status: "pass" | "fail" | "warn" | "info"; }
@@ -168,12 +169,15 @@ function CheckContent() {
       .then(data => {
         if (data.error) { setError(data.error); return; }
         if (data.limit) { return; }
-        setSpeedData({
-          mobileScore: data.mobileScore, desktopScore: data.desktopScore,
-          ttfb: data.ttfb, lcp: data.lcp, fcp: data.fcp, cls: data.cls,
-          passesOneSecond: data.passesOneSecond, reportId: data.reportId,
-        });
         setReportReady(data.reportId);
+        if (data.pageSpeedStatus !== 'PENDING') {
+          setSpeedData({
+            mobileScore: data.mobileScore, desktopScore: data.desktopScore,
+            ttfb: data.ttfb, lcp: data.lcp, fcp: data.fcp, cls: data.cls,
+            passesOneSecond: data.passesOneSecond, reportId: data.reportId,
+            pageSpeedStatus: data.pageSpeedStatus,
+          });
+        }
       })
       .catch(() => setError("Audit failed. Please try again."));
   }, []); // eslint-disable-line
@@ -217,7 +221,7 @@ function CheckContent() {
           </h1>
           <p style={{ fontSize: 16, color: "#475569", margin: 0 }}>
             {fastData
-              ? `${signals.length} signals analyzed — performance scores ${speedData ? "complete" : "loading…"}`
+              ? `${signals.length} signals analyzed — performance scores ${speedData ? (speedData.pageSpeedStatus === 'OK' ? "complete" : "unavailable") : "loading…"}`
               : <span style={{ animation: "blink 1.4s ease-in-out infinite", display: "inline-block" }}>Scanning signals now…</span>
             }
           </p>
@@ -267,7 +271,7 @@ function CheckContent() {
             {!speedData && (
               <div style={{ fontSize: 16, color: "#10D9A040", display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "blink 1.2s ease-in-out infinite" }} />
-                Running Google Lighthouse…
+                Running Google PageSpeed Analysis…
               </div>
             )}
           </div>
@@ -291,7 +295,7 @@ function CheckContent() {
             ))}
           </div>
 
-          {speedData && (
+          {speedData && speedData.pageSpeedStatus === 'OK' && (
             <div style={{
               marginTop: 12, padding: "10px 16px",
               background: speedData.passesOneSecond ? "#10D9A010" : "#F8717110",
@@ -302,6 +306,16 @@ function CheckContent() {
               animation: "fadeSlideIn 0.3s ease-out",
             }}>
               {speedData.passesOneSecond ? "✓ Passes the 1-second above-the-fold test" : "✗ Fails the 1-second above-the-fold test"}
+            </div>
+          )}
+          {speedData && speedData.pageSpeedStatus === 'TIMEOUT' && (
+            <div style={{ marginTop: 12, padding: "10px 16px", background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, fontSize: 16, color: "#FBBF24", fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
+              ⚠ Performance scores unavailable — site took too long to respond
+            </div>
+          )}
+          {speedData && speedData.pageSpeedStatus === 'ERROR' && (
+            <div style={{ marginTop: 12, padding: "10px 16px", background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, fontSize: 16, color: "#F87171", fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
+              ✗ Performance analysis failed — check the full report for details
             </div>
           )}
         </div>
