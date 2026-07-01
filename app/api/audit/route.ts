@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse, after } from 'next/server';
+import { lookup } from 'dns/promises';
 import { supabase } from '@/lib/supabase';
 import { buildFallbackResult } from '@/lib/agents/pagespeedAgent';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
@@ -33,6 +34,15 @@ export async function POST(req: NextRequest) {
 
     const hostname = new URL(normalizedUrl).hostname;
     const baseUrl = new URL(normalizedUrl).origin;
+
+    try {
+      await lookup(hostname);
+    } catch {
+      return NextResponse.json(
+        { error: 'Site could not be reached. Please check the spelling and try again.' },
+        { status: 422 }
+      );
+    }
 
     console.log('STEP2: firing fast agents');
     const [htmlResult, hostingResult, availabilityResult, sitemapResult] = await Promise.all([
