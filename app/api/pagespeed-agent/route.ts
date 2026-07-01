@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+
+export const maxDuration = 300;
 import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAgent';
+import { runPreflightCheck } from '@/lib/agents/pagespeedAgent/preflightCheck';
 import { scoreAudit } from '@/lib/auditScorer';
 import type { TechStackResult } from '@/lib/htmlAudit';
 
@@ -27,18 +30,40 @@ export async function POST(req: NextRequest) {
 
   const techResult = (existing.full_report as Record<string, unknown>)?.tech as TechStackResult;
 
-  // Record start time before the PageSpeed API call
+  // Pre-flight: DNS, HTTP status, redirects, TTFB, Cloudflare — before calling Google
+  const preflight = await runPreflightCheck(url);
+  console.log(
+    'PAGESPEED_AGENT: preflight',
+    preflight.diagnosticReason ?? 'OK',
+    `dns=${preflight.dnsLookupMs}ms ttfb=${preflight.ttfbMs}ms status=${preflight.finalResponseStatus} cf=${preflight.cloudflareDetected} redirects=${preflight.redirectCount}`,
+  );
+
+  // Record start time and preflight results before the PageSpeed API call
   const startedAt = new Date().toISOString();
   const startMs   = Date.now();
 
   await supabase
     .from('pingclose_audits')
-    .update({ pagespeed_started_at: startedAt, pagespeed_timeout_seconds: 75 })
+    .update({
+      pagespeed_started_at:            startedAt,
+      pagespeed_timeout_seconds:       75,
+      preflight_final_url:             preflight.finalUrl,
+      preflight_dns_status:            preflight.dnsStatus,
+      preflight_dns_lookup_ms:         preflight.dnsLookupMs,
+      preflight_http_status:           preflight.httpStatus,
+      preflight_https_status:          preflight.httpsStatus,
+      preflight_redirect_count:        preflight.redirectCount,
+      preflight_final_response_status: preflight.finalResponseStatus,
+      preflight_ttfb_ms:               preflight.ttfbMs,
+      preflight_cloudflare_detected:   preflight.cloudflareDetected,
+      preflight_blocked_or_challenged: preflight.blockedOrChallenged,
+      preflight_diagnostic_reason:     preflight.diagnosticReason,
+    })
     .eq('id', reportId);
 
   console.log('PAGESPEED_AGENT: started_at written', startedAt);
 
-  // Run PageSpeed — never throws, has internal 50s AbortController timeout
+  // Run PageSpeed — never throws, has internal 75s AbortController timeout
   const agentResult = await runPageSpeedAgent(url);
 
   let speedResult;
@@ -51,8 +76,18 @@ export async function POST(req: NextRequest) {
   } else {
     console.error('PAGESPEED_AGENT: failed —', agentResult.error);
     const isTimeout = /timed out/i.test(agentResult.error);
-    pagespeedStatus        = isTimeout ? 'timeout' : 'error';
-    pagespeedErrorReason   = isTimeout ? 'TIMEOUT' : agentResult.error.slice(0, 500);
+    pagespeedStatus = isTimeout ? 'timeout' : 'error';
+
+    // Enrich error reason: preflight tells us whether this was the website, Google, or unknown
+    if (preflight.diagnosticReason) {
+      pagespeedErrorReason = preflight.diagnosticReason;
+    } else if (isTimeout) {
+      // Preflight was clean — Google's API itself was slow, not the website
+      pagespeedErrorReason = 'GOOGLE_API_TIMEOUT';
+    } else {
+      pagespeedErrorReason = agentResult.error.slice(0, 500);
+    }
+
     speedResult = buildFallbackResult(isTimeout ? 'TIMEOUT' : 'ERROR');
   }
 

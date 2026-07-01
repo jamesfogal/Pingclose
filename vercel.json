@@ -2,9 +2,6 @@
   "functions": {
     "app/api/**": {
       "maxDuration": 60
-    },
-    "app/api/pagespeed-agent/route.ts": {
-      "maxDuration": 90
     }
   }
 }
