@@ -149,10 +149,12 @@ function CheckContent() {
     return () => clearInterval(id);
   }, [reportReady, speedData]); // eslint-disable-line
 
-  // Poll Supabase every 3s until pagespeed_status leaves 'pending'
+  // Poll Supabase every 3s until pagespeed_status leaves 'pending' — hard stop at 90s
   useEffect(() => {
     if (!reportReady || speedData) return;
+    let polls = 0;
     const id = setInterval(async () => {
+      polls++;
       try {
         const r = await fetch(`/api/report?id=${reportReady}`);
         const data = await r.json();
@@ -166,8 +168,21 @@ function CheckContent() {
             reportId: reportReady,
             pageSpeedStatus: (data.pagespeed_status as string).toUpperCase(),
           });
+          clearInterval(id);
+          return;
         }
       } catch { /* ignore network blips */ }
+      // After 30 polls (90s) give up — treat as timeout
+      if (polls >= 30) {
+        setSpeedData({
+          mobileScore: 0, desktopScore: 0,
+          ttfb: 0, lcp: 0, fcp: 0, cls: 0,
+          passesOneSecond: false,
+          reportId: reportReady,
+          pageSpeedStatus: 'TIMEOUT',
+        });
+        clearInterval(id);
+      }
     }, 3000);
     return () => clearInterval(id);
   }, [reportReady, speedData]); // eslint-disable-line
