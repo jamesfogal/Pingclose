@@ -177,17 +177,9 @@ export async function POST(req: NextRequest) {
     const reportId = audit?.id || null;
 
     if (reportId) {
+      // Emails are sent by the pagespeed-agent AFTER the speed test completes,
+      // so they contain real scores instead of 0/100 placeholders.
       const agencySignal = await checkAgencySignal(ip, reportId);
-      await deliverReport({
-        reportId,
-        normalizedUrl,
-        email: email || null,
-        phone: phone || null,
-        deliveryEmail,
-        agencySignal,
-        speedResult,
-        techResult
-      });
 
       after(async () => {
         console.log('AUDIT_AFTER: launching pagespeed-agent for', reportId);
@@ -196,12 +188,27 @@ export async function POST(req: NextRequest) {
           const res = await fetch(agentUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reportId, url: normalizedUrl }),
+            body: JSON.stringify({ reportId, url: normalizedUrl, deliveryEmail, agencySignal, email: email || null, phone: phone || null }),
           });
           console.log('AUDIT_AFTER: pagespeed-agent responded', res.status);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : String(e);
           console.error('AUDIT_AFTER: pagespeed-agent call failed', msg);
+          // Fallback: agent never ran, send emails now so the lead isn't lost
+          try {
+            await deliverReport({
+              reportId,
+              normalizedUrl,
+              email: email || null,
+              phone: phone || null,
+              deliveryEmail,
+              agencySignal,
+              speedResult,
+              techResult,
+            });
+          } catch (mailErr) {
+            console.error('AUDIT_AFTER: fallback email failed', mailErr);
+          }
         }
       });
     }
