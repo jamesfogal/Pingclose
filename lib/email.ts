@@ -206,8 +206,8 @@ export async function sendLeadNotification(params: {
                 ${[
                   ['🌐 Domain', hostname],
                   ['📧 Email', email],
-                  ['📱 Mobile Score', `<span style="color:${scoreColor};font-weight:700;font-size:18px;">${mobileScore}/100</span>`],
-                  ['🖥️ Desktop Score', `${desktopScore}/100`],
+                  ['📱 Mobile Score', speedPending ? `<span style="color:#64748B;font-weight:700;font-size:16px;">⏳ Calculating…</span>` : `<span style="color:${scoreColor};font-weight:700;font-size:18px;">${mobileScore}/100</span>`],
+                  ['🖥️ Desktop Score', speedPending ? `<span style="color:#64748B;">⏳ Calculating…</span>` : `${desktopScore}/100`],
                   ['🔧 CMS', cms || 'Unknown'],
                   ['🏠 Hosting', `${hosting} — ${hostingVerdictLabel}`],
                   ['🔍 Primary Keyword', primaryKeyword || 'Not detected'],
