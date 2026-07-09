@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { cleanSecret } from '@/lib/cleanSecret';
 
 const VIP_EMAILS = ['jim@pingclose.com', 'james.fogal@gmail.com', 'james.fogal@citywidealarms.com'];
 
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     await supabase.from('email_verifications').insert({ email: email.toLowerCase(), code, expires_at: expiresAt });
 
     // Send code via Resend
-    const resendKey = process.env.RESEND_API_KEY;
+    const resendKey = cleanSecret(process.env.RESEND_API_KEY);
     if (!resendKey) throw new Error('RESEND_API_KEY not set');
     const resend = new Resend(resendKey);
 
