@@ -380,7 +380,7 @@ function CheckContent() {
               fontWeight: 600,
               animation: "fadeSlideIn 0.3s ease-out",
             }}>
-              {tier === "superstar" ? "⭐ Loads in under 1 second — fastest 10% of the web" : tier === "pass" ? "✓ Passes Google's 2.5-second test — but not under 1 second" : "✗ Fails Google's 2.5-second speed test"}
+              {tier === "superstar" ? "⭐ Under 1 second — the gold standard" : tier === "pass" ? "✓ Passes Google's 2.5-second test — 1 second is the gold standard" : "✗ Fails Google's 2.5-second speed test"}
             </div>
             );
           })()}
