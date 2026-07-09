@@ -14,8 +14,8 @@ export function scoreAudit(speedResult: PageSpeedResult, techResult: TechStackRe
   if (!techResult.isHttps) issue(10, '🔴 No HTTPS — Google shows a security warning to every visitor and applies a ranking penalty');
   if (techResult.hostingVerdict === 'dead-zone') issue(10, `🔴 ${techResult.hosting} hosting detected — this host cannot achieve under 1 second load time regardless of what else is fixed`);
   const lcpTier = speedResult.lcp > 0 && speedResult.lcp < 1000 ? 'superstar' : speedResult.lcp > 0 && speedResult.lcp <= 2500 ? 'pass' : 'fail';
-  if (lcpTier === 'fail') issue(9, `🔴 Loads in ${(speedResult.lcp / 1000).toFixed(1)}s — failing Google's 2.5-second speed test. Speed = clicks.`);
-  else if (lcpTier === 'pass') issue(6, `🟡 Loads in ${(speedResult.lcp / 1000).toFixed(1)}s — passes Google's 2.5s bar, but sites under 1 second are in the fastest 10% of the web and win the clicks`);
+  if (lcpTier === 'fail') issue(9, `🔴 Loads in ${(speedResult.lcp / 1000).toFixed(1)}s — failing Google's 2.5-second speed test. 53% of mobile visitors abandon pages that take over 3 seconds (Google).`);
+  else if (lcpTier === 'pass') issue(6, `🟡 Loads in ${(speedResult.lcp / 1000).toFixed(1)}s — passes Google's 2.5s bar, but 1 second is the gold standard. Bounce probability jumps 32% as load goes from 1s to 3s (Google)`);
   if (speedResult.lcp > 4000) issue(9, `🔴 LCP is ${(speedResult.lcp/1000).toFixed(1)}s — catastrophically slow, costing you Google rankings and visitors`);
   if (!techResult.hasGA4 && !techResult.hasGTM) issue(9, '🔴 No analytics installed — you cannot know which marketing is working, which pages convert, or where visitors drop off');
   if (speedResult.mobileDesktopGap >= 25) issue(9, `🔴 ${speedResult.mobileDesktopGap}-point gap between mobile and desktop — your real customers are getting a dramatically worse experience`);
