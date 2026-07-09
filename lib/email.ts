@@ -26,12 +26,16 @@ export async function sendReportEmail(
   url: string,
   mobileScore: number,
   passesOneSecond: boolean,
-  speedPending = false
+  speedPending = false,
+  lcp = 0
 ) {
+  const tier = lcp > 0 && lcp < 1000 ? 'superstar' : lcp > 0 && lcp <= 2500 ? 'pass' : 'fail';
   const reportUrl = `${siteUrl}/report/${reportId}`;
   const scoreColor = mobileScore >= 70 ? '#10D9A0' : mobileScore >= 50 ? '#FBBF24' : '#F87171';
-  const verdict = passesOneSecond
-    ? '✅ Your site passes the 1-second test'
+  const verdict = tier === 'superstar'
+    ? '⭐ Under 1 second — your site is in the fastest 10% of the web'
+    : tier === 'pass'
+    ? '✅ Passes Google\'s 2.5-second test — but the leaders load in under 1 second'
     : '❌ Your site is failing Google\'s first hurdle';
 
   const hostname = (() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })();
@@ -152,6 +156,7 @@ export async function sendLeadNotification(params: {
   mobileScore: number;
   desktopScore: number;
   passesOneSecond: boolean;
+  lcp?: number;
   cms: string;
   hosting: string;
   hostingVerdictLabel: string;
@@ -161,7 +166,7 @@ export async function sendLeadNotification(params: {
 }) {
   const {
     reportId, url, email, mobileScore, desktopScore,
-    passesOneSecond, cms, hosting, hostingVerdictLabel,
+    passesOneSecond, lcp = 0, cms, hosting, hostingVerdictLabel,
     agencySignal, primaryKeyword, speedPending = false
   } = params;
 
@@ -170,10 +175,11 @@ export async function sendLeadNotification(params: {
   const hostname = (() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })();
 
   const scoreColor = mobileScore >= 70 ? '#10D9A0' : mobileScore >= 50 ? '#FBBF24' : '#F87171';
-  const verdictBg = speedPending ? '#1E305015' : passesOneSecond ? '#10D9A015' : '#F8717115';
-  const verdictBorder = speedPending ? '#1E305040' : passesOneSecond ? '#10D9A040' : '#F8717140';
-  const verdictText = speedPending ? '⏳ Speed score calculating — check back shortly' : passesOneSecond ? '✅ Passing Google\'s 1-second test' : '❌ FAILING Google\'s first hurdle';
-  const urgency = speedPending ? '📋 New audit submitted — speed score calculating' : !passesOneSecond ? '🔥 HOT LEAD — Site is failing. Call them now.' : '📋 New audit submitted.';
+  const tier = lcp > 0 && lcp < 1000 ? 'superstar' : lcp > 0 && lcp <= 2500 ? 'pass' : 'fail';
+  const verdictBg = speedPending ? '#1E305015' : tier === 'superstar' ? '#10D9A015' : tier === 'pass' ? '#FBBF2415' : '#F8717115';
+  const verdictBorder = speedPending ? '#1E305040' : tier === 'superstar' ? '#10D9A040' : tier === 'pass' ? '#FBBF2440' : '#F8717140';
+  const verdictText = speedPending ? '⏳ Speed score calculating — check back shortly' : tier === 'superstar' ? '⭐ Under 1 second — fastest 10% of the web' : tier === 'pass' ? '✅ Passes 2.5s test — NOT under 1 second (upsell speed)' : '❌ FAILING Google\'s 2.5-second test';
+  const urgency = speedPending ? '📋 New audit submitted — speed score calculating' : tier === 'fail' ? '🔥 HOT LEAD — Site is failing. Call them now.' : tier === 'pass' ? '🟡 WARM LEAD — Passing, but not under 1 second.' : '📋 New audit submitted.';
 
   const resend = await getResend();
   await resend.emails.send({
@@ -194,7 +200,7 @@ export async function sendLeadNotification(params: {
 
             <!-- Urgency Banner -->
             <div style="background:${verdictBg};border:1px solid ${verdictBorder};border-radius:10px;padding:18px 20px;margin-bottom:20px;text-align:center;">
-              <div style="font-size:18px;font-weight:700;color:${passesOneSecond ? '#10D9A0' : '#F87171'};">${urgency}</div>
+              <div style="font-size:18px;font-weight:700;color:${tier === 'superstar' ? '#10D9A0' : tier === 'pass' ? '#FBBF24' : '#F87171'};">${urgency}</div>
               <div style="font-size:16px;color:#94A3B8;margin-top:6px;">${verdictText}</div>
             </div>
 
