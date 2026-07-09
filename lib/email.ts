@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { supabase } from '@/lib/supabase';
+import { cleanSecret } from '@/lib/cleanSecret';
 
 async function getResend(): Promise<Resend> {
   // Try Supabase config first (set via /setup page)
@@ -9,7 +10,7 @@ async function getResend(): Promise<Resend> {
     .eq('key', 'resend_api_key')
     .single();
 
-  const key = data?.value || process.env.RESEND_API_KEY;
+  const key = cleanSecret(data?.value || process.env.RESEND_API_KEY);
   if (!key || !key.startsWith('re_')) throw new Error('No valid Resend API key configured. Visit /setup to add your key.');
   return new Resend(key);
 }
