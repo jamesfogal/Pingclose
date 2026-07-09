@@ -71,9 +71,9 @@ interface Audit {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function metricColor(ms: number, type: "ttfb" | "fcp" | "lcp") {
-  if (type === "ttfb") return ms <= 6   ? "#10D9A0" : ms <= 10  ? "#FBBF24" : "#F87171";
-  if (type === "fcp")  return ms < 30   ? "#10D9A0" : ms < 40   ? "#FBBF24" : "#F87171";
-  return ms <= 99 ? "#10D9A0" : ms < 1000 ? "#FBBF24" : "#F87171";
+  if (type === "ttfb") return ms <= 800  ? "#10D9A0" : ms <= 1800 ? "#FBBF24" : "#F87171";
+  if (type === "fcp")  return ms <= 1800 ? "#10D9A0" : ms <= 3000 ? "#FBBF24" : "#F87171";
+  return ms < 1000 ? "#10D9A0" : ms <= 2500 ? "#FBBF24" : "#F87171";
 }
 function scoreColor(n: number) { return n >= 90 ? "#10D9A0" : n >= 50 ? "#FBBF24" : "#F87171"; }
 function scoreLabel(n: number) { return n >= 90 ? "Fast" : n >= 50 ? "Needs Work" : "Slow"; }
@@ -189,9 +189,9 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 10 }}>
         {[
-          { label: "Server Response", sub: "TTFB", value: `${ttfb}ms`,   color: ttfbColor, verdict: ttfb <= 6   ? "Fast" : ttfb <= 10  ? "Slow" : "Very Slow" },
-          { label: "First Content",   sub: "FCP",  value: `${fcpSec}s`,  color: fcpColor,  verdict: fcp  < 30   ? "Fast" : fcp  < 40   ? "Slow" : "Very Slow" },
-          { label: "Page Loaded",     sub: "LCP",  value: `${lcpSec}s`,  color: lcpColor,  verdict: lcp  <= 99  ? "Fast" : lcp  < 1000 ? "Slow" : "Very Slow" },
+          { label: "Server Response", sub: "TTFB", value: `${ttfb}ms`,   color: ttfbColor, verdict: ttfb <= 800  ? "Fast" : ttfb <= 1800 ? "Slow" : "Very Slow" },
+          { label: "First Content",   sub: "FCP",  value: `${fcpSec}s`,  color: fcpColor,  verdict: fcp  <= 1800 ? "Fast" : fcp  <= 3000 ? "Slow" : "Very Slow" },
+          { label: "Page Loaded",     sub: "LCP",  value: `${lcpSec}s`,  color: lcpColor,  verdict: lcp  < 1000  ? "Fast" : lcp  <= 2500 ? "Slow" : "Very Slow" },
         ].map(({ label, sub, value, color, verdict }) => (
           <div key={sub} style={{ background: "#0D1528", border: `1px solid ${color}40`, borderRadius: 10, padding: "16px 12px", textAlign: "center" }}>
             <div style={{ fontSize: 22, fontWeight: 800, color, marginBottom: 2 }}>{value}</div>
@@ -283,12 +283,12 @@ export default function ReportPage() {
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${verdictColor}18`, border: `1px solid ${verdictColor}40`, borderRadius: 6, padding: "4px 12px", marginBottom: 20 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: verdictColor, display: "inline-block" }} />
             <span style={{ fontSize: 16, fontWeight: 700, color: verdictColor, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              {speedTier === "superstar" ? "⭐ Under 1 Second — Fastest 10% of the Web" : speedTier === "pass" ? "Passes Google's 2.5-Second Test" : "Fails Google's 2.5-Second Test"}
+              {speedTier === "superstar" ? "⭐ Under 1 Second — The Gold Standard" : speedTier === "pass" ? "Passes Google's 2.5-Second Test" : "Fails Google's 2.5-Second Test"}
             </span>
           </div>
           <div style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, color: "#F1F5F9", letterSpacing: "-1.5px", lineHeight: 1.1, marginBottom: 16 }}>
             {speedTier === "superstar"
-              ? <>Your site is in the<br /><span style={{ color: "#10D9A0" }}>fastest 10% of the web.</span></>
+              ? <>Your site hits the<br /><span style={{ color: "#10D9A0" }}>1-second gold standard.</span></>
               : speedTier === "pass"
               ? <>Your site clears<br /><span style={{ color: "#FBBF24" }}>Google&apos;s first hurdle.</span></>
               : <>Your site is failing<br /><span style={{ color: "#F87171" }}>Google&apos;s first hurdle.</span></>
@@ -296,10 +296,15 @@ export default function ReportPage() {
           </div>
           <div style={{ fontSize: 18, color: "#64748B", maxWidth: 520, lineHeight: 1.7 }}>
             {speedTier === "superstar"
-              ? "Loading in under 1 second puts you significantly ahead of your competitors in Google's eyes. This report shows what else needs fixing to stay there."
+              ? "Sites that load in 1 second see conversion rates up to 3–5× higher than slow sites. This report shows what else needs fixing to stay there."
               : speedTier === "pass"
-              ? "You pass Google's 2.5-second bar — but the leaders load in under 1 second, and speed = clicks. Here's what's holding you back."
-              : "Competitors who pass this test outrank you before the page even loads. Here's the full picture."}
+              ? "You pass Google's 2.5-second bar — but 1 second is the gold standard, and bounce probability jumps 32% as load time goes from 1 to 3 seconds. Here's what's holding you back."
+              : "53% of mobile visitors abandon a page that takes over 3 seconds — and competitors who pass this test outrank you before your page even loads."}
+          </div>
+          <div style={{ fontSize: 13, color: "#475569", marginTop: 14 }}>
+            {speedTier === "superstar"
+              ? <>Sources: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener" style={{ color: "#475569" }}>Google</a> · <a href="https://www.portent.com/blog/analytics/research-site-speed-hurting-everyones-revenue.htm" target="_blank" rel="noopener" style={{ color: "#475569" }}>Portent</a></>
+              : <>Source: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener" style={{ color: "#475569" }}>Google research</a></>}
           </div>
         </div>
       </div>
@@ -345,7 +350,7 @@ export default function ReportPage() {
 
         {/* 1-second badge */}
         <div style={{ padding: "14px 20px", background: `${verdictColor}10`, border: `1px solid ${verdictColor}30`, borderRadius: 10, fontSize: 17, fontWeight: 600, color: verdictColor, marginBottom: 12 }}>
-          {speedTier === "superstar" ? "⭐ Loads in under 1 second — fastest 10% of the web" : speedTier === "pass" ? "✓ Passes Google's 2.5-second test — but not yet under 1 second" : "✗ Fails Google's 2.5-second speed test"}
+          {speedTier === "superstar" ? "⭐ Under 1 second — the gold standard" : speedTier === "pass" ? "✓ Passes Google's 2.5-second test — but not the 1-second gold standard" : "✗ Fails Google's 2.5-second speed test"}
         </div>
 
         {/* Mobile/Desktop gap */}
