@@ -240,7 +240,8 @@ export default function ReportPage() {
   const hostname     = (() => { try { return new URL(audit.url).hostname; } catch { return audit.url; } })();
   const speed        = audit.full_report?.speed;
   const tech         = audit.full_report?.tech;
-  const verdictColor = audit.passes_one_second ? "#10D9A0" : "#F87171";
+  const speedTier    = audit.lcp > 0 && audit.lcp < 1000 ? "superstar" : audit.lcp > 0 && audit.lcp <= 2500 ? "pass" : "fail";
+  const verdictColor = speedTier === "superstar" ? "#10D9A0" : speedTier === "pass" ? "#FBBF24" : "#F87171";
 
   const hostingVerdictColor = () => {
     switch (tech?.hostingVerdict) {
@@ -274,9 +275,7 @@ export default function ReportPage() {
 
       {/* ── VERDICT HERO BAND ────────────────────────────────────────────────── */}
       <div style={{
-        background: audit.passes_one_second
-          ? "linear-gradient(180deg, #10D9A014 0%, transparent 100%)"
-          : "linear-gradient(180deg, #F8717114 0%, transparent 100%)",
+        background: `linear-gradient(180deg, ${verdictColor}14 0%, transparent 100%)`,
         borderBottom: `1px solid ${verdictColor}20`,
         padding: "56px 24px 48px",
       }}>
@@ -284,18 +283,22 @@ export default function ReportPage() {
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${verdictColor}18`, border: `1px solid ${verdictColor}40`, borderRadius: 6, padding: "4px 12px", marginBottom: 20 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: verdictColor, display: "inline-block" }} />
             <span style={{ fontSize: 16, fontWeight: 700, color: verdictColor, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              {audit.passes_one_second ? "Passes 1-Second Test" : "Fails 1-Second Test"}
+              {speedTier === "superstar" ? "⭐ Under 1 Second — Fastest 10% of the Web" : speedTier === "pass" ? "Passes Google's 2.5-Second Test" : "Fails Google's 2.5-Second Test"}
             </span>
           </div>
           <div style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, color: "#F1F5F9", letterSpacing: "-1.5px", lineHeight: 1.1, marginBottom: 16 }}>
-            {audit.passes_one_second
-              ? <>Your site clears<br /><span style={{ color: "#10D9A0" }}>Google&apos;s first hurdle.</span></>
+            {speedTier === "superstar"
+              ? <>Your site is in the<br /><span style={{ color: "#10D9A0" }}>fastest 10% of the web.</span></>
+              : speedTier === "pass"
+              ? <>Your site clears<br /><span style={{ color: "#FBBF24" }}>Google&apos;s first hurdle.</span></>
               : <>Your site is failing<br /><span style={{ color: "#F87171" }}>Google&apos;s first hurdle.</span></>
             }
           </div>
           <div style={{ fontSize: 18, color: "#64748B", maxWidth: 520, lineHeight: 1.7 }}>
-            {audit.passes_one_second
-              ? "Speed is cleared. This report shows what else needs fixing before your competitors notice."
+            {speedTier === "superstar"
+              ? "Loading in under 1 second puts you significantly ahead of your competitors in Google's eyes. This report shows what else needs fixing to stay there."
+              : speedTier === "pass"
+              ? "You pass Google's 2.5-second bar — but the leaders load in under 1 second, and speed = clicks. Here's what's holding you back."
               : "Competitors who pass this test outrank you before the page even loads. Here's the full picture."}
           </div>
         </div>
@@ -341,8 +344,8 @@ export default function ReportPage() {
         </div>
 
         {/* 1-second badge */}
-        <div style={{ padding: "14px 20px", background: audit.passes_one_second ? "#10D9A010" : "#F8717110", border: `1px solid ${audit.passes_one_second ? "#10D9A030" : "#F8717130"}`, borderRadius: 10, fontSize: 17, fontWeight: 600, color: audit.passes_one_second ? "#10D9A0" : "#F87171", marginBottom: 12 }}>
-          {audit.passes_one_second ? "✓ Passes the 1-second above-the-fold test" : "✗ Fails the 1-second above-the-fold test"}
+        <div style={{ padding: "14px 20px", background: `${verdictColor}10`, border: `1px solid ${verdictColor}30`, borderRadius: 10, fontSize: 17, fontWeight: 600, color: verdictColor, marginBottom: 12 }}>
+          {speedTier === "superstar" ? "⭐ Loads in under 1 second — fastest 10% of the web" : speedTier === "pass" ? "✓ Passes Google's 2.5-second test — but not yet under 1 second" : "✗ Fails Google's 2.5-second speed test"}
         </div>
 
         {/* Mobile/Desktop gap */}
@@ -873,7 +876,7 @@ export default function ReportPage() {
           <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: "#F1F5F9", margin: "0 0 20px", letterSpacing: "-1px", lineHeight: 1.15 }}>
             We Find <span style={{ color: "#10D9A0" }}>Broken Websites.</span>
           </h2>
-          {audit.passes_one_second && audit.mobile_score >= 90 ? (
+          {speedTier !== "fail" && audit.mobile_score >= 90 ? (
             <>
               <div style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", lineHeight: 1.5, marginBottom: 10 }}>Your site is fast — but is the rest of the story this good?</div>
               <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 32, lineHeight: 1.7 }}>Speed is just the first hurdle. Want to see how your Local SEO, Google Business Profile, citations, and conversion tracking stack up against your competitors?</div>
