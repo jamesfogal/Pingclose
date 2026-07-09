@@ -21,7 +21,7 @@ export async function deliverReport(opts: DeliveryOptions): Promise<void> {
 
   if (deliveryEmail && email) {
     console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
-    tasks.push(sendReportEmail(email, reportId, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond, speedPending));
+    tasks.push(sendReportEmail(email, reportId, normalizedUrl, speedResult.mobileScore, speedResult.passesOneSecond, speedPending, speedResult.lcp));
   }
   tasks.push(sendLeadNotification({
     reportId,
@@ -30,6 +30,7 @@ export async function deliverReport(opts: DeliveryOptions): Promise<void> {
     mobileScore: speedResult.mobileScore,
     desktopScore: speedResult.desktopScore,
     passesOneSecond: speedResult.passesOneSecond,
+    lcp: speedResult.lcp,
     cms: techResult.cms,
     hosting: techResult.hosting,
     hostingVerdictLabel: techResult.hostingVerdictLabel,
