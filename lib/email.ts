@@ -33,10 +33,13 @@ export async function sendReportEmail(
   const reportUrl = `${siteUrl}/report/${reportId}`;
   const scoreColor = mobileScore >= 70 ? '#10D9A0' : mobileScore >= 50 ? '#FBBF24' : '#F87171';
   const verdict = tier === 'superstar'
-    ? '⭐ Under 1 second — your site is in the fastest 10% of the web'
+    ? '⭐ Under 1 second — the gold standard. Sites this fast convert up to 3–5× higher than slow sites.'
     : tier === 'pass'
-    ? '✅ Passes Google\'s 2.5-second test — but the leaders load in under 1 second'
-    : '❌ Your site is failing Google\'s first hurdle';
+    ? '✅ Passes Google\'s 2.5-second test — but 1 second is the gold standard. Bounce probability jumps 32% as load goes from 1s to 3s.'
+    : '❌ Failing Google\'s speed test — 53% of mobile visitors abandon pages that take over 3 seconds.';
+  const verdictSources = tier === 'superstar'
+    ? 'Sources: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" style="color:#64748B;">Google</a> · <a href="https://www.portent.com/blog/analytics/research-site-speed-hurting-everyones-revenue.htm" style="color:#64748B;">Portent</a>'
+    : 'Source: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" style="color:#64748B;">Google research</a>';
 
   const hostname = (() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })();
 
@@ -63,7 +66,8 @@ export async function sendReportEmail(
                 ? `<div style="font-size:36px;font-weight:800;color:#64748B;line-height:1;">Calculating…</div>
               <div style="font-size:16px;color:#64748B;margin-top:8px;">Speed score ready in under 60 seconds — refresh your report</div>`
                 : `<div style="font-size:72px;font-weight:800;color:${scoreColor};line-height:1;">${mobileScore}</div>
-              <div style="font-size:16px;color:#94A3B8;margin-top:8px;">${verdict}</div>`
+              <div style="font-size:16px;color:#94A3B8;margin-top:8px;">${verdict}</div>
+              <div style="font-size:12px;color:#64748B;margin-top:6px;">${verdictSources}</div>`
               }
               <div style="font-size:14px;color:#475569;margin-top:6px;">${hostname}</div>
             </div>
@@ -178,7 +182,7 @@ export async function sendLeadNotification(params: {
   const tier = lcp > 0 && lcp < 1000 ? 'superstar' : lcp > 0 && lcp <= 2500 ? 'pass' : 'fail';
   const verdictBg = speedPending ? '#1E305015' : tier === 'superstar' ? '#10D9A015' : tier === 'pass' ? '#FBBF2415' : '#F8717115';
   const verdictBorder = speedPending ? '#1E305040' : tier === 'superstar' ? '#10D9A040' : tier === 'pass' ? '#FBBF2440' : '#F8717140';
-  const verdictText = speedPending ? '⏳ Speed score calculating — check back shortly' : tier === 'superstar' ? '⭐ Under 1 second — fastest 10% of the web' : tier === 'pass' ? '✅ Passes 2.5s test — NOT under 1 second (upsell speed)' : '❌ FAILING Google\'s 2.5-second test';
+  const verdictText = speedPending ? '⏳ Speed score calculating — check back shortly' : tier === 'superstar' ? '⭐ Under 1 second — the gold standard' : tier === 'pass' ? '✅ Passes 2.5s test — NOT the 1s gold standard (upsell speed)' : '❌ FAILING Google\'s 2.5-second test';
   const urgency = speedPending ? '📋 New audit submitted — speed score calculating' : tier === 'fail' ? '🔥 HOT LEAD — Site is failing. Call them now.' : tier === 'pass' ? '🟡 WARM LEAD — Passing, but not under 1 second.' : '📋 New audit submitted.';
 
   const resend = await getResend();
