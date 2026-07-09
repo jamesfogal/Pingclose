@@ -17,7 +17,7 @@ export async function deliverReport(opts: DeliveryOptions): Promise<void> {
   const { reportId, normalizedUrl, email, deliveryEmail, agencySignal, speedResult, techResult } = opts;
   const tasks: Promise<unknown>[] = [];
 
-  const speedPending = speedResult.pageSpeedStatus === 'PENDING';
+  const speedPending = speedResult.pageSpeedStatus !== 'OK';
 
   if (deliveryEmail && email) {
     console.log(`EMAIL: sending to=${email} from=${process.env.RESEND_FROM_EMAIL} keySet=${!!process.env.RESEND_API_KEY}`);
