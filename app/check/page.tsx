@@ -367,19 +367,23 @@ function CheckContent() {
             ))}
           </div>
 
-          {speedData && speedData.pageSpeedStatus === 'OK' && (
+          {speedData && speedData.pageSpeedStatus === 'OK' && (() => {
+            const tier = speedData.lcp > 0 && speedData.lcp < 1000 ? "superstar" : speedData.lcp > 0 && speedData.lcp <= 2500 ? "pass" : "fail";
+            const tierColor = tier === "superstar" ? "#10D9A0" : tier === "pass" ? "#FBBF24" : "#F87171";
+            return (
             <div style={{
               marginTop: 12, padding: "10px 16px",
-              background: speedData.passesOneSecond ? "#10D9A010" : "#F8717110",
-              border: `1px solid ${speedData.passesOneSecond ? "#10D9A030" : "#F8717130"}`,
+              background: `${tierColor}10`,
+              border: `1px solid ${tierColor}30`,
               borderRadius: 8, fontSize: 16,
-              color: speedData.passesOneSecond ? "#10D9A0" : "#F87171",
+              color: tierColor,
               fontWeight: 600,
               animation: "fadeSlideIn 0.3s ease-out",
             }}>
-              {speedData.passesOneSecond ? "✓ Passes the 1-second above-the-fold test" : "✗ Fails the 1-second above-the-fold test"}
+              {tier === "superstar" ? "⭐ Loads in under 1 second — fastest 10% of the web" : tier === "pass" ? "✓ Passes Google's 2.5-second test — but not under 1 second" : "✗ Fails Google's 2.5-second speed test"}
             </div>
-          )}
+            );
+          })()}
           {speedData && speedData.pageSpeedStatus === 'TIMEOUT' && (
             <div style={{ marginTop: 12, padding: "10px 16px", background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, fontSize: 16, color: "#FBBF24", fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
               ⚠ Performance scores unavailable — site took too long to respond
