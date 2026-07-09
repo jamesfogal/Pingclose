@@ -23,7 +23,8 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
   const totalPageSize = audits['total-byte-weight']?.numericValue || 0;
   const totalRequests = audits['network-requests']?.details?.items?.length || 0;
 
-  const passesOneSecond = ttfb <= 6 && fcp < 30 && lcp <= 99;
+  // True "under 1 second": LCP < 1000ms (metrics are in milliseconds)
+  const passesOneSecond = lcp > 0 && lcp < 1000;
 
   const webpAuditItems = audits['uses-webp-images']?.details?.items || [];
   const lazyItems = audits['offscreen-images']?.details?.items || [];
