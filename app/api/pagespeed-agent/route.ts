@@ -5,10 +5,11 @@ export const maxDuration = 90;
 import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAgent';
 import { runPreflightCheck } from '@/lib/agents/pagespeedAgent/preflightCheck';
 import { scoreAudit } from '@/lib/auditScorer';
+import { deliverReport } from '@/lib/reportDelivery';
 import type { TechStackResult } from '@/lib/htmlAudit';
 
 export async function POST(req: NextRequest) {
-  const { reportId, url } = await req.json();
+  const { reportId, url, deliveryEmail = false, agencySignal = false, email = null, phone = null } = await req.json();
 
   if (!reportId || !url) {
     return NextResponse.json({ error: 'reportId and url required' }, { status: 400 });
@@ -151,6 +152,22 @@ export async function POST(req: NextRequest) {
   if (updateError) {
     console.error('PAGESPEED_AGENT: update failed', updateError.message);
     return NextResponse.json({ error: 'update failed', detail: updateError.message }, { status: 500 });
+  }
+
+  // Send report + lead emails now that real scores exist
+  try {
+    await deliverReport({
+      reportId,
+      normalizedUrl: url,
+      email,
+      phone,
+      deliveryEmail,
+      agencySignal,
+      speedResult,
+      techResult,
+    });
+  } catch (mailErr) {
+    console.error('PAGESPEED_AGENT: email delivery failed', mailErr);
   }
 
   console.log('PAGESPEED_AGENT: done', reportId, 'status=', pagespeedStatus, 'duration_ms=', durationMs);
