@@ -26,12 +26,14 @@ export default function Home() {
   const router = useRouter();
   const [url,          setUrl]          = useState("");
   const [email,        setEmail]        = useState("");
+  const [phone,        setPhone]        = useState("");
   const [code,         setCode]         = useState("");
   const [stage,        setStage]        = useState<Stage>("form");
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState("");
   const [urlFocused,   setUrlFocused]   = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
   const mobileScore  = useCountUp(73,  1400);
   const desktopScore = useCountUp(89, 1700);
 
@@ -48,7 +50,7 @@ export default function Home() {
       const res  = await fetch("/api/send-code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url, email }) });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
-      if (data.alreadyVerified) { playPing(); router.push(`/check?url=${encodeURIComponent(url)}&email=${encodeURIComponent(email)}`); return; }
+      if (data.alreadyVerified) { playPing(); router.push(`/check?url=${encodeURIComponent(url)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`); return; }
       setStage("verifying");
     } catch { setError("Something went wrong. Please try again."); }
     finally { setLoading(false); }
@@ -64,7 +66,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Invalid code."); return; }
       playPing();
-      router.push(`/check?url=${encodeURIComponent(url)}&email=${encodeURIComponent(email)}`);
+      router.push(`/check?url=${encodeURIComponent(url)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`);
     } catch { setError("Something went wrong. Please try again."); }
     finally { setLoading(false); }
   }
@@ -172,6 +174,12 @@ export default function Home() {
                   <input type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)}
                     onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)}
                     style={inputStyle(emailFocused)} />
+                  <div>
+                    <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6 }}>Get a call back within minutes</div>
+                    <input type="tel" placeholder="Your cell phone number" value={phone} onChange={e => setPhone(e.target.value)}
+                      onFocus={() => setPhoneFocused(true)} onBlur={() => setPhoneFocused(false)}
+                      style={inputStyle(phoneFocused)} />
+                  </div>
                   {error && <div style={{ fontSize: 16, color: "#F87171" }}>{error}</div>}
                   <button type="submit" disabled={loading} style={btnStyle}
                     onMouseEnter={e => { if (canSubmit) (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px #10D9A040"; }}
