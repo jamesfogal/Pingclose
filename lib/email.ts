@@ -157,6 +157,7 @@ export async function sendLeadNotification(params: {
   reportId: string;
   url: string;
   email: string | null | undefined;
+  phone: string | null | undefined;
   mobileScore: number;
   desktopScore: number;
   passesOneSecond: boolean;
@@ -169,7 +170,7 @@ export async function sendLeadNotification(params: {
   speedPending?: boolean;
 }) {
   const {
-    reportId, url, email, mobileScore, desktopScore,
+    reportId, url, email, phone, mobileScore, desktopScore,
     passesOneSecond, lcp = 0, cms, hosting, hostingVerdictLabel,
     agencySignal, primaryKeyword, speedPending = false
   } = params;
@@ -216,6 +217,7 @@ export async function sendLeadNotification(params: {
                 ${[
                   ['🌐 Domain', hostname],
                   ['📧 Email', email],
+                  ['📞 Phone', phone ? `<a href="tel:${phone}" style="color:#10D9A0;font-weight:700;font-size:18px;">${phone}</a>` : 'Not provided'],
                   ['📱 Mobile Score', speedPending ? `<span style="color:#64748B;font-weight:700;font-size:16px;">⏳ Calculating…</span>` : `<span style="color:${scoreColor};font-weight:700;font-size:18px;">${mobileScore}/100</span>`],
                   ['🖥️ Desktop Score', speedPending ? `<span style="color:#64748B;">⏳ Calculating…</span>` : `${desktopScore}/100`],
                   ['🔧 CMS', cms || 'Unknown'],

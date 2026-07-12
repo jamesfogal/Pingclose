@@ -14,7 +14,7 @@ interface DeliveryOptions {
 }
 
 export async function deliverReport(opts: DeliveryOptions): Promise<void> {
-  const { reportId, normalizedUrl, email, deliveryEmail, agencySignal, speedResult, techResult } = opts;
+  const { reportId, normalizedUrl, email, phone, deliveryEmail, agencySignal, speedResult, techResult } = opts;
   const tasks: Promise<unknown>[] = [];
 
   const speedPending = speedResult.pageSpeedStatus !== 'OK';
@@ -27,6 +27,7 @@ export async function deliverReport(opts: DeliveryOptions): Promise<void> {
     reportId,
     url: normalizedUrl,
     email,
+    phone,
     mobileScore: speedResult.mobileScore,
     desktopScore: speedResult.desktopScore,
     passesOneSecond: speedResult.passesOneSecond,
