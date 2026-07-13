@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="800" height="240">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'BricolageGrotesque';
+        src: url('../node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff2') format('woff2');
+      }
+    </style>
+    <!-- Teal glow filter for origin dot -->
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="240" fill="#0B0E16"/>
+
+  <!-- ── RADAR ICON ── origin at (52, 206) arcs sweep up+right ── -->
+  <!-- Arc 4 — outermost, faintest -->
+  <path d="M 52,66 A 140,140 0 0,1 192,206"
+        fill="none" stroke="#10D9A0" stroke-width="2" stroke-opacity="0.28"
+        stroke-linecap="round"/>
+  <!-- Tick marks at arc 4 endpoints -->
+  <line x1="52" y1="62" x2="52" y2="72" stroke="#10D9A0" stroke-width="1.5" stroke-opacity="0.4"/>
+  <line x1="188" y1="206" x2="198" y2="206" stroke="#10D9A0" stroke-width="1.5" stroke-opacity="0.4"/>
+
+  <!-- Arc 3 -->
+  <path d="M 52,100 A 106,106 0 0,1 158,206"
+        fill="none" stroke="#10D9A0" stroke-width="2.4" stroke-opacity="0.45"
+        stroke-linecap="round"/>
+  <line x1="52" y1="96" x2="52" y2="106" stroke="#10D9A0" stroke-width="1.5" stroke-opacity="0.5"/>
+  <line x1="154" y1="206" x2="164" y2="206" stroke="#10D9A0" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- Arc 2 -->
+  <path d="M 52,134 A 72,72 0 0,1 124,206"
+        fill="none" stroke="#10D9A0" stroke-width="2.8" stroke-opacity="0.62"
+        stroke-linecap="round"/>
+  <line x1="52" y1="130" x2="52" y2="140" stroke="#10D9A0" stroke-width="1.5" stroke-opacity="0.65"/>
+  <line x1="120" y1="206" x2="130" y2="206" stroke="#10D9A0" stroke-width="1.5" stroke-opacity="0.65"/>
+
+  <!-- Arc 1 — innermost, brightest -->
+  <path d="M 52,168 A 38,38 0 0,1 90,206"
+        fill="none" stroke="#10D9A0" stroke-width="3.2" stroke-opacity="0.88"
+        stroke-linecap="round"/>
+  <line x1="52" y1="164" x2="52" y2="174" stroke="#10D9A0" stroke-width="1.8" stroke-opacity="0.85"/>
+  <line x1="86" y1="206" x2="96" y2="206" stroke="#10D9A0" stroke-width="1.8" stroke-opacity="0.85"/>
+
+  <!-- Origin dot — glow halo then solid -->
+  <circle cx="52" cy="206" r="14" fill="#10D9A0" fill-opacity="0.08"/>
+  <circle cx="52" cy="206" r="9" fill="#10D9A0" fill-opacity="0.18"/>
+  <circle cx="52" cy="206" r="5.5" fill="#10D9A0"/>
+
+  <!-- Subtle vertical separator -->
+  <line x1="215" y1="36" x2="215" y2="204" stroke="#10D9A0" stroke-width="1" stroke-opacity="0.12"/>
+
+  <!-- ── WORDMARK ── -->
+  <!-- "Ping" in teal — using system-safe stack, will be overridden by web fonts if available -->
+  <text
+    x="236" y="145"
+    font-family="'BricolageGrotesque', 'WorkSans', 'Arial Black', sans-serif"
+    font-weight="700"
+    font-size="86"
+    letter-spacing="-2"
+    fill="#10D9A0"
+  >Ping</text>
+  <!-- "Close" in white — measured after "Ping": approx 4ch × ~55px = ~220px -->
+  <text
+    x="452" y="145"
+    font-family="'BricolageGrotesque', 'WorkSans', 'Arial Black', sans-serif"
+    font-weight="700"
+    font-size="86"
+    letter-spacing="-2"
+    fill="#F1F5F9"
+  >Close</text>
+
+  <!-- Tagline -->
+  <text
+    x="237" y="183"
+    font-family="'WorkSans', 'Arial', sans-serif"
+    font-weight="400"
+    font-size="14"
+    letter-spacing="0.5"
+    fill="#10D9A0"
+    fill-opacity="0.55"
+  >free website speed test for local businesses</text>
+</svg>
