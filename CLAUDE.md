@@ -210,3 +210,58 @@ The visitor must think:
 
 Jim Fogal · (314) 517-2533 · St. Louis, MO
 Closing line: "Ready to hear that phone ring?"
+
+---
+
+# FOGAL'S FIRST LAW OF DEBUGGING
+
+Before proposing any solution, list the five simplest explanations first.
+
+Examples:
+- typo / bad input / missing config / permission problem / timeout setting
+- stale deployment / cache issue / null data / wrong environment / API limit
+
+Prove or eliminate these first. The probability that the simple explanation is correct must be driven to zero before considering a more complex explanation.
+
+No architecture changes may be proposed until simple explanations are eliminated.
+
+---
+
+# PRE-COMMIT VERIFICATION STANDARD
+
+Every task will be challenged and verified. Do not ask for commit approval until:
+
+1. Change is implemented
+2. TypeScript passes (npx tsc --noEmit)
+3. Build passes (npm run build)
+4. Actual behavior is tested
+5. Evidence is collected
+
+Required proof before every commit request:
+- Exact files changed
+- Exact lines/functions changed
+- TypeScript result
+- Build result
+- Test performed
+- Proof the bug is fixed
+- Proof existing behavior still works
+- What could still fail
+- What cannot be proven without deployment
+
+HARD STOP — justify in writing before proceeding if the solution:
+- adds a migration or new table
+- adds more than 3 files
+- adds more than 100 lines of code
+- adds a new service
+- changes architecture
+
+---
+
+# DATABASE MIGRATION RULE
+
+Never run ALTER TABLE, CREATE TABLE, or any schema change without:
+1. Showing the exact SQL first
+2. Explaining every column and why it is needed
+3. Getting explicit written approval from Jim
+
+No exceptions. Not even for additive, nullable changes.

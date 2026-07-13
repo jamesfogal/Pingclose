@@ -46,3 +46,8 @@ next-env.d.ts
 .netlify
 
 .env*
+
+# local credential scratch files — never commit
+.dflogin.tmp
+.dfpassword.tmp
+*.tmp

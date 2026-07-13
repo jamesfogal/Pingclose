@@ -1,16 +1,12 @@
 import type { LocalSerpResult, LocalCompetitor } from './types';
+import { dataforSeoPost } from './auth';
 
-// National brands to skip — we only want local competitors
-const NATIONAL_BRANDS = ['adt.com', 'ring.com', 'vivint.com', 'brinks.com', 'simplisafe.com',
-  'youtube.com', 'facebook.com', 'yelp.com', 'yellowpages.com', 'bbb.org', 'angi.com',
-  'thumbtack.com', 'homeadvisor.com', 'homedepot.com', 'lowes.com', 'amazon.com'];
-
-function getAuth(): string {
-  const login = process.env.DATAFORSEO_LOGIN;
-  const password = process.env.DATAFORSEO_PASSWORD;
-  if (!login || !password) throw new Error('DataForSEO credentials not configured');
-  return 'Basic ' + Buffer.from(`${login}:${password}`).toString('base64');
-}
+const NATIONAL_BRANDS = [
+  'youtube.com', 'facebook.com', 'instagram.com', 'twitter.com', 'linkedin.com',
+  'yelp.com', 'yellowpages.com', 'bbb.org', 'angi.com', 'thumbtack.com',
+  'homeadvisor.com', 'homedepot.com', 'lowes.com', 'amazon.com', 'wikipedia.org',
+  'reddit.com', 'tripadvisor.com', 'google.com',
+];
 
 function extractDomain(url: string): string {
   try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
@@ -20,32 +16,21 @@ function isNational(domain: string): boolean {
   return NATIONAL_BRANDS.some(b => domain.includes(b));
 }
 
+const RANK_CTR: Record<number, number> = { 1: 0.28, 2: 0.15, 3: 0.11, 4: 0.08, 5: 0.06, 6: 0.04, 7: 0.03, 8: 0.02, 9: 0.02, 10: 0.02 };
+
 export async function getLocalSerp(
   keyword: string,
   location: string,
   customerDomain: string,
 ): Promise<LocalSerpResult> {
-  const auth = getAuth();
   const cleanCustomer = customerDomain.replace('www.', '');
 
-  // Call 1 — get local SERP
-  const serpRes = await fetch('https://api.dataforseo.com/v3/serp/google/organic/live/advanced', {
-    method: 'POST',
-    headers: { 'Authorization': auth, 'Content-Type': 'application/json' },
-    body: JSON.stringify([{
-      keyword,
-      location_name: location,
-      language_name: 'English',
-      device: 'desktop',
-      os: 'windows',
-      depth: 20,
-    }]),
-  });
+  const serpJson = await dataforSeoPost(
+    '/v3/serp/google/organic/live/advanced',
+    [{ keyword, location_name: location, language_name: 'English', device: 'desktop', os: 'windows', depth: 20 }],
+  ) as Record<string, unknown>;
 
-  if (!serpRes.ok) throw new Error(`DataForSEO SERP API error: ${serpRes.status}`);
-  const serpJson = await serpRes.json();
-  const serpItems: Record<string, unknown>[] = serpJson?.tasks?.[0]?.result?.[0]?.items ?? [];
-
+  const serpItems: Record<string, unknown>[] = (serpJson as any)?.tasks?.[0]?.result?.[0]?.items ?? [];
   const organicItems = serpItems.filter(i => i.type === 'organic');
 
   const localCompetitors: LocalCompetitor[] = [];
@@ -60,31 +45,23 @@ export async function getLocalSerp(
     }
   });
 
-  // Call 2 — get monthly clicks for #1 local competitor
   const topCompetitorDomain = localCompetitors[0]?.domain ?? null;
   if (topCompetitorDomain) {
-    const metricsRes = await fetch('https://api.dataforseo.com/v3/dataforseo_labs/google/domain_rank_overview/live', {
-      method: 'POST',
-      headers: { 'Authorization': auth, 'Content-Type': 'application/json' },
-      body: JSON.stringify([{
-        target: topCompetitorDomain,
-        location_name: 'United States',
-        language_name: 'English',
-      }]),
-    });
+    const metricsJson = await dataforSeoPost(
+      '/v3/dataforseo_labs/google/domain_rank_overview/live',
+      [{ target: topCompetitorDomain, location_name: 'United States', language_name: 'English' }],
+    ) as Record<string, unknown>;
 
-    if (metricsRes.ok) {
-      const metricsJson = await metricsRes.json();
-      const metrics = metricsJson?.tasks?.[0]?.result?.[0] ?? {};
-      localCompetitors[0].monthlyClicks = Number(metrics.metrics?.organic?.etv ?? 0);
-    }
+    const item = (metricsJson as any)?.tasks?.[0]?.result?.[0]?.items?.[0] ?? {};
+    localCompetitors[0].monthlyClicks = Math.round(Number(item.metrics?.organic?.etv ?? 0));
   }
 
-  // Estimate customer monthly clicks based on rank
-  const rankClickShare: Record<number, number> = { 1: 0.28, 2: 0.15, 3: 0.11, 4: 0.08, 5: 0.06 };
   const topClicks = localCompetitors[0]?.monthlyClicks ?? 0;
-  const customerClickShare = customerRank ? (rankClickShare[customerRank] ?? 0.02) : 0.01;
-  const customerMonthlyClicks = Math.round(topClicks * (customerClickShare / 0.28));
+  const customerCtr = customerRank ? (RANK_CTR[customerRank] ?? 0.01) : 0;
+  const topCtr = localCompetitors[0] ? (RANK_CTR[localCompetitors[0].rank] ?? 0.01) : 0.28;
+  const customerMonthlyClicks = topClicks > 0 && topCtr > 0
+    ? Math.round(topClicks * (customerCtr / topCtr))
+    : 0;
 
   return {
     keyword,
