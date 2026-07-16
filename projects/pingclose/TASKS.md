@@ -2,7 +2,7 @@
 Diagnostic platform. Finds problems. Never fixes them.
 Never say PingClose fixes anything. Never mention methodology.
 
-Last Updated: 2026-07-12
+Last Updated: 2026-07-16
 Status: LIVE — first $495 sale confirmed 2026-07-11
 
 ---
@@ -17,8 +17,8 @@ Files: app/HomeClient.tsx, app/page.tsx
 ---
 
 ### PC-A2 — New H1 — keyword-driven, search-intent first
-Status: OPEN
-Description: Replace "Want the Fastest Website on the Block?" with a keyword-driven H1 that meets searchers where they are. Must be above the fold, largest text on page, no images above fold. City-aware version in PC-A6.
+Status: DONE (2026-07-16) — "Ping Your Website to See How Many Clicks You Are Losing." Repositions around clicks instead of raw speed. City-aware version (PC-A6) still open.
+Commit: bb844bb
 Files: app/HomeClient.tsx
 
 ---
@@ -31,8 +31,8 @@ Files: app/HomeClient.tsx
 ---
 
 ### PC-A4 — Phone field label fix
-Status: OPEN
-Description: Change "Get a call back within minutes" — Jim said this stops 25% of signups. Replace with something optional and benefit-focused. Candidate: "Cell phone (we'll text you your results)."
+Status: DONE (2026-07-16) — "Get a call back within minutes" removed entirely. Email field now says "Verify your email so we can send you your report."; phone field now says "Verify your cell phone to receive your report as a link."
+Commit: bb844bb
 Files: app/HomeClient.tsx
 
 ---
@@ -60,12 +60,69 @@ Dependencies: PC-A5
 
 ---
 
+### PC-A8 — "Click monitor" byline
+Status: DONE (2026-07-16) — "We are a click monitor. The faster you are, the more clicks you receive." added below the logo.
+Commit: bb844bb
+Files: app/HomeClient.tsx
+
+---
+
+### PC-A9 — Direct $495 price on pricing page
+Status: DONE (2026-07-16) — Pricing page now shows "$495 to correct your speed — additional fixes available à la carte" directly, instead of only linking out to LocalSEOAEOPro pricing. Specific à la carte prices still pending from Jim.
+Commit: bb844bb
+Files: app/pricing/page.tsx
+
+---
+
+### PC-A10 — Mobile grid bug on pricing page
+Status: DONE (2026-07-16) — Both card-grid layouts on the pricing page had no responsive breakpoint at all, squeezing two cards into ~150-220px columns on a phone. Fixed with a shared `.responsive-grid-2col` class in globals.css (stacks to 1 column below 768px), reusable by other pages.
+Commit: bb844bb
+Files: app/globals.css, app/pricing/page.tsx
+
+---
+
+### PC-A11 — Below-the-fold images
+Status: OPEN
+Description: Jim wants images below the fold to "spruce up" the homepage. Per the site's own design rules, images must explain a real finding (diagnostic visual, comparison, scorecard) — not just decorate. No Canva ("has that Canva look"). Jim will browse 21st.dev for a pattern/design to point at; still needs final direction on what the image(s) should actually show.
+Files: app/HomeClient.tsx
+
+---
+
+### PC-A12 — FAQ page: possible mobile-responsive bug
+Status: OPEN
+Description: Jim reported the FAQ page showed no questions when checked on mobile. Verified thoroughly at desktop viewport (4 different methods — page text, full accessibility tree, network/console logs) and could not reproduce; but given PC-A10 found a real, confirmed mobile-only bug on a similarly-structured page (pricing), FaqClient.tsx (404 lines) likely has an analogous unfixed responsive issue. Needs an actual mobile-viewport check, not assumed fine.
+Files: app/faq/FaqClient.tsx
+
+---
+
+### PC-A13 — Expand and improve FAQ content
+Status: OPEN — WAITING
+Description: Jim wants more FAQ questions, answered better, informed by what competitor tools (Pingdom mentioned) cover. Direct research against Pingdom's marketing site was blocked (403s / redirected to a signup page, no accessible FAQ content found). Jim will paste in specific Pingdom reference content himself rather than have Claude scrape it. Waiting on that before expanding.
+Files: app/faq/FaqClient.tsx
+
+---
+
 ## SECTION B — CHECK PAGE
 
 ### PC-B1 — Check page content and design review
 Status: OPEN
 Description: Review current check page. Add: list of what is being checked (74 signals), estimated time remaining, trust signals. Ensure no blinking or layout shift while results load.
 Files: app/check/page.tsx
+
+---
+
+### PC-B2 — Honest 90s countdown/lock on "View Full Report" button
+Status: OPEN — designed, not built
+Description: The "View Your Full Report" link is currently always clickable, even mid-scan — landing early on a report page that (see PC-C11) shows permanent zeros. Fix: lock the button behind an honest 90-second countdown (the real worst-case, including a PageSpeed retry) labeled clearly ("Analyzing your site — up to 90 seconds"). Unlocks immediately the moment PageSpeed actually finishes ("Click Here — We Got Done Early →"), or unlocks at 0 as a fallback. Explicitly NOT a shorter/adaptive countdown — Jim asked to hold that idea until validated against real completion-time data (see CARRY-FORWARD).
+Files: app/check/page.tsx
+Dependencies: PC-C11 (the report page needs to handle "still pending" gracefully either way)
+
+---
+
+### PC-B3 — Content-heavy early warning (images/video/WebP/TTFB)
+Status: OPEN — designed, not built
+Description: From the fast HTML scan (before PageSpeed runs): count total images, non-WebP images (by file extension), self-hosted (non-embedded, non-iframe) videos. Combined with TTFB, show an early warning if the page looks heavy/uncompressed, before PageSpeed even starts. Explicitly a heuristic/proxy, not a guarantee — a page could have many small WebP images and not get flagged, or vice versa.
+Files: lib/agents/htmlAgent.ts, app/check/page.tsx
 
 ---
 
@@ -147,6 +204,21 @@ Dependencies: PC-C7
 
 ---
 
+### PC-C11 — Report page shows permanent zeros if visited before PageSpeed finishes
+Status: OPEN — real bug, confirmed live
+Description: /report/[id]/page.tsx fetches its data exactly once on load, with no polling. If a visitor lands there before PageSpeed completes (confirmed possible today — the "View Full Report" link is always clickable, see PC-B2), they see frozen placeholder/zero scores forever unless they manually refresh. Needs polling (same pattern /check already uses) plus a 90-second timeout fallback that renders gracefully if PageSpeed genuinely never finishes.
+Files: app/report/[id]/page.tsx
+
+---
+
+### PC-C12 — pagespeed_retry_count column + retry logging
+Status: OPEN — migration awaiting Jim's yes
+Description: Google's PageSpeed API occasionally returns a generic transient error unrelated to the site being tested (confirmed: same URL failed once then succeeded twice more within an hour). A retry-once fix already shipped in lib/agents/pagespeedAgent/fetchPageSpeed.ts (coded, NOT yet tested — could not force a real Google-side failure on demand; a mock-fetch test was proposed but not run). Jim also wants retries recorded, not just silently retried, as a pattern-analysis signal. Needs this exact migration, shown for approval, not yet run:
+  ALTER TABLE pingclose_audits ADD COLUMN pagespeed_retry_count integer NOT NULL DEFAULT 0;
+Files: lib/agents/pagespeedAgent/fetchPageSpeed.ts, app/api/pagespeed-agent/route.ts
+
+---
+
 ## SECTION D — ADMIN REPORT PAGE
 
 ### PC-D1 — Admin timing panel
@@ -193,13 +265,109 @@ Dependencies: PC-E1
 
 ---
 
+## SECTION F — SECURITY (found + fixed 2026-07-16)
+
+### PC-SEC1 — Admin routes brute-force bypass
+Status: DONE — Four admin routes (/api/admin/login, /api/setup, /api/setup/test, /api/admin/audits) each checked the same password independently, but only the login route enforced the 5-attempts/15-min rate limiter. Consolidated into one shared verifyAdminAuth() helper so all four are protected.
+Commit: 7779613
+Files: lib/adminRateLimiter.ts, app/api/admin/login/route.ts, app/api/admin/audits/route.ts, app/api/setup/route.ts, app/api/setup/test/route.ts
+
+---
+
+### PC-SEC2 — Timing-safe password comparison
+Status: DONE — Replaced `===` with crypto.timingSafeEqual as part of PC-SEC1's shared helper.
+Commit: 7779613
+Files: lib/adminRateLimiter.ts
+
+---
+
+### PC-SEC3 — Leftover POC endpoints removed
+Status: DONE — /api/poc/agent and /api/poc/dispatcher were unauthenticated dev scaffolding for testing Next.js's after() mechanism, left live in production. Allowed anyone to insert/overwrite rows in pingclose_audits with no auth. Confirmed nothing else referenced them (grep) before deleting; confirmed gone via build route list (24 routes → 22).
+Commit: 7779613
+Files: app/api/poc/agent/route.ts (deleted), app/api/poc/dispatcher/route.ts (deleted)
+
+---
+
+### PC-SEC4 — SSRF gap in audit tool
+Status: DONE — /api/audit and /api/audit/fast fetch a user-submitted URL server-side with no check that it doesn't resolve to a private/loopback/link-local/cloud-metadata address. Added lib/ssrfGuard.ts; tested live both directions (127.0.0.1 / localhost / 169.254.169.254 correctly rejected 422; a real public site still works).
+Commit: 7779613
+Files: lib/ssrfGuard.ts (new), app/api/audit/route.ts, app/api/audit/fast/route.ts
+
+---
+
+### PC-SEC5 — No rate limiting on /api/audit/fast
+Status: DONE — Added IP-based limit (10/day), reusing ip_address already logged by /api/audit rather than a new table. Tested live: normal use still works, and the actual 429 trip was confirmed with synthetic test data (inserted + cleaned up).
+Commit: 7779613
+Files: lib/rateLimiter.ts, app/api/audit/fast/route.ts
+
+---
+
+### PC-SEC6 — Email verification never enforced server-side
+Status: DONE — /api/audit trusted whatever email was in the request body; the 6-digit code UI was purely cosmetic since nothing server-side checked it. Now requires a verified row in email_verifications (VIP list exempted — see PC-TASK-003 note above). Tested live: unverified email blocked (403), VIP bypass still works, a real verified email still works.
+Commit: cdf4a82
+Files: app/api/audit/route.ts
+
+---
+
+### PC-SEC7 — /api/dataforseo-keywords public + unauthenticated
+Status: OPEN — Route has no auth and no rate limit, but every call costs money against the DataForSEO API. Needs a decision on whether this should even be public.
+Files: app/api/dataforseo-keywords/route.ts
+
+---
+
+### PC-SEC8 — Resend key returned in plaintext from /api/setup
+Status: OPEN — decision needed
+Description: /api/setup GET returns the raw Resend API key value once authenticated as admin. Low severity for an admin-only tool, but worth a decision on masking it instead.
+Files: app/api/setup/route.ts
+
+---
+
+### PC-SEC9 — Rate limiter fails open if Supabase is unreachable
+Status: OPEN — decision needed
+Description: If Supabase is down/misconfigured, the rate-limit check (and the new email-verification check) currently fails open — allows the request through rather than blocking it. Confirmed this exact behavior firing in a local dev environment with placeholder credentials. Needs a decision: keep fail-open (availability over strictness) or switch to fail-closed for admin/security-critical checks specifically.
+Files: lib/adminRateLimiter.ts, lib/rateLimiter.ts
+
+---
+
+### PC-SEC10 — Leaked service_role key rotation
+Status: OPEN — HALF DONE, real live risk until finished
+Description: The Supabase service_role key was accidentally pasted into a public online notepad site while troubleshooting local dev credentials. New dedicated secret key ("pingclose", sb_secret_...) already created in Supabase and wired into local .env.local. Still needed: (1) delete the old leaked service_role key in Supabase's dashboard — Settings → API Keys → Legacy anon, service_role API keys tab, (2) update Vercel's Production environment variable SUPABASE_SERVICE_ROLE_KEY to the new secret key so the live site isn't still depending on the exposed one. Confirmed live site still works right now on the old key — not an active outage, but a real exposed credential until step 1 is done.
+Files: (Supabase dashboard + Vercel dashboard, not code)
+
+---
+
+## SECTION G — CODE QUALITY (found 2026-07-16, not started)
+
+### PC-CQ1 — No centralized design tokens
+Status: OPEN
+Description: 116+ hardcoded hex color literals (e.g. #10D9A0) across 9 files, no shared CSS variables/Tailwind theme despite Tailwind being a dependency. Every file reinvents its own button/input styles inline.
+Files: app-wide
+
+---
+
+### PC-CQ2 — Emoji used as functional icons
+Status: OPEN
+Description: 79 emoji characters (📱🖥️⚡🔴🟠🟡✓❌🏆 etc.) used as the icon system instead of the radar/arc motif established in the brand doc. Directly contradicts the brand's own "no decoration unearned by function" rule.
+Files: app-wide
+
+---
+
+### PC-CQ3 — Files exceeding the project's own 200-line rule
+Status: OPEN
+Description: app/check/page.tsx (496 lines), app/HomeClient.tsx (442 at time of audit), app/faq/FaqClient.tsx (404), app/admin/page.tsx (297), app/pricing/page.tsx (275), lib/email.ts (260) all exceed CLAUDE.md's own 200-line-per-file rule.
+Files: see above
+
+---
+
 ## CARRY-FORWARD OPEN ITEMS
 
-- **SELF-HEALING** — All agents must be self-healing. DataForSEO: DONE ✅. Still needed: PageSpeed, HTML, Hosting, Preflight, Resend.
-- **OPEN-1** — PageSpeed API auto-retry on 429/error. Target <0.1% audit failure rate.
+- **SELF-HEALING** — All agents must be self-healing. DataForSEO: DONE ✅. PageSpeed: retry-once logic shipped 2026-07-16 (see PC-C12), coded but not tested. Still needed: HTML, Hosting, Preflight, Resend.
+- **OPEN-1** — PageSpeed API auto-retry on 429/error. Superseded by PC-C12 (2026-07-16) — retry-once shipped for generic transient errors specifically; 429/quota errors are deliberately NOT retried (would just fail again immediately). Target <0.1% audit failure rate still not measured.
 - **OPEN-3** — Daily synthetic-user monitor. Site was broken for a week and nobody knew.
 - **OPEN-4** — passes_one_second DB backfill. All rows before 2026-07-09 have wrong values.
-- **PC-TASK-003** — Remove VIP_EMAILS hardcoded list from send-code/route.ts.
+- **PC-TASK-003** — Remove VIP_EMAILS hardcoded list from send-code/route.ts. NOTE (2026-07-16): this same list is now also reused via `isVIP()` in lib/rateLimiter.ts for the email-verification enforcement fix (PC-SEC6) — removing it needs to account for both call sites, not just send-code.
+- **PC-FUTURE-1** — Adaptive countdown on the report-wait screen: if the fast scan shows lazy-loading + all-WebP images, show a shorter estimate than the honest 90s default (PC-B2). Explicitly NOT to be built until validated against real completion-time data across hundreds of real audits — Jim: a wrong early prediction risks losing a real customer. Do not implement without that data and without Jim's explicit go-ahead.
+- **PC-CONNECTOR-1** — Not a pingclose bug: the "Could not connect to MCP server @21st-dev/magic" banner is a global Claude Code app-level connector setting, not configured anywhere in this project. Fix lives in Jim's Claude Code app settings, not this codebase.
 
 ---
 
@@ -220,3 +388,6 @@ Dependencies: PC-E1
 | PC-C011 | DataForSEO agent — keywords + local SERP + self-healing retry | — | 2026-07-12 |
 | PC-C012 | Phone number field on signup form | 2ad395b | 2026-07-12 |
 | PC-C013 | Jim alert email with clickable phone | ad8b484 | 2026-07-12 |
+| PC-SEC1–5 | Admin auth rate-limit bypass, SSRF gap, POC route removal, /api/audit/fast rate limit | 7779613 | 2026-07-16 |
+| PC-SEC6 | Email verification enforced server-side in /api/audit | cdf4a82 | 2026-07-16 |
+| PC-A2, A4, A8–A10 | New H1, phone/email field copy, click-monitor byline, $495 pricing, mobile pricing-grid fix | bb844bb | 2026-07-16 |
