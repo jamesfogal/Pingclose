@@ -10,7 +10,7 @@ import { analyzeLawFaqSchema } from '@/lib/agents/lawFaqAgent';
 import { analyzeLawyerSchema } from '@/lib/agents/lawyerSchemaAgent';
 import { buildSchemaOpportunities } from '@/lib/schemaOpportunities';
 import { analyzeContentQuality } from '@/lib/agents/contentQualityAgent';
-import { checkRateLimit, checkAgencySignal } from '@/lib/rateLimiter';
+import { checkRateLimit, checkAgencySignal, isVIP } from '@/lib/rateLimiter';
 import { scoreAudit } from '@/lib/auditScorer';
 import { deliverReport } from '@/lib/reportDelivery';
 import type { TechStackResult } from '@/lib/htmlAudit';
@@ -21,6 +21,23 @@ export async function POST(req: NextRequest) {
 
     if (!url || (!email && !phone)) {
       return NextResponse.json({ error: 'URL and at least one delivery method are required' }, { status: 400 });
+    }
+
+    // The /check UI only gets here after the 6-digit code is confirmed, but
+    // nothing server-side enforced that — this route trusted whatever email
+    // was in the body. VIP emails skip the code entirely (see send-code)
+    // and never get a verified row, so they're exempted here too.
+    if (email && !isVIP(email)) {
+      const { data: verification } = await supabase
+        .from('email_verifications')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .eq('verified', true)
+        .maybeSingle();
+
+      if (!verification) {
+        return NextResponse.json({ error: 'Please verify your email before running an audit.' }, { status: 403 });
+      }
     }
 
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
