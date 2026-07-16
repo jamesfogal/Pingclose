@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { lookup } from 'dns/promises';
+import { assertPublicHostname } from '@/lib/ssrfGuard';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
 import { runHostingAgent, computeHostingVerdict } from '@/lib/agents/hostingAgent';
 import { runAvailabilityAgent } from '@/lib/agents/availabilityAgent';
+import { checkIpRateLimit } from '@/lib/rateLimiter';
+import { getClientIp } from '@/lib/adminRateLimiter';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const { limited } = await checkIpRateLimit(ip);
+    if (limited) {
+      return NextResponse.json({ error: "You've run a lot of scans today — please try again tomorrow." }, { status: 429 });
+    }
+
     const { url } = await req.json();
     if (!url) return NextResponse.json({ error: 'URL required' }, { status: 400 });
 
@@ -14,7 +22,7 @@ export async function POST(req: NextRequest) {
     const baseUrl = new URL(normalizedUrl).origin;
 
     try {
-      await lookup(hostname);
+      await assertPublicHostname(hostname);
     } catch {
       return NextResponse.json(
         { error: 'Site could not be reached. Please check the spelling and try again.' },

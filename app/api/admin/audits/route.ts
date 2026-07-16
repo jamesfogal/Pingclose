@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getClientIp, verifyAdminAuth } from '@/lib/adminRateLimiter';
 
 export async function GET(req: NextRequest) {
-  const password = req.headers.get('x-admin-password');
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
+  if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const filter = req.nextUrl.searchParams.get('filter');
 
@@ -31,10 +31,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const password = req.headers.get('x-admin-password');
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
+  if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id, pipeline_stage, notes } = await req.json();
 

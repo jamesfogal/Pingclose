@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse, after } from 'next/server';
-import { lookup } from 'dns/promises';
+import { assertPublicHostname } from '@/lib/ssrfGuard';
 import { supabase } from '@/lib/supabase';
 import { buildFallbackResult } from '@/lib/agents/pagespeedAgent';
 import { runHtmlAgent } from '@/lib/agents/htmlAgent';
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const baseUrl = new URL(normalizedUrl).origin;
 
     try {
-      await lookup(hostname);
+      await assertPublicHostname(hostname);
     } catch {
       return NextResponse.json(
         { error: 'Site could not be reached. Please check the spelling and try again.' },

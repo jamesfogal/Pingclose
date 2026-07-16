@@ -49,6 +49,22 @@ If a file calls more than 2 external APIs, extract an orchestrator.
 
 ---
 
+## Never Start Any Task Without Permission
+
+**Rule:** Never spawn a background task or agent — for any reason — without first asking and getting an explicit yes. Never run more than one task at a time, under any circumstance. Any task that does run gets a hard 3-4 minute limit; if it isn't done by then, it must be stopped automatically rather than left running.
+
+**Required sequence:**
+1. State exactly what task would run and why
+2. Wait for Jim's explicit yes
+3. Only then launch it — one at a time, never in parallel
+4. Set a hard 3-4 minute cap; if it's not finished by then, kill it automatically rather than let it keep running
+
+**Why:** On 2026-07-16, four background agents were launched in parallel without asking first, to validate a new Claude skill. One got stuck for over an hour on a permission prompt that never resolved, burning real tokens (~112k confirmed, more unaccounted for) while locking Jim out of the conversation with no way to intervene or redirect. Jim: "I never want you to run anything without asking. I almost always have questions and you just start doing stuff that I eventually hate."
+
+**How to apply:** This applies to every project, every task, every time. No exceptions for "it's small," "it'll be quick," or "you already said something like this was fine earlier." A prior loosely-worded instruction is never blanket permission to launch a task — ask again, every time, before the launch specifically.
+
+---
+
 # PINGCLOSE.COM — MASTER DESIGN SYSTEM
 
 ## Project Purpose

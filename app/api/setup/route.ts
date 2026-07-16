@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getClientIp, verifyAdminAuth } from '@/lib/adminRateLimiter';
 
-function auth(req: NextRequest) {
-  return req.headers.get('x-admin-password') === process.env.ADMIN_PASSWORD;
+async function auth(req: NextRequest): Promise<{ ok: boolean; limited: boolean }> {
+  return verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
 }
 
 export async function GET(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { ok, limited } = await auth(req);
+  if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data } = await supabase
     .from('platform_config')
@@ -21,7 +24,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { ok, limited } = await auth(req);
+  if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { resend_api_key } = await req.json();
 

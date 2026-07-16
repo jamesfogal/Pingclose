@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
-
-function auth(req: NextRequest) {
-  return req.headers.get('x-admin-password') === process.env.ADMIN_PASSWORD;
-}
+import { getClientIp, verifyAdminAuth } from '@/lib/adminRateLimiter';
 
 export async function POST(req: NextRequest) {
-  if (!auth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
+  if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // Get key from Supabase
   const { data } = await supabase
