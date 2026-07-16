@@ -127,7 +127,7 @@ export default function PricingPage() {
             PingClose tells you your above-the-fold score. LocalSEOAEOPro makes it pass.
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+          <div className="responsive-grid-2col" style={{ gap: 16, marginBottom: 24 }}>
             {/* Free audit column */}
             <div className="card-hover" style={{ background: TEAL + "08", border: `2px solid ${TEAL}40`, borderRadius: 12, padding: "28px 24px" }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: TEAL, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>Free — PingClose Audit</div>
@@ -161,7 +161,8 @@ export default function PricingPage() {
             <div className="card-hover" style={{ background: "#A78BFA10", border: "2px solid #A78BFA40", borderRadius: 12, padding: "28px 24px" }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>LocalSEOAEOPro — Full Fix</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above + Below the Fold</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>Everything PingClose finds — and everything below it</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9", marginBottom: 4 }}>$495</div>
+              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>to correct your speed — additional fixes available à la carte</div>
               {[
                 "All above-the-fold issues fixed",
                 "Lazy loading on every page below the fold",
@@ -206,7 +207,7 @@ export default function PricingPage() {
           <h2 style={{ fontSize: 26, fontWeight: 800, margin: "0 0 24px", textAlign: "center" }}>
             What PingClose Measures
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="responsive-grid-2col" style={{ gap: 16 }}>
             <div style={{ background: RED + "10", border: `1px solid ${RED}30`, borderRadius: 12, padding: "24px" }}>
               <div style={{ fontSize: 17, fontWeight: 700, color: RED, marginBottom: 16 }}>❌ What Free Tools Give You</div>
               {[

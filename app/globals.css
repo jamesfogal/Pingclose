@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Shared 2-column layout that stacks to 1 column on mobile.
+   Added because the pricing page's card grids had no mobile breakpoint at
+   all, squeezing two cards into ~150-220px columns on a phone. */
+.responsive-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+  .responsive-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+}

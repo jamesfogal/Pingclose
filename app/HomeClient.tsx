@@ -135,6 +135,9 @@ export default function Home() {
               Ping<span style={{ color: "#F1F5F9" }}>Close</span>
             </div>
           </div>
+          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 20px", lineHeight: 1.5 }}>
+            We are a click monitor. The faster you are, the more clicks you receive.
+          </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
             <a href="/faq"
               style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A040", borderRadius: 8, padding: "10px 22px", transition: "background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)" }}
@@ -161,8 +164,8 @@ export default function Home() {
                   <span style={{ fontSize: 16, color: "#10D9A0", fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
                 </div>
                 <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: "#F9FAFB" }}>
-                  Want the Fastest Website<br />
-                  <span style={{ color: "#10D9A0" }}>on Your Block?</span>
+                  Ping Your Website to See How Many<br />
+                  <span style={{ color: "#10D9A0" }}>Clicks You Are Losing.</span>
                 </h1>
                 <p style={{ fontSize: 22, color: "#CBD5E1", margin: "0 0 32px", lineHeight: 1.6 }}>
                   Ping your site and find out right now. We check 74 signals and tell you exactly what&apos;s slowing you down.
@@ -171,14 +174,17 @@ export default function Home() {
                   <input type="text" placeholder="yourwebsite.com" value={url} onChange={e => setUrl(e.target.value)}
                     onFocus={() => setUrlFocused(true)} onBlur={() => setUrlFocused(false)}
                     style={inputStyle(urlFocused)} />
-                  <input type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)}
-                    onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)}
-                    style={inputStyle(emailFocused)} />
                   <div>
-                    <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6 }}>Get a call back within minutes</div>
+                    <input type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)}
+                      onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)}
+                      style={inputStyle(emailFocused)} />
+                    <div style={{ fontSize: 16, color: "#64748B", marginTop: 6 }}>Verify your email so we can send you your report.</div>
+                  </div>
+                  <div>
                     <input type="tel" placeholder="Your cell phone number" value={phone} onChange={e => setPhone(e.target.value)}
                       onFocus={() => setPhoneFocused(true)} onBlur={() => setPhoneFocused(false)}
                       style={inputStyle(phoneFocused)} />
+                    <div style={{ fontSize: 16, color: "#64748B", marginTop: 6 }}>Verify your cell phone to receive your report as a link.</div>
                   </div>
                   {error && <div style={{ fontSize: 16, color: "#F87171" }}>{error}</div>}
                   <button type="submit" disabled={loading} style={btnStyle}
