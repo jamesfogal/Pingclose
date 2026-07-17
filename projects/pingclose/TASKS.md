@@ -7,6 +7,39 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 
 ---
 
+## QUICK STATUS — read this first
+🟩 = done and verified · 🟥 = coded/in-progress but not finished, or a real problem found · ⬜ = not started
+
+1. 🟩 Admin routes brute-force bypass — live (PC-SEC1)
+2. 🟩 Timing-safe password comparison — live (PC-SEC2)
+3. 🟩 Leftover POC endpoints removed — live (PC-SEC3)
+4. 🟩 SSRF gap closed — live (PC-SEC4)
+5. 🟩 Rate limiting on /api/audit/fast — live (PC-SEC5)
+6. 🟩 Email verification enforced server-side — live (PC-SEC6)
+7. ⬜ Not started — /api/dataforseo-keywords public + unauthenticated (PC-SEC7)
+8. ⬜ Not started — decision: mask Resend key in /api/setup? (PC-SEC8)
+9. ⬜ Not started — decision: fail-open vs fail-closed rate limiter (PC-SEC9)
+10. ⬜ Not started — design token system (PC-CQ1)
+11. ⬜ Not started — replace emoji icons (PC-CQ2)
+12. ⬜ Not started — split oversized files (PC-CQ3)
+13. 🟥 Further along, not fully closed — leaked service_role key: new key created, wired in, Vercel updated, redeployed, confirmed live on the new key. Old leaked key still technically valid — can't be revoked without also migrating localseoaeopro's browser client off the legacy anon key (confirmed: it's actively used there, in lib/supabase/client.ts). Now a cross-project decision, not a UI hurdle. (PC-SEC10)
+14. 🟥 Coded, not tested — PageSpeed retry fix, didn't get back to real-world/mock testing tonight (PC-C12)
+15. ⬜ Not started — report page shows permanent zeros if clicked before PageSpeed finishes (PC-C11)
+16. ⬜ Not started — honest 90s countdown/lock on "View Full Report" button (PC-B2)
+17. ⬜ Not started — content-heavy early warning (PC-B3)
+18. ⬜ Waiting on Jim's yes — migration: pagespeed_retry_count column (PC-C12)
+19. 🟩 Done and live — homepage copy repositioned toward clicks, verify-email/phone microcopy, $495 pricing, mobile pricing-grid fix (PC-A2, A4, A8-A10)
+20. ⬜ Not started — below-the-fold images, no Canva, browse 21st.dev for a pattern (PC-A11)
+21. ⬜ Not started — reminder: fix/disconnect the failing 21st-dev/magic connector — Claude Code app setting, not a pingclose bug
+22. ⬜ Not started — check FAQ page at mobile viewport for a responsive bug (PC-A12)
+23. ⬜ Waiting on Jim — expand/improve FAQ content, waiting on Jim to paste in Pingdom reference material (PC-A13)
+
+40. ⬜ Far backlog — adaptive countdown based on lazy-load/WebP signals, gated on real completion-time data, not to be built without that data + Jim's explicit go-ahead (PC-FUTURE-1)
+
+**NEW — big open strategic question, not started:** merge localSEOAEOPro into PingClose as one unified app — possibly "PingClose" + "PingClose FixIt" as a single brand instead of two separate products. Timing argument: neither site is indexed by Google yet, so there's no SEO/domain equity to lose by merging now vs. later. Real tradeoff is strategic (one unified brand vs. the current two-touch "diagnostic creates curiosity → separate brand closes the sale" funnel psychology), not technical risk. localseoaeopro is also a meaningfully bigger/more complex app (real user auth, admin systems, its own skills/middleware) than pingclose's current lead-gen funnel. Needs its own proper planning session — do not start implementing without that.
+
+---
+
 ## SECTION A — FRONT PAGE
 
 ### PC-A1 — Homepage design overhaul
@@ -330,9 +363,10 @@ Files: lib/adminRateLimiter.ts, lib/rateLimiter.ts
 ---
 
 ### PC-SEC10 — Leaked service_role key rotation
-Status: OPEN — HALF DONE, real live risk until finished
-Description: The Supabase service_role key was accidentally pasted into a public online notepad site while troubleshooting local dev credentials. New dedicated secret key ("pingclose", sb_secret_...) already created in Supabase and wired into local .env.local. Still needed: (1) delete the old leaked service_role key in Supabase's dashboard — Settings → API Keys → Legacy anon, service_role API keys tab, (2) update Vercel's Production environment variable SUPABASE_SERVICE_ROLE_KEY to the new secret key so the live site isn't still depending on the exposed one. Confirmed live site still works right now on the old key — not an active outage, but a real exposed credential until step 1 is done.
-Files: (Supabase dashboard + Vercel dashboard, not code)
+Status: OPEN — further along, not fully closed
+Description: The Supabase service_role key was accidentally pasted into a public online notepad site while troubleshooting local dev credentials. Progress: new dedicated secret key ("pingclose", sb_secret_...) created in Supabase, wired into local .env.local, Vercel's Production SUPABASE_SERVICE_ROLE_KEY updated via CLI, production redeployed, and confirmed live via a real end-to-end test — the live site now runs entirely on the new key.
+Remaining blocker: the OLD leaked key is still technically valid and hasn't been revoked. Investigated disabling it via Supabase's "Disable JWT-based API keys" (Settings → API Keys → Legacy tab) — but that action disables the legacy `anon` and `service_role` keys TOGETHER (they're JWTs signed by the same underlying secret, so one can't be revoked without the other). Confirmed via grep that `localseoaeopro` — a separate app sharing this same Supabase project — has a real, live browser-facing Supabase client (lib/supabase/client.ts, createBrowserClient) actively using the legacy NEXT_PUBLIC_SUPABASE_ANON_KEY. Disabling the legacy pair now would break that other live site. Fully closing this requires localseoaeopro to first migrate its browser client to the new publishable-key system (same migration pingclose already did) — a change to a different project, needs its own decision, not something to do unilaterally from pingclose.
+Files: (Supabase dashboard + Vercel dashboard, not code; localseoaeopro/lib/supabase/client.ts if that migration is undertaken)
 
 ---
 
@@ -356,6 +390,14 @@ Files: app-wide
 Status: OPEN
 Description: app/check/page.tsx (496 lines), app/HomeClient.tsx (442 at time of audit), app/faq/FaqClient.tsx (404), app/admin/page.tsx (297), app/pricing/page.tsx (275), lib/email.ts (260) all exceed CLAUDE.md's own 200-line-per-file rule.
 Files: see above
+
+---
+
+## SECTION H — STRATEGIC DECISIONS (not started, needs its own planning session)
+
+### PC-STRAT1 — Merge localSEOAEOPro into PingClose
+Status: OPEN — big decision, do not start implementing without a dedicated planning session
+Description: Jim's idea (2026-07-16): roll localSEOAEOPro into PingClose as one unified app, possibly branded "PingClose" + "PingClose FixIt" instead of two separate products. Timing argument in favor: neither site is indexed by Google yet, so there's no SEO/domain equity at risk by merging now vs. later — removes the biggest objection to doing this early. The real tradeoff is strategic, not technical: a unified brand vs. the current two-touch funnel psychology (PingClose creates curiosity by finding problems → separate LocalSEOAEOPro brand closes the sale by fixing them), which is currently a hard rule in this very file's header and in CLAUDE.md ("PingClose FINDS problems. LocalSEOAEOPro FIXES them. Never say PingClose fixes anything."). Also relevant: localseoaeopro is a meaningfully bigger, more complex app (real user auth, admin systems, its own skills/middleware) than pingclose's current lead-gen funnel — this is not a small code migration. Before any implementation: decide what "merged" actually means (one app under one domain? two domains sharing a backend? unified account system?), and revisit the CLAUDE.md positioning rules, since they'd need to change first.
 
 ---
 
