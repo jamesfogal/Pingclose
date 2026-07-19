@@ -10,7 +10,7 @@ interface RawFetchResult {
   error?: string;
 }
 
-async function fetchStrategy(url: string, strategy: 'mobile' | 'desktop', apiKey: string): Promise<RawFetchResult> {
+async function fetchStrategyOnce(url: string, strategy: 'mobile' | 'desktop', apiKey: string): Promise<RawFetchResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -40,6 +40,20 @@ async function fetchStrategy(url: string, strategy: 'mobile' | 'desktop', apiKey
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Google's PageSpeed API occasionally returns a generic "Lighthouse returned
+// error: Something went wrong" for reasons on Google's end, unrelated to the
+// site being tested — confirmed by the same URL succeeding moments before
+// and after such a failure. Retrying once clears most of these. Not worth
+// retrying a quota error (will just fail again) or a timeout (already waited
+// the full 75s once).
+async function fetchStrategy(url: string, strategy: 'mobile' | 'desktop', apiKey: string): Promise<RawFetchResult> {
+  const first = await fetchStrategyOnce(url, strategy, apiKey);
+  if (first.ok || first.quotaExceeded || first.status === 0) return first;
+
+  console.warn(`PAGESPEED_RETRY: ${strategy} failed (${first.error}), retrying once`);
+  return fetchStrategyOnce(url, strategy, apiKey);
 }
 
 export async function fetchPageSpeed(url: string, apiKey: string): Promise<

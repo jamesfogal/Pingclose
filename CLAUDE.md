@@ -32,6 +32,22 @@ If a file calls more than 2 external APIs, extract an orchestrator.
 
 ---
 
+## Security Audit Before Every Commit or Deploy
+
+**Rule:** Before committing or deploying any task, Claude must re-read the actual current contents of every file the task touches and check it with fresh eyes for security problems — bad auth, leaked secrets, missing validation, injected data — before asking Jim for commit/deploy approval. This is separate from and in addition to the "Never Deploy Without Approval" diff review.
+
+**Required sequence:**
+1. Re-read every file changed or touched by the task (not from memory of having written it — actually read the current file contents)
+2. Check specifically for: hardcoded secrets/keys, missing auth checks, missing rate limits, injection risk, anything written to a public/committed file that shouldn't be
+3. Report findings honestly, using the numbered 🟩/🟥/⬜ format — including anything found, even if it means admitting a mistake
+4. Only after that audit is reported does the normal pre-deploy diff-and-approval sequence begin
+
+**Why:** On 2026-07-17, in the same haste that came from being organized and moving fast, Claude wrote a live production Supabase secret key value in plaintext into MASTER_BRAIN.md, a committed file in a public repo. GitHub's push protection caught it before it went live — Claude did not catch it first. Jim's words: "We are getting very organized but in our haste we cannot make mistakes."
+
+**How to apply:** This applies to every project, every commit, every deploy, every time — no exceptions for "small" or "already tested" changes. Being organized is not a substitute for checking.
+
+---
+
 ## Never Guess. Always Verify First.
 
 **Rule:** Before suggesting any cause for a bug or failure, Claude MUST read the actual error. No guesses. No theories. No "it might be X."
@@ -79,8 +95,7 @@ The website should feel like a premium SaaS diagnostic platform — not a market
 
 ## Critical Positioning (Never Violate)
 
-- PingClose FINDS problems. LocalSEOAEOPro FIXES them.
-- Never say PingClose fixes anything.
+- It's all PingClose. One platform — finds problems and fixes them. LocalSEOAEOPro is being folded in, not a separate brand to refer visitors to.
 - Never mention PingClose's methodology or internal systems.
 - Reveal findings. Hide how the analysis works.
 

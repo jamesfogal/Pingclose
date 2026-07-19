@@ -6,21 +6,31 @@ import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAg
 import { runPreflightCheck } from '@/lib/agents/pagespeedAgent/preflightCheck';
 import { scoreAudit } from '@/lib/auditScorer';
 import { deliverReport } from '@/lib/reportDelivery';
+import { assertPublicHostname } from '@/lib/ssrfGuard';
 import type { TechStackResult } from '@/lib/htmlAudit';
 
 export async function POST(req: NextRequest) {
-  const { reportId, url, deliveryEmail = false, agencySignal = false, email = null, phone = null } = await req.json();
+  const { reportId, url, deliveryEmail = false, agencySignal = false } = await req.json();
 
   if (!reportId || !url) {
     return NextResponse.json({ error: 'reportId and url required' }, { status: 400 });
   }
 
+  try {
+    await assertPublicHostname(new URL(url).hostname);
+  } catch {
+    return NextResponse.json({ error: 'Site could not be reached.' }, { status: 422 });
+  }
+
   console.log('PAGESPEED_AGENT: starting for', reportId, url);
 
-  // Fetch existing row to retrieve techResult stored in full_report
+  // Fetch existing row to retrieve techResult stored in full_report, plus the
+  // real email/phone on file — never trust delivery contact info from the
+  // request body, since this route has no auth and anyone who knows a
+  // reportId could otherwise redirect report emails to an address they choose.
   const { data: existing, error: fetchError } = await supabase
     .from('pingclose_audits')
-    .select('full_report')
+    .select('full_report, email, phone')
     .eq('id', reportId)
     .single();
 
@@ -29,6 +39,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'row not found' }, { status: 404 });
   }
 
+  const email = existing.email as string | null;
+  const phone = existing.phone as string | null;
   const techResult = (existing.full_report as Record<string, unknown>)?.tech as TechStackResult;
 
   // Pre-flight: DNS, HTTP status, redirects, TTFB, Cloudflare — before calling Google
