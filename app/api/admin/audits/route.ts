@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { getClientIp, verifyAdminAuth } from '@/lib/adminRateLimiter';
 
 export async function GET(req: NextRequest) {
-  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
+  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'), req.headers.get('x-admin-totp'));
   if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
   if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
+  const { ok, limited } = await verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'), req.headers.get('x-admin-totp'));
   if (limited) return NextResponse.json({ error: 'Too many attempts. Try again in 15 minutes.' }, { status: 429 });
   if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

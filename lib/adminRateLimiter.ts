@@ -1,5 +1,6 @@
 import { timingSafeEqual as nodeTimingSafeEqual } from 'crypto';
 import { supabase } from '@/lib/supabase';
+import { verifyTotpCode } from '@/lib/totp';
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_MINUTES = 15;
@@ -52,13 +53,25 @@ export function getClientIp(req: { headers: { get(name: string): string | null }
  * ADMIN_PASSWORD must call this instead of comparing the header/body value
  * themselves — a bare `=== process.env.ADMIN_PASSWORD` check has no rate
  * limit, letting the password be brute-forced against that route directly.
+ *
+ * Requires both the password AND a live TOTP code — same stateless pattern
+ * as the password itself (resent on every request, not a one-time login).
  */
-export async function verifyAdminAuth(ip: string, providedPassword: string | null | undefined): Promise<{ ok: boolean; limited: boolean }> {
+export async function verifyAdminAuth(
+  ip: string,
+  providedPassword: string | null | undefined,
+  providedTotpCode: string | null | undefined,
+): Promise<{ ok: boolean; limited: boolean }> {
   const { limited } = await checkAdminLoginRateLimit(ip);
   if (limited) return { ok: false, limited: true };
 
-  const correct = process.env.ADMIN_PASSWORD;
-  const ok = !!correct && !!providedPassword && timingSafeCompare(providedPassword, correct);
+  const correctPassword = process.env.ADMIN_PASSWORD;
+  const totpSecret = process.env.ADMIN_TOTP_SECRET;
+
+  const passwordOk = !!correctPassword && !!providedPassword && timingSafeCompare(providedPassword, correctPassword);
+  const totpOk = !!totpSecret && !!providedTotpCode && verifyTotpCode(totpSecret, providedTotpCode);
+
+  const ok = passwordOk && totpOk;
   if (!ok) await recordAdminLoginAttempt(ip);
   return { ok, limited: false };
 }

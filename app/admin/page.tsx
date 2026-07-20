@@ -33,6 +33,7 @@ const scoreColor = (s: number) => s >= 70 ? "#10D9A0" : s >= 50 ? "#FBBF24" : "#
 
 export default function AdminPage() {
   const [password, setPassword]   = useState("");
+  const [totpCode, setTotpCode]   = useState("");
   const [authed, setAuthed]       = useState(false);
   const [authErr, setAuthErr]     = useState("");
   const [audits, setAudits]       = useState<Audit[]>([]);
@@ -48,17 +49,17 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password })
+      body: JSON.stringify({ password, totpCode })
     });
     const data = await res.json();
     if (data.ok) { setAuthed(true); loadAudits("all"); }
-    else setAuthErr("Wrong password.");
+    else setAuthErr("Wrong password or code.");
   }
 
   async function loadAudits(f: string) {
     setLoading(true);
     const res = await fetch(`/api/admin/audits?filter=${f}`, {
-      headers: { "x-admin-password": password }
+      headers: { "x-admin-password": password, "x-admin-totp": totpCode }
     });
     const data = await res.json();
     setAudits(Array.isArray(data) ? data : []);
@@ -69,7 +70,7 @@ export default function AdminPage() {
     setSaving(true);
     await fetch("/api/admin/audits", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      headers: { "Content-Type": "application/json", "x-admin-password": password, "x-admin-totp": totpCode },
       body: JSON.stringify({ id: audit.id, pipeline_stage, notes })
     });
     await loadAudits(filter);
@@ -81,7 +82,7 @@ export default function AdminPage() {
     setSaving(true);
     await fetch("/api/admin/audits", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      headers: { "Content-Type": "application/json", "x-admin-password": password, "x-admin-totp": totpCode },
       body: JSON.stringify({ id: audit.id, pipeline_stage: audit.pipeline_stage, notes })
     });
     setSaving(false);
@@ -109,6 +110,8 @@ export default function AdminPage() {
         <form onSubmit={login} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <input type="password" placeholder="Admin password" value={password} onChange={e => setPassword(e.target.value)}
             style={{ padding: "12px 16px", background: "#111827", border: "1px solid #1F2937", borderRadius: 8, color: "#F1F5F9", fontSize: 16, outline: "none" }} />
+          <input type="text" inputMode="numeric" placeholder="6-digit authenticator code" value={totpCode} onChange={e => setTotpCode(e.target.value)} maxLength={6}
+            style={{ padding: "12px 16px", background: "#111827", border: "1px solid #1F2937", borderRadius: 8, color: "#F1F5F9", fontSize: 16, outline: "none", letterSpacing: 4 }} />
           {authErr && <div style={{ fontSize: 16, color: "#F87171" }}>{authErr}</div>}
           <button type="submit" style={{ padding: 12, background: "#10D9A0", border: "none", borderRadius: 8, color: "#0B0E16", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
             Sign In →

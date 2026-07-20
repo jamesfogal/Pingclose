@@ -9,94 +9,55 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 
 ## QUICK STATUS — read this first
 
-**Legend:** ❌ = critical/dangerous (my judgment — push back if you disagree) · 🟩 = done · 🟥 = in progress or a confirmed problem · ⬜ = not started
-**Numbers are positional, not permanent.** They reflect current priority order and shift whenever a new item is inserted or something completes — a new emergency task can jump straight to #1 and push everything else down. Numbers only lock in forever once a task is completed and moved to the archive at the bottom.
-**Dates in `[brackets]` are permanent.** They record when the item was first identified and never change, no matter how many times its number shifts. That's the real measure of how long something has been sitting.
-**Priority logic (confirmed 2026-07-19):** the organizing question is what gets PingClose launched and making money fastest — not just "is this technically dangerous." That means real bugs/security gaps rank highest (❌ CRITICAL), the site's visual/code quality is now itself a launch blocker (🎨 LAUNCH-CRITICAL CLEANUP, elevated above where it used to sit), and the phone/SMS/voice system is deliberately moved down — not paused, never removed from the list — while Jim spends a couple of days deciding on his own approach.
-**500-line checkpoint:** at every ~500-line interval, re-run this whole prioritization pass — review recent conversation for new items, re-sort by the logic above, and ask the four standing questions (see hook setup).
+**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #44, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom. 8 done, on #9 now.
 
 ---
 
-**UP NEXT:** #8 — Leaked service_role key still technically valid `[added 2026-07-16]`. Completed items permanently hold #1-7 (see archive at the bottom) — the open list continues from #8, it does not restart at #1. Sequence confirmed 2026-07-19: work through the full ❌ Critical tier (#8-20) first, then #21 — OpenPhone/Quo signup — comes immediately after, ahead of the cleanup/styling work, since real phone verification can't happen without it.
-
----
-
-## ❌ CRITICAL — real dangers, fix regardless of anything else
-
-8. ❌🟥 `[2026-07-16]` Leaked service_role key still technically valid — new key live and working on pingclose, but the OLD leaked key can't be revoked without also migrating localseoaeopro off its shared legacy key. Since these two apps are becoming one, this is prep work on PingClose's own future codebase, not a favor to a separate app.
-
-   **Done so far (2026-07-19):**
-   - 🟩 6 files in localseoaeopro updated to use PingClose's existing new key values instead of the legacy anon/service_role keys: `lib/supabase/client.ts`, `lib/supabase/server.ts`, `middleware.ts` (→ new publishable key), `lib/supabase/admin.ts`, `app/api/admin-audits/route.ts`, `lib/skills/healthReporter.ts` (→ new secret key)
-   - 🟩 New key values (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`) added to localseoaeopro's Vercel Production environment — publishable key retrieved directly from Supabase's API, secret key extracted from pingclose's local `.env.local`, neither ever displayed in chat
-   - 🟩 TypeScript clean, production build passes (all 19 routes + middleware compile correctly), diff reviewed fresh for security — no secrets embedded, no unrelated changes swept in
-   - 🟩 Old legacy env vars (`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) still present in Vercel too — both key systems coexist right now, so nothing is broken yet
-
-   **Still pending:**
-   - ⬜ Commit the 6 files (only those 6 — this repo has other pre-existing unrelated uncommitted changes that must not get swept in) and deploy
-   - ⬜ Verify localseoaeopro's live login/dashboard/admin panel actually work correctly on the new keys, in production
-   - ⬜ Only after that's confirmed — rotate/disable the legacy JWT secret in Supabase, which is the step that actually closes the leak
-   - ⬜ Final check: confirm the old leaked key no longer authenticates, confirm both pingclose and localseoaeopro still fully functional (PC-SEC10)
-9. ❌🟥 `[2026-07-19]` Admin login is one shared password — no MFA, no session, no per-user identity (PC-SEC14)
-10. ❌🟥 `[2026-07-19]` Phone-only submissions to /api/audit skip verification entirely and crash with a 500 (PC-SEC11)
-11. ❌⬜ `[2026-07-16]` Report page shows permanent zeros if clicked before PageSpeed finishes — hits every customer (PC-C11)
-12. ❌🟥 `[2026-07-16]` PageSpeed retry fix coded but not tested — affects report reliability (PC-C12)
-13. ❌⬜ `[2026-07-16]` Migration for the retry fix above, waiting on Jim's yes (PC-C12)
-14. ❌🟥 `[2026-07-16]` Fail-open/closed decision made (fail-closed on admin login, leaning fail-closed on audit form), not yet built (PC-SEC9)
-15. ❌⬜ `[2026-07-19]` /api/send-code has no rate limit, spammable (PC-SEC12)
-16. ❌⬜ `[2026-07-16]` /api/dataforseo-keywords public + unauthenticated, costs money per call (PC-SEC7)
-17. ❌⬜ `[2026-07-19]` Add CAPTCHA to admin login (PC-SEC13)
-18. ❌⬜ `[2026-07-19]` Audit MFA status on AWS/Supabase/Vercel/GitHub/Resend accounts (PC-SEC15)
-19. ❌⬜ `[2026-07-16]` Decide on masking Resend key in /api/setup — lowest severity of this group (PC-SEC8)
-20. ❌🟥 `[2026-07-19]` New CLAUDE.md security-audit rule written, still uncommitted
-
-## 📞 RIGHT AFTER CRITICAL — blocks real phone verification, so it can't wait behind cleanup/styling
-
-21. ⬜ `[2026-07-19]` Sign up for OpenPhone/Quo, submit 10DLC business registration — Jim's own action, needs his business details (not something Claude can do on his behalf) (PC-E2)
-
-## 🎨 LAUNCH-CRITICAL CLEANUP — the site's look/quality is now a launch blocker
-
-22. ⬜ `[2026-07-16]` Centralized design token system — fixes 116+ hardcoded hex colors (PC-CQ1)
-23. ⬜ `[2026-07-16]` Replace 79 emoji-as-icons with a real icon system (PC-CQ2)
-24. ⬜ `[2026-07-16]` Split files exceeding the project's own 200-line rule (PC-CQ3)
-25. ⬜ `[2026-07-16]` Below-the-fold images / homepage visual anchor, no Canva look (PC-A11)
-26. ⬜ `[2026-07-16]` FAQ page mobile-responsive bug check (PC-A12)
-27. ⬜ `[2026-07-16]` Expand FAQ content — waiting on Jim to paste Pingdom reference material (PC-A13)
-28. ⬜ `[2026-07-16]` Honest 90s countdown/lock on "View Full Report" button (PC-B2)
-29. ⬜ `[2026-07-16]` Content-heavy early warning heuristic (PC-B3)
-30. ⬜ `[2026-07-16]` Fix/disconnect the failing 21st-dev/magic connector (Claude Code app setting, not app code)
-
-## 📱 PHONE/SMS/VOICE SYSTEM — decision made 2026-07-19, signup itself moved up (see above), rest stays here
-
-**DECIDED (2026-07-19): OpenPhone/Quo, human-answered, one vendor, no AI agent yet.** AWS SNS path abandoned — building the OTP flow on AWS as a "temporary" bridge and then rebuilding it again on OpenPhone/Quo later would have meant doing the same work twice, so it's built once, directly on the platform that's actually being kept. AI voice/text agents (Retell AI confirmed as the only researched option with no Twilio dependency, Synthflow and Bland AI disqualified for requiring Twilio underneath) are explicitly deferred until real call volume from the OpenPhone number justifies the added per-minute cost — not something to build alongside the initial rollout.
-
-31. ⬜ `[2026-07-19]` Verify OpenPhone/Quo's actual webhook/API capabilities (send code, receive replies) before building against it
-32. ⬜ `[2026-07-19]` Add SMS consent microcopy to the phone field on the homepage form — cheap, protects compliance regardless of anything else
-33. ⬜ `[2026-07-19]` Build phone verification (OTP send + confirm) directly on OpenPhone/Quo's API, mirroring the existing email-verification flow (PC-E4)
-34. ⬜ `[2026-07-19]` Build event-forwarding into the existing notification pipeline (PC-E5)
-35. ⬜ `[2026-07-19]` AWS 10DLC origination request — abandoned in favor of OpenPhone/Quo, no further action needed (PC-E2, closed)
-36. ⬜ `[2026-07-19]` Future, explicitly gated on real call volume — AI voice/text agent via Retell AI, no Twilio dependency confirmed (PC-FUTURE-2)
-
-## 🔮 FAR BACKLOG
-
-37. ⬜ `[2026-07-16]` Adaptive countdown based on lazy-load/WebP signals, gated on real data (PC-FUTURE-1)
-
-## 🧭 STRATEGIC — own planning session
-
-38. ⬜ `[2026-07-16]` Merge localSEOAEOPro into PingClose as one unified app (PC-STRAT1)
-39. ⬜ `[2026-07-19]` Remove all "forward to LocalSEOAEOPro" language/links from PingClose, point to PingClose's own pricing instead — first concrete step of the merge. Scoped tonight: `app/pricing/page.tsx` (page title/meta description, Open Graph tags, JSON-LD structured data, two headline lines, the entire "Fix column" pricing card, 2 external links to localseoaeopro.com/pricing), `app/report/[id]/page.tsx` (the main "Fix These Problems" CTA card + copy + external link), `app/faq/FaqClient.tsx` (1 external link). CLAUDE.md's "Critical Positioning" rule already rewritten for single-brand messaging (2026-07-19) — this item is now just the actual page/copy work. (PC-STRAT1, sub-task)
-40. ⬜ `[2026-07-19]` Update CLAUDE.md's "Project Purpose" and "Primary Conversion Goal" sections to match the single-brand direction — both still describe PingClose as diagnostic-only ("encourage the visitor to request a deeper analysis," CTA "Request Deep Analysis" / "See Sample Findings") with no mention that PingClose now fixes things directly (PC-STRAT1, sub-task)
-
----
-
-## ✅ COMPLETED (permanent numbers, deployed date + time — never renumbered, never reordered)
-
-#1 — 🟩 Admin routes brute-force bypass — **deployed 2026-07-16, 2:40 PM CDT** (commit 7779613) (PC-SEC1)
-#2 — 🟩 Timing-safe password comparison — **deployed 2026-07-16, 2:40 PM CDT** (commit 7779613) (PC-SEC2)
-#3 — 🟩 Leftover POC endpoints removed — **deployed 2026-07-16, 2:40 PM CDT** (commit 7779613) (PC-SEC3)
-#4 — 🟩 SSRF gap closed — **deployed 2026-07-16, 2:40 PM CDT** (commit 7779613) (PC-SEC4)
-#5 — 🟩 Rate limiting on /api/audit/fast — **deployed 2026-07-16, 2:40 PM CDT** (commit 7779613) (PC-SEC5)
-#6 — 🟩 Email verification enforced server-side — **deployed 2026-07-16, 4:18 PM CDT** (commit cdf4a82) (PC-SEC6)
-#7 — 🟩 Homepage copy repositioned, verify-email/phone microcopy, $495 pricing, mobile pricing-grid fix — **deployed 2026-07-16, 5:39 PM CDT** (commit bb844bb) (PC-A2, A4, A8-A10)
+1. 🟩❌ Admin routes brute-force bypass (PC-SEC1) — start: 2026-07-16 · completed: 2026-07-16, 2:40 PM CDT (commit 7779613)
+2. 🟩❌ Timing-safe password comparison (PC-SEC2) — start: 2026-07-16 · completed: 2026-07-16, 2:40 PM CDT (commit 7779613)
+3. 🟩❌ Leftover POC endpoints removed (PC-SEC3) — start: 2026-07-16 · completed: 2026-07-16, 2:40 PM CDT (commit 7779613)
+4. 🟩❌ SSRF gap closed (PC-SEC4) — start: 2026-07-16 · completed: 2026-07-16, 2:40 PM CDT (commit 7779613)
+5. 🟩❌ Rate limiting on /api/audit/fast (PC-SEC5) — start: 2026-07-16 · completed: 2026-07-16, 2:40 PM CDT (commit 7779613)
+6. 🟩❌ Email verification enforced server-side (PC-SEC6) — start: 2026-07-16 · completed: 2026-07-16, 4:18 PM CDT (commit cdf4a82)
+7. 🟩 Homepage copy repositioned, verify-email/phone microcopy, $495 pricing, mobile pricing-grid fix (PC-A2, A4, A8-A10) — start: 2026-07-16 · completed: 2026-07-16, 5:39 PM CDT (commit bb844bb)
+8. 🟩❌ Leaked Supabase service_role key fully closed (PC-SEC10) — start: 2026-07-16 · completed: 2026-07-19, ~7:35 PM CDT. localseoaeopro migrated off legacy anon/service_role keys to PingClose's existing new key values (commits `69f8cfa`, `1c9c4d4`), verified live, then the legacy JWT secret was disabled in Supabase. Re-verified live after rotation — no breakage. The key that leaked into a public online notepad no longer authenticates.
+9. ❌🟩 Admin login now requires password + TOTP authenticator code (PC-SEC14) — start: 2026-07-19 · completed: 2026-07-19. Built `lib/totp.ts` (RFC 6238, no new dependency, verified against the official RFC test vector — matched exactly). `verifyAdminAuth()` now requires both password and a live 6-digit code, same stateless resend pattern as the password. All 4 admin-gated routes (login, audits GET/PATCH, setup GET/POST, setup/test) updated consistently. Real bug found and fixed during testing: local `.env.local` had `ADMIN_PASSWORD=""` (empty) — not a bug in this feature, pre-existing local-dev gap. Diagnosed with temporary logging (removed before commit), confirmed via real log output, fixed with Jim's actual password. End-to-end verified live: real password + real code from Jim's authenticator app → 200 on login, 200 on the follow-up audits fetch. TypeScript clean, build clean, all files re-read fresh for the security audit — no secrets, no debug code left behind. Per-user identity/sessions explicitly not built (still just one admin) — this closes the "password-only" danger, not full multi-admin infrastructure.
+10. ❌🥫 Phone-only submissions to /api/audit skip verification entirely and crash with a 500 (PC-SEC11) — start: 2026-07-19
+11. ❌⬜ Report page shows permanent zeros if clicked before PageSpeed finishes — hits every customer (PC-C11) — start: 2026-07-16
+12. ❌🥫 PageSpeed retry fix coded but not tested — affects report reliability (PC-C12) — start: 2026-07-16
+13. ❌⬜ Migration for the retry fix above, waiting on Jim's yes (PC-C12) — start: 2026-07-16
+14. ❌🥫 Fail-open/closed decision made (fail-closed on admin login, leaning fail-closed on audit form), not yet built (PC-SEC9) — start: 2026-07-16
+15. ❌⬜ /api/send-code has no rate limit, spammable (PC-SEC12) — start: 2026-07-19
+16. ❌⬜ /api/dataforseo-keywords public + unauthenticated, costs money per call (PC-SEC7) — start: 2026-07-16
+17. ❌⬜ Add CAPTCHA to admin login (PC-SEC13) — start: 2026-07-19
+18. ❌⬜ Audit MFA status on AWS/Supabase/Vercel/GitHub/Resend accounts (PC-SEC15) — start: 2026-07-19
+19. ❌⬜ Decide on masking Resend key in /api/setup (PC-SEC8) — start: 2026-07-16
+20. ❌🟩 New CLAUDE.md security-audit rule — start: 2026-07-19 · completed: 2026-07-19 (pingclose commit `bd01cb1`)
+21. ❌⬜ Supabase security advisor ERROR — `public.v_pagespeed_daily` view uses SECURITY DEFINER, potentially bypasses row-level security. Needs investigation into what data the view exposes. — start: 2026-07-19
+22. ❌⬜ Supabase security advisor WARN — `handle_new_user()` is callable by anyone, even unauthenticated, with elevated privileges. Likely the standard "create profile on signup" pattern, needs verification not assumption. — start: 2026-07-19
+23. ⬜ Supabase security advisor WARN — two functions have mutable search_path, a known Postgres footgun. Lower severity, not critical. — start: 2026-07-19
+24. ❌⬜ LSAP's "Page Speed Intelligence" module doesn't call Google's real PageSpeed API — it asks an LLM to generate fake plausible-looking speed data, with a hardcoded fake fallback. Decided: replace with PingClose's real PageSpeed agent. Not started. — start: 2026-07-19
+25. ⬜ Sign up for OpenPhone/Quo, submit 10DLC business registration — Jim's own action (PC-E2) — start: 2026-07-19
+26. ⬜ Centralized design token system — fixes 116+ hardcoded hex colors (PC-CQ1) — start: 2026-07-16
+27. ⬜ Replace 79 emoji-as-icons with a real icon system (PC-CQ2) — start: 2026-07-16
+28. ⬜ Split files exceeding the project's own 200-line rule (PC-CQ3) — start: 2026-07-16
+29. ⬜ Below-the-fold images / homepage visual anchor, no Canva look (PC-A11) — start: 2026-07-16
+30. ⬜ FAQ page mobile-responsive bug check (PC-A12) — start: 2026-07-16
+31. ⬜ Expand FAQ content — waiting on Jim to paste Pingdom reference material (PC-A13) — start: 2026-07-16
+32. ⬜ Honest 90s countdown/lock on "View Full Report" button (PC-B2) — start: 2026-07-16
+33. ⬜ Content-heavy early warning heuristic (PC-B3) — start: 2026-07-16
+34. ⬜ Fix/disconnect the failing 21st-dev/magic connector (Claude Code app setting, not app code) — start: 2026-07-16
+35. ⬜ Verify OpenPhone/Quo's actual webhook/API capabilities before building against it — start: 2026-07-19
+36. ⬜ Add SMS consent microcopy to the phone field on the homepage form — start: 2026-07-19
+37. ⬜ Build phone verification (OTP send + confirm) on OpenPhone/Quo's API, mirroring email verification (PC-E4) — start: 2026-07-19
+38. ⬜ Build event-forwarding into the existing notification pipeline (PC-E5) — start: 2026-07-19
+39. ⬜ AWS 10DLC origination request — abandoned in favor of OpenPhone/Quo, no further action needed (PC-E2, closed) — start: 2026-07-19
+40. ⬜ Future, gated on real call volume — AI voice/text agent via Retell AI, no Twilio dependency confirmed (PC-FUTURE-2) — start: 2026-07-19
+41. ⬜ Adaptive countdown based on lazy-load/WebP signals, gated on real data (PC-FUTURE-1) — start: 2026-07-16
+42. ⬜ Merge localSEOAEOPro into PingClose as one unified app — own planning session (PC-STRAT1) — start: 2026-07-16
+43. ⬜ Remove all "forward to LocalSEOAEOPro" links/copy from PingClose's pricing, report, and FAQ pages, point to PingClose's own pricing instead (PC-STRAT1, sub-task) — start: 2026-07-19
+44. ⬜ Update CLAUDE.md's "Project Purpose" and "Primary Conversion Goal" sections to match single-brand direction (PC-STRAT1, sub-task) — start: 2026-07-19
+45. 🟩 Decided 2026-07-19, no build needed — considered requiring fresh verification on every single visit, reversed after weighing it: the original honesty problem (claiming to verify something and never actually doing it) is fully solved by verifying at least once — repeat customers shouldn't be re-annoyed every time. **Final: keep the existing skip-if-already-verified behavior for email exactly as it already works, and build phone verification (#37) the same way** — verify once, trust it going forward, unless the contact info changes. Tradeoff accepted: stale contact info if someone changes their number/email without telling us — low-stakes for a lead-gen form. — start: 2026-07-19 · completed: 2026-07-19
 
 ---
 

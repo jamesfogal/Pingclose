@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { getClientIp, verifyAdminAuth } from '@/lib/adminRateLimiter';
 
 async function auth(req: NextRequest): Promise<{ ok: boolean; limited: boolean }> {
-  return verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'));
+  return verifyAdminAuth(getClientIp(req), req.headers.get('x-admin-password'), req.headers.get('x-admin-totp'));
 }
 
 export async function GET(req: NextRequest) {
