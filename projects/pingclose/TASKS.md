@@ -9,7 +9,7 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 
 ## QUICK STATUS — read this first
 
-**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #44, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom. 8 done, on #9 now.
+**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #44, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom. 9 done, on #10 now.
 
 ---
 
@@ -21,8 +21,8 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 6. 🟩❌ Email verification enforced server-side (PC-SEC6) — start: 2026-07-16 · completed: 2026-07-16, 4:18 PM CDT (commit cdf4a82)
 7. 🟩 Homepage copy repositioned, verify-email/phone microcopy, $495 pricing, mobile pricing-grid fix (PC-A2, A4, A8-A10) — start: 2026-07-16 · completed: 2026-07-16, 5:39 PM CDT (commit bb844bb)
 8. 🟩❌ Leaked Supabase service_role key fully closed (PC-SEC10) — start: 2026-07-16 · completed: 2026-07-19, ~7:35 PM CDT. localseoaeopro migrated off legacy anon/service_role keys to PingClose's existing new key values (commits `69f8cfa`, `1c9c4d4`), verified live, then the legacy JWT secret was disabled in Supabase. Re-verified live after rotation — no breakage. The key that leaked into a public online notepad no longer authenticates.
-9. ❌🟩 Admin login now requires password + TOTP authenticator code (PC-SEC14) — start: 2026-07-19 · completed: 2026-07-19. Built `lib/totp.ts` (RFC 6238, no new dependency, verified against the official RFC test vector — matched exactly). `verifyAdminAuth()` now requires both password and a live 6-digit code, same stateless resend pattern as the password. All 4 admin-gated routes (login, audits GET/PATCH, setup GET/POST, setup/test) updated consistently. Real bug found and fixed during testing: local `.env.local` had `ADMIN_PASSWORD=""` (empty) — not a bug in this feature, pre-existing local-dev gap. Diagnosed with temporary logging (removed before commit), confirmed via real log output, fixed with Jim's actual password. End-to-end verified live: real password + real code from Jim's authenticator app → 200 on login, 200 on the follow-up audits fetch. TypeScript clean, build clean, all files re-read fresh for the security audit — no secrets, no debug code left behind. Per-user identity/sessions explicitly not built (still just one admin) — this closes the "password-only" danger, not full multi-admin infrastructure.
-10. ❌🥫 Phone-only submissions to /api/audit skip verification entirely and crash with a 500 (PC-SEC11) — start: 2026-07-19
+9. ❌🟩 Admin login now requires password + TOTP authenticator code (PC-SEC14) — start: 2026-07-19 · completed: 2026-07-19. Built `lib/totp.ts` (RFC 6238, no new dependency, verified against the official RFC test vector — matched exactly). `verifyAdminAuth()` now requires both password and a live 6-digit code, same stateless resend pattern as the password. All 4 admin-gated routes (login, audits GET/PATCH, setup GET/POST, setup/test) updated consistently. Real bug found and fixed during testing: local `.env.local` had `ADMIN_PASSWORD=""` (empty) — not a bug in this feature, pre-existing local-dev gap. Diagnosed with temporary logging (removed before commit), confirmed via real log output, fixed with Jim's actual password. End-to-end verified live: real password + real code from Jim's authenticator app → 200 on login, 200 on the follow-up audits fetch. TypeScript clean, build clean, all files re-read fresh for the security audit — no secrets, no debug code left behind. Per-user identity/sessions explicitly not built (still just one admin) — this closes the "password-only" danger, not full multi-admin infrastructure. **Deployed:** pushed to `origin/main` as commit `94459ae`, Vercel deployment triggered (was INITIALIZING when last checked — not yet re-confirmed READY).
+10. ❌🥫 Phone-only submissions to /api/audit skip verification entirely and crash with a 500 (PC-SEC11) — start: 2026-07-19. Root cause confirmed 2026-07-19 by direct reproduction (not just reading code): `checkRateLimit(undefined)` → `isVIP(undefined)` → `undefined.toLowerCase()` throws, caught by the outer try/catch, returns a generic 500. Fix is isolated and safe to ship any time, but Jim decided to hold it until phone verification (#37) is built rather than patch piecemeal.
 11. ❌⬜ Report page shows permanent zeros if clicked before PageSpeed finishes — hits every customer (PC-C11) — start: 2026-07-16
 12. ❌🥫 PageSpeed retry fix coded but not tested — affects report reliability (PC-C12) — start: 2026-07-16
 13. ❌⬜ Migration for the retry fix above, waiting on Jim's yes (PC-C12) — start: 2026-07-16
@@ -37,7 +37,7 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 22. ❌⬜ Supabase security advisor WARN — `handle_new_user()` is callable by anyone, even unauthenticated, with elevated privileges. Likely the standard "create profile on signup" pattern, needs verification not assumption. — start: 2026-07-19
 23. ⬜ Supabase security advisor WARN — two functions have mutable search_path, a known Postgres footgun. Lower severity, not critical. — start: 2026-07-19
 24. ❌⬜ LSAP's "Page Speed Intelligence" module doesn't call Google's real PageSpeed API — it asks an LLM to generate fake plausible-looking speed data, with a hardcoded fake fallback. Decided: replace with PingClose's real PageSpeed agent. Not started. — start: 2026-07-19
-25. ⬜ Sign up for OpenPhone/Quo, submit 10DLC business registration — Jim's own action (PC-E2) — start: 2026-07-19
+25. ⬜ Sign up for OpenPhone/Quo, submit 10DLC business registration — Jim's own action (PC-E2) — start: 2026-07-19. Scheduled for the morning of 2026-07-20 — this is the real bottleneck for #37 (10DLC carrier registration isn't instant), not the list order.
 26. ⬜ Centralized design token system — fixes 116+ hardcoded hex colors (PC-CQ1) — start: 2026-07-16
 27. ⬜ Replace 79 emoji-as-icons with a real icon system (PC-CQ2) — start: 2026-07-16
 28. ⬜ Split files exceeding the project's own 200-line rule (PC-CQ3) — start: 2026-07-16
@@ -49,7 +49,7 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 34. ⬜ Fix/disconnect the failing 21st-dev/magic connector (Claude Code app setting, not app code) — start: 2026-07-16
 35. ⬜ Verify OpenPhone/Quo's actual webhook/API capabilities before building against it — start: 2026-07-19
 36. ⬜ Add SMS consent microcopy to the phone field on the homepage form — start: 2026-07-19
-37. ⬜ Build phone verification (OTP send + confirm) on OpenPhone/Quo's API, mirroring email verification (PC-E4) — start: 2026-07-19
+37. ⬜ Build phone verification (OTP send + confirm) on OpenPhone/Quo's API, mirroring email verification (PC-E4) — start: 2026-07-19. Discussed moving this into the #10 slot tonight (2026-07-19) — decided against it: numbering stays locked per the rule above, and the real blocker is #25 (account signup + 10DLC approval, not yet done), not the list order.
 38. ⬜ Build event-forwarding into the existing notification pipeline (PC-E5) — start: 2026-07-19
 39. ⬜ AWS 10DLC origination request — abandoned in favor of OpenPhone/Quo, no further action needed (PC-E2, closed) — start: 2026-07-19
 40. ⬜ Future, gated on real call volume — AI voice/text agent via Retell AI, no Twilio dependency confirmed (PC-FUTURE-2) — start: 2026-07-19
@@ -399,8 +399,8 @@ Files: lib/adminRateLimiter.ts, lib/rateLimiter.ts
 ---
 
 ### PC-SEC11 — Phone-only submissions bypass verification and crash
-Status: OPEN — real bug, confirmed 2026-07-19 by reading current code
-Description: /api/audit requires "at least one of email or phone" (line 22), but the email-verification check only runs `if (email && !isVIP(email))` — skipped entirely if only phone is provided. Immediately after, `checkRateLimit(email)` calls `isVIP(email)` which does `email.toLowerCase()` on a possibly-undefined value, throwing. The outer try/catch swallows it and returns a generic 500 "Audit failed." Net effect today: phone-only submissions don't work at all (not a live exploit), but it's broken and needs a real fix — likely moot once PC-E4 (mandatory dual verification) ships, since email would become required either way.
+Status: OPEN — real bug, root cause confirmed 2026-07-19 by direct reproduction
+Description: /api/audit requires "at least one of email or phone" (line 22), but the email-verification check only runs `if (email && !isVIP(email))` — skipped entirely if only phone is provided. Immediately after, `checkRateLimit(email)` calls `isVIP(email)` which does `email.toLowerCase()` on a possibly-undefined value, throwing. The outer try/catch swallows it and returns a generic 500 "Audit failed." Confirmed by actually reproducing the exact TypeError (`Cannot read properties of undefined (reading 'toLowerCase')`), not just reading the code. Net effect today: phone-only submissions don't work at all (not a live exploit), but it's broken and needs a real fix — likely moot once PC-E4 (mandatory dual verification) ships, since email would become required either way. Fix is isolated and safe to ship any time; Jim decided to hold it until phone verification (#37/PC-E4) is built rather than patch piecemeal.
 Files: app/api/audit/route.ts, lib/rateLimiter.ts
 
 ---
