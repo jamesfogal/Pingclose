@@ -1318,3 +1318,61 @@ Local commit only — not pushed as of this entry. Jim did not ask for it to be 
 Same standard as every prior entry in this file: word-for-word where practical, exact commit hashes and file paths, exact Jim quotes preserved rather than paraphrased, root causes stated only where actually confirmed (by direct reproduction, log output, or file re-reads) rather than guessed. Written by Claude in the same session it describes, at Jim's explicit request ("Now add the entire work from today into the Pingclose Master,md file"), appended once, not edited retroactively.
 
 (Next session appends below this line.)
+
+=================================================
+# SESSION PC-2026-07-21-001
+=================================================
+
+Session ID:        PC-2026-07-21-001
+Date:               2026-07-21
+Start Time:         unknown — continuation of the same ongoing chat conversation as PC-2026-07-19-002, resuming after a calendar-day gap ("goodnight" / "Can you add this info to my google contacts" marks the start of this session's own content).
+End Time:           ongoing at time of this entry
+Project:            PingClose
+Participants:       Jim Fogal, Claude (Sonnet 5)
+Current Commits:    8c21eee (committed locally, NOT pushed as of this entry)
+Vercel Project:     prj_ype7bc4ehRWej1NLN6Y3l6LrzUrg
+Vercel Team:        team_RVAEAhWfvHQTPT8iIDdy5Oa7
+Supabase Project:   xvrhxtnhmnurvxitnijy (shared with localseoaeopro, stlpaypro, alarminspect)
+
+-------------------------------------------------
+
+### PART 1 — GOOGLE CONTACTS REQUEST (not a pingclose task, no connector available)
+
+Jim asked Claude to add a contact to his Google Contacts (name, title, phone, email, and company/address provided by Jim — not reproduced here since this repo is public; see chat history for the actual details). Claude has no Google Contacts / People API connector available in this session's tool list. Gave Jim two options rather than guessing at capability: (A) add a Google Contacts connector via claude.ai Settings -> Connectors (if one exists in the directory) so Claude can do this directly in future sessions; (B) add the contact manually right now at contacts.google.com (Create contact -> fill fields -> Save). Offered to check via the MCP registry search tool whether a Google Contacts connector actually exists and is simply unauthorized versus not offered at all — Jim did not take that offer up before moving to the next topic.
+
+-------------------------------------------------
+
+### PART 2 — "ULTRA MODE" INSTRUCTIONS PASTED, CONFLICT FLAGGED, RESOLVED
+
+Jim pasted a block of "Claude Ultra Mode Operating Instructions" — a proposed high-effort review methodology (trigger conditions: large codebase analysis, full project reviews, architecture design, security audits, performance optimization, large refactors, multi-file changes, root-cause debugging, documentation generation, knowledge-base organization, complex planning, cross-project dependency analysis, large migrations, API/database redesign, production-readiness reviews; a "Dynamic Workflow Strategy" decomposing work into parallel specialized review streams — architecture, UI/UX, security, performance, accessibility, code quality, testing, documentation, dependencies, API, database, error handling, build/deployment; a consolidation step ranking findings Critical/High/Medium/Low/Nice-to-Have; an implementation philosophy requiring every recommendation tie to a concrete benefit; and a final-deliverable format).
+
+Claude did not adopt this silently. Flagged two things directly: (1) there is no actual "Ultra Mode" toggle in Claude Code — nothing to switch on as a product feature, only a methodology Claude could choose to apply using existing tools (the `Agent` tool, and the already-installed `fogal-audit` skill, which covers similar ground for design/security/code-quality specifically); (2) the "Dynamic Workflow Strategy" section's call for parallel review streams directly contradicts CLAUDE.md's own "Never Start Any Task Without Permission" rule — written after the 2026-07-16 incident where four parallel background agents were launched at once and one hung for over an hour burning ~112k confirmed tokens with Jim locked out of the conversation. Presented this conflict via AskUserQuestion rather than picking a side unilaterally.
+
+Jim's answers: (1) "Sequential only (keep current rule)" — every review angle runs one at a time, no parallel agents, ever, no exception granted even for this specific framework; (2) "Save as a standing rule" — added to CLAUDE.md, not treated as a one-off for a single task.
+
+-------------------------------------------------
+
+### PART 3 — CLAUDE.md UPDATED: "Ultra Mode — High-Effort Review Mode (SEQUENTIAL ONLY)" (commit 8c21eee)
+
+New section added to CLAUDE.md, placed immediately after "Never Start Any Task Without Permission" since it is explicitly written as subordinate to that rule. Content: when to apply it (the same large-task trigger list Jim provided, explicitly excluding simple questions/quick edits/small bug fixes unless asked); an explicit statement that there is no real product toggle and every review angle runs sequentially in the main conversation, never as a parallel background agent, unless Jim grants an explicit per-task exception; the same list of review angles Jim provided; the same five-step consolidation process; the same implementation philosophy (don't change things just because possible — every recommendation must improve reliability, maintainability, security, usability, performance, reduce tech debt, or simplify future development); a requirement to explain why/risks/benefit/rollback before implementing anything surfaced this way, then follow the existing commit/deploy approval rules exactly as for any other change; and the same final-deliverable checklist Jim specified (executive summary, major findings, recommended actions, files affected, risks, estimated effort, testing recommendations, remaining manual-review items). Closed with a **Why** line naming the 2026-07-16 incident and Jim's 2026-07-21 decision to keep the framework but sequential-only.
+
+Jim asked "Tell me exactly how this will impact Claude to help me?" before committing. Claude answered directly, in plain language: this only triggers on large review-type asks, not small ones; when it triggers, review angles are worked through one at a time instead of a single quick take, ending in one consolidated, severity-ranked list instead of scattered notes; recommendations are filtered to only ones that tie to a real, named benefit; and — the part Claude emphasized as unchanged — no parallel agents ever, still asks before launching anything, and every existing approval gate (security audit before commit, diff-and-yes before deploy, migration approval) still applies exactly as before this section existed. This section changes analysis depth, not the approval/safety gates around it.
+
+`git diff CLAUDE.md` shown before commit (25 lines added, documentation only, no code/secrets). `git add CLAUDE.md` (targeted, single file), `git status` confirmed only that file staged, then:
+
+    commit 8c21eee "Add sequential-only Ultra Mode review methodology to CLAUDE.md"
+    1 file changed, 25 insertions(+)
+
+Local commit only — not pushed as of this entry.
+
+-------------------------------------------------
+
+### OPEN ITEMS CARRIED FORWARD FROM PC-2026-07-19-002 (unchanged, still open as of this entry)
+
+All fifteen items listed at the end of PC-2026-07-19-002 remain open and unaddressed in this session: PC-SEC11 crash fix (deferred pending #37), PC-C11/PC-C12 report-page and PageSpeed-retry issues, PC-SEC9/12/7/13/15/8 decisions and gaps, the three unreviewed Supabase security-advisor findings, LSAP's fabricated PageSpeed data (list #24), Jim's OpenPhone/Quo signup (list #25, was scheduled for the morning of 2026-07-20 — status not confirmed this session), #8's independent re-verification (never done), and deployment `dpl_HEb8qeYriXCDYL2ZiHk1xMJkRUuL`'s READY state (never re-confirmed). Additionally now open: commit `a1dd790` and `41090da` were confirmed pushed in PC-2026-07-19-002's final actions (`git push origin main` succeeded, `94459ae..41090da`) — that push is NOT itself re-verified in this session, only recorded as having happened. Commit `8c21eee` from this session is local-only and not yet pushed.
+
+-------------------------------------------------
+
+### PROCESS NOTE FOR THIS ENTRY
+
+Same standard as every prior entry: word-for-word where practical, exact commit hashes and file paths, Jim's exact quotes preserved, no root-cause or capability claims stated beyond what was actually confirmed this session. Written by Claude at Jim's explicit request ("Commit this and be sure everything is recorded in our MD File"), appended once, not edited retroactively.
