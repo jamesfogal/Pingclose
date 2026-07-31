@@ -81,6 +81,31 @@ If a file calls more than 2 external APIs, extract an orchestrator.
 
 ---
 
+## Ultra Mode — High-Effort Review Mode (SEQUENTIAL ONLY)
+
+**Rule:** For large, high-stakes review tasks — full codebase/project reviews, architecture design, security audits, performance optimization, large refactors, multi-file changes, root-cause debugging, documentation generation, complex planning, cross-project dependency analysis, large migrations, API/database redesign, production-readiness reviews — go deeper and more structured than a normal quick pass. Do NOT use this for simple questions, quick edits, or small bug fixes unless Jim asks.
+
+**This modifies, and is subordinate to, "Never Start Any Task Without Permission" above.** There is no real "Ultra Mode" toggle in Claude Code — this is a review methodology, not a product feature. Every review angle below runs **one at a time, in the main conversation, never as a parallel background agent**, unless Jim explicitly approves a specific parallel exception for that specific task. The no-parallel-ever rule is not superseded by this section.
+
+**Review angles to work through (sequentially, as relevant to the task):** architecture, UI/UX, security, performance, accessibility, code quality, testing strategy, documentation, dependencies, API design, database design, error handling, build/deployment.
+
+**After the angles relevant to the task are covered:**
+1. Merge duplicate findings across angles
+2. Resolve conflicting recommendations
+3. Rank issues by impact
+4. Identify quick wins
+5. Produce a single implementation plan, findings ranked Critical / High / Medium / Low / Nice-to-Have
+
+**Implementation philosophy:** don't change things just because they're possible. Every recommendation must satisfy at least one of: improves reliability, improves maintainability, improves security, improves usability, improves performance, reduces technical debt, simplifies future development. Avoid unnecessary complexity or new infrastructure.
+
+**Before implementing any major change surfaced this way:** explain why it's needed, identify risks, describe expected benefit, note rollback considerations — then follow the normal commit/deploy approval rules above (security audit, diff review, explicit yes) exactly as for any other change.
+
+**Final deliverable for a full Ultra Mode pass:** executive summary, major findings, recommended actions, files affected, risks, estimated effort, testing recommendations, remaining manual-review items.
+
+**Why:** Jim asked for this reviewing depth/structure but the underlying "Dynamic Workflow" concept as originally written called for parallel agent streams — which directly conflicts with the standing no-parallel rule from the 2026-07-16 token-burn incident. Jim's decision (2026-07-21): keep it, but sequential only.
+
+---
+
 # PINGCLOSE.COM — MASTER DESIGN SYSTEM
 
 ## Project Purpose
