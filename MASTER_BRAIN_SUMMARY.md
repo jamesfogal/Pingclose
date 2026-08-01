@@ -1,4 +1,4 @@
-# MASTER_BRAIN_SUMMARY — PingClose
+# MASTER_BRAIN_SUMMARY - PingClose
 ## Executive Summary
 
 =================================================
@@ -13,117 +13,149 @@ CRITICAL TIMESTAMP RULES
 
 ---
 
-Last Updated: 2026-07-04 00:00:00 UTC (Decision PC-2026-07-04-D001 added)
+Last Updated: 2026-07-31 22:39:36 UTC (Sessions PC-2026-07-16-001, PC-2026-07-19-002, and PC-2026-07-21-001 incorporated)
 
 ---
 
 ## Current Production State
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
 - Site: https://pingclose.com
-- Status: PARTIALLY BROKEN
-- Email verification is broken for ALL non-VIP visitors
-- Root cause: RESEND_API_KEY has BOM (U+FEFF) at character index 7
-- Every /api/send-code call returns 500 "Failed to send code. Please try again."
-- Broken since deployment: dpl_EiKHaD9tMRxmoNVmFcX3EbG7WVZ9
-- Last known good email verifications: June 12 and June 19 (prior deployment)
-- PageSpeed agent: working, 90s cap, 75s AbortController
-- Polling: working, 90s hard stop
-- Report page: redesigned (Emil Kowalski / Linear aesthetic)
-- Vercel project: prj_ype7bc4ehRWej1NLN6Y3l6LrzUrg
-- Supabase project: xvrhxtnhmnurvxitnijy
+- Status: LIVE, with the major 2026-07-16 and 2026-07-19 security fixes shipped
+- Last session-confirmed READY deployment: dpl_2C9RhkaaRjx4SPiCEfKkB4yMqH7v
+- Later deployment triggered on 2026-07-19: dpl_HEb8qeYriXCDYL2ZiHk1xMJkRUuL for commit 94459ae; it was INITIALIZING when last checked and was not re-confirmed READY in MASTER_BRAIN
+- Admin routes now use one shared, rate-limited auth path and require password plus 6-digit TOTP
+- `/api/audit` now enforces server-side email verification; VIP bypass still exists
+- `/api/audit` and `/api/audit/fast` now reject private, loopback, link-local, and cloud-metadata SSRF targets
+- `/api/audit/fast` now has rate limiting
+- Homepage and pricing copy are repositioned around clicks and the $495 offer; the pricing-page mobile two-column bug is fixed
+- PingClose was moved onto a new dedicated Supabase secret key after a public leak of the old service_role key
+- Highest-impact remaining product bugs: phone-only submissions crash, report page can freeze on permanent zero values, and PageSpeed retry logging/migration is unfinished
+- Shared dependency to remember: PingClose, LocalSEOAEOPro, STLPayPro, and Alarminspect still share one Supabase project
 
 ## Current Architecture
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
 - Framework: Next.js App Router
 - Hosting: Vercel
-- Database: Supabase (shared with localseoaeopro project)
-- Email: Resend (BROKEN — BOM in API key)
+- Database: Supabase project `xvrhxtnhmnurvxitnijy` shared across multiple businesses
+- Email: Resend
 - PageSpeed: Google PageSpeed Insights API
-- Background work: Next.js after() — fires pagespeed-agent post-response
+- SEO competitor data: DataForSEO
+- Admin auth model: shared password plus TOTP through `verifyAdminAuth()`; still no per-user identities or session system
+- Verification model: email verification is enforced server-side; phone verification is not built yet
+- Wait/report flow: `/check` handles waiting, but `/report/[id]` still fetches once and does not poll
 
 Key files:
-- app/HomeClient.tsx — email verification gate (form → verifying → verified)
-- app/api/send-code/route.ts — generates 6-digit code, sends via Resend
-- app/api/verify-code/route.ts — validates 6-digit code
-- app/api/audit/route.ts — main audit orchestrator
-- app/api/pagespeed-agent/route.ts — PageSpeed agent (maxDuration: 90)
-- app/check/page.tsx — polling page with 90s hard stop
-- app/report/[id]/page.tsx — redesigned report page
-- lib/agents/ — 8 audit agents
-- vercel.json — all routes capped at 90s
+- `app/HomeClient.tsx` - homepage form and conversion copy
+- `app/api/audit/route.ts` - main audit entry point and server-side email-verification enforcement
+- `app/api/audit/fast/route.ts` - fast path with SSRF guard and rate limiting
+- `app/api/send-code/route.ts` and `app/api/verify-code/route.ts` - email verification flow
+- `app/api/admin/login/route.ts`, `app/api/admin/audits/route.ts`, `app/api/setup/route.ts`, `app/api/setup/test/route.ts` - shared admin-auth surface
+- `lib/adminRateLimiter.ts` - admin auth helper and rate limiting
+- `lib/ssrfGuard.ts` - SSRF target rejection
+- `lib/totp.ts` - RFC 6238 TOTP verification
+- `app/check/page.tsx` - wait-screen UX
+- `app/report/[id]/page.tsx` - customer/admin report page; still needs polling-safe behavior
+- `projects/pingclose/TASKS.md` - live numbered execution list
 
 ## Fixed Issues
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-- [2026-07-03] Check page blinking — polling now detects DB status change (commit 5b49c0a)
-- [2026-07-03] PageSpeed agent killed at 60s — export const maxDuration = 90 added (commit b61e313, e825fdd)
-- [2026-07-03] vercel.json glob conflict — unified all routes to 90s
-- [2026-07-03] Infinite polling loop — 90s hard stop with TIMEOUT fallback (commit ed18a07)
-- [2026-07-03] Report page redesign — Linear/Vercel/Raycast aesthetic (commit 35459df)
+- [2026-07-03] Check page blinking fixed; polling now detects DB status change (commit 5b49c0a)
+- [2026-07-03] PageSpeed agent timeout raised and polling hard stop added (commits b61e313, e825fdd, ed18a07)
+- [2026-07-03] Report page redesign shipped (commit 35459df)
+- [2026-07-16] Admin brute-force bypass across four routes closed by consolidating auth into one shared helper (commit 7779613)
+- [2026-07-16] Password comparison made timing-safe (commit 7779613)
+- [2026-07-16] Unauthenticated `/api/poc/*` routes removed from production (commit 7779613)
+- [2026-07-16] SSRF gap closed for `/api/audit` and `/api/audit/fast` with dedicated guard logic (commit 7779613)
+- [2026-07-16] Rate limiting added to `/api/audit/fast` (commit 7779613)
+- [2026-07-16] Email verification enforced server-side in `/api/audit` (commit cdf4a82)
+- [2026-07-16] Homepage H1, helper copy, pricing-page $495 offer, and pricing-page mobile grid fix shipped (commit bb844bb)
+- [2026-07-16] Production moved to a new dedicated Supabase secret key and redeployed after the service_role key leak
+- [2026-07-19] Admin login upgraded to password plus TOTP across login, audits, setup, and setup/test (commit 94459ae)
+- [2026-07-21] Sequential-only "Ultra Mode" review process documented in `CLAUDE.md` for future large reviews (commit 8c21eee, local-only)
 
 ## Open Issues
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-- [CRITICAL] RESEND_API_KEY BOM — all email verification broken — fix: delete and repaste key in Vercel
-- [HIGH] No health monitoring — no system watches whether PingClose itself is functioning
-- [HIGH] VIP_EMAILS hardcoded list — Jim cannot test email flow from his own machine
-- [MEDIUM] Email sends before PageSpeed completes — customer gets incomplete report link
-- [DEFERRED] SuperAgent / health monitoring architecture — awaiting ChatGPT review
+- [CRITICAL] Phone-only submissions to `/api/audit` both skip verification logic and crash with a 500; fix was deliberately deferred until phone verification is designed and built (PC-SEC11 / PC-E4)
+- [CRITICAL] `/report/[id]` can show permanent zero and placeholder values if opened before PageSpeed finishes (PC-C11)
+- [HIGH] PageSpeed retry logic is coded but untested; retry-count migration still awaits explicit approval (PC-C12)
+- [HIGH] `/api/send-code` has no rate limit (PC-SEC12)
+- [HIGH] `/api/dataforseo-keywords` is still public and can spend money per call (PC-SEC7)
+- [HIGH] Mandatory phone verification is not built; provider choice and workflow remain open (PC-E4 / PC-STRAT2)
+- [HIGH] The old leaked service_role key closure remained a sensitive cross-project follow-up because full invalidation depended on LocalSEOAEOPro's legacy-key migration and later PingClose sessions did not independently re-verify the final state
+- [MEDIUM] Fail-open versus fail-closed behavior is still unresolved for several security checks (PC-SEC9)
+- [MEDIUM] `/api/setup` still returns the raw Resend key to an authenticated admin unless it is masked (PC-SEC8)
+- [MEDIUM] Supabase security-advisor findings were identified but not fully investigated
+- [MEDIUM] Admin CAPTCHA and cloud-account MFA audit were both left open (PC-SEC13 / PC-SEC15)
+- [LOW] Design-token cleanup, emoji-icon replacement, oversized-file splits, and homepage/FAQ design follow-ups remain unstarted
 
 ## Rules Learned
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-- Never paste API keys from Notes, email, or any app that may add BOM characters
-- Always paste keys directly from the source (resend.com, etc.)
-- export const maxDuration in route file is authoritative — vercel.json globs do not override it
-- VIP bypass lists prevent the developer from testing real user flows
-- Every infrastructure failure must be caught by automated health checks, not real users
+- Verify security and production claims against actual code, logs, tests, or live behavior; do not infer
+- Security-sensitive work takes precedence over design cleanup when trust-boundary bugs are open
+- Never start any task or background agent without explicit permission in a separate turn
+- Never run more than one task in parallel; large reviews are sequential only
+- Any spawned task should be time-boxed to roughly 3-4 minutes
+- Do not use Windows 8.3 short-name paths for scratch or test work
+- Do not pretend a requested tool or connector exists; disclose the gap plainly
+- Never commit, push, deploy, rotate secrets, or run migrations without explicit approval
+- Treat every shared Supabase or Vercel change as potentially cross-project
+- Paths and URLs in future responses should be clickable markdown links
 
 ## Important Decisions
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-- [2026-07-03] Agreed: pagespeed AbortController at 75s, Vercel cap at 90s (15s cushion)
-- [2026-07-03] Agreed: polling hard stop at 30 polls = 90s then TIMEOUT state
-- [2026-07-03] Decided: build healthAgent system after Resend key is fixed
-- [2026-07-03] Decided: SuperAgent architecture to be reviewed with ChatGPT before implementation
-- [2026-07-03] Decided: Master Brain system to be permanent source of truth across all projects
-- [2026-07-04] Decided: Self-Healing Agent Architecture — PingClose broken into contained agents over time. Each fragile external service lives inside its own agent. Future Repair Agent diagnoses failures, retries/repairs known issues, escalates anything requiring Jim approval. DEFERRED until Sunday 2026-07-06.
-- [2026-07-04] Next session directive: Review all open PingClose tasks, knock them out one at a time, starting with highest business-impact issue.
+- [2026-07-16] Fix security first; broad design and code-quality cleanup stays deferred
+- [2026-07-16] Shared Supabase infrastructure will not be changed unilaterally; the old leaked key's final invalidation depends on LocalSEOAEOPro's migration path
+- [2026-07-16] `projects/pingclose/TASKS.md` is the live execution checklist and should mirror current priority order
+- [2026-07-19] Admin MFA choice: keep the shared-password model for now, but require TOTP on top of it
+- [2026-07-19] Mandatory dual verification (email plus phone) is the target model, but phone verification is still unbuilt
+- [2026-07-19] Task numbering in the flat execution list is locked; do not reorder items to "move them up"
+- [2026-07-19] Keep the "verify once, trust later" behavior for already-verified contact data; future phone verification should mirror the email flow
+- [2026-07-19] Twilio is permanently excluded as the phone/SMS provider
+- [2026-07-16] Merge of LocalSEOAEOPro into PingClose is a strategic planning decision, not an active implementation task
+- [2026-07-21] "Ultra Mode" exists only as a sequential review methodology inside the main conversation, never as parallel background agents
 
 ## Last Deployments
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-- Deployment: dpl_EiKHaD9tMRxmoNVmFcX3EbG7WVZ9 | Branch: main | Status: LIVE (broken email)
-- Contains commits: ed18a07, e825fdd, b61e313, 35459df, 5b49c0a
+- Deployment: dpl_2C9RhkaaRjx4SPiCEfKkB4yMqH7v | Branch: main | Status: READY | Session-confirmed production deployment after security fixes and secret rotation on 2026-07-16
+- Deployment: dpl_HEb8qeYriXCDYL2ZiHk1xMJkRUuL | Branch: main | Status when last checked: INITIALIZING | Triggered by commit 94459ae on 2026-07-19; MASTER_BRAIN does not later re-confirm READY
+- Recorded later push in the 2026-07-19 / 2026-07-21 conversation tail: `94459ae..41090da` | Result: push recorded as successful, but deployment state from that later push was not independently re-verified in the summarized sessions
 
 ## Last Commits
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-- ed18a07 | 2026-07-03 | Add 90s hard stop to PageSpeed polling — never runs forever
-- e825fdd | 2026-07-03 | Cap all API routes at 90s — AbortController fires at 75s, 15s cushion
-- b61e313 | 2026-07-03 | Fix pagespeed-agent maxDuration — set 300s via route export
-- 35459df | 2026-07-03 | Redesign report page — Linear/Vercel visual treatment
-- 5b49c0a | 2026-07-03 | Poll Supabase for PageSpeed completion — stop blinking when done
+- 7779613 | 2026-07-16 | Close admin brute-force bypass, timing-safe compare, remove POC routes, add SSRF guard, rate-limit `/api/audit/fast`
+- cdf4a82 | 2026-07-16 | Enforce email verification server-side in `/api/audit`
+- bb844bb | 2026-07-16 | Reposition homepage/pricing copy around clicks and $495; fix pricing mobile grid
+- 48dd8e7 | 2026-07-16 | Sync `projects/pingclose/TASKS.md` and add security/code-quality/strategy tracking
+- 9419927 | 2026-07-16 | Follow-up `TASKS.md` sync after later session updates
+- 94459ae | 2026-07-19 | Require TOTP authenticator code alongside admin password
+- a1dd790 | 2026-07-19 | Update `TASKS.md` with #9 deploy note, #10 root cause, and #25/#37 sequencing decision
+- 8c21eee | 2026-07-21 | Add sequential-only Ultra Mode review methodology to `CLAUDE.md` (local-only, not pushed in the recorded session)
 
 ## Things Never To Forget
 Date Added:    2026-07-04 00:00:00 UTC
-Last Modified: 2026-07-04 00:00:00 UTC
+Last Modified: 2026-07-31 22:39:36 UTC
 
-1. RESEND_API_KEY must be deleted and repasted clean in Vercel — BOM is invisible, you cannot see it
-2. Jim's emails bypass all verification — he has never seen the real user email flow
-3. Mark Mattieu tried twice (mark@memfilms.com, mmattei89@gmail.com) on 2026-07-03 — both failed
-4. The email verification feature DID work on June 12 and June 19 on a prior deployment
-5. No health monitoring exists — every failure is discovered by real users, not automated checks
-6. export const maxDuration = 90 in the route file is the only reliable way to set Vercel function duration
-7. Supabase is shared between PingClose and LocalSEOAEOPro — never split without explicit approval
-8. Master Brain files are the permanent source of truth — not chat history
+1. PingClose and LocalSEOAEOPro still share one Supabase project; key changes can break both
+2. The old Supabase service_role key was publicly leaked once; every rotation, revocation, and re-test step must be treated as high stakes
+3. Phone verification does not exist yet; phone-only submissions are currently broken and should not be treated as safe or complete
+4. The report page can freeze on permanent zeros if opened too early; `/check` and `/report` must be fixed together
+5. `/api/send-code` and `/api/dataforseo-keywords` still expose real abuse or cost risk
+6. The latest MASTER_BRAIN entry does not independently re-confirm READY for deployment dpl_HEb8qeYriXCDYL2ZiHk1xMJkRUuL
+7. Admin auth is materially better now, but it is still one shared admin identity rather than full user/session management
+8. MASTER_BRAIN files remain the long-term memory; `projects/pingclose/TASKS.md` is the live execution list

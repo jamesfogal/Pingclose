@@ -1,282 +1,539 @@
-# MASTER_BRAIN_TASKS — All Projects
+# MASTER_BRAIN_TASKS - All Projects
 ## Permanent Task Tracker
 
-Last Updated: 2026-07-12
-Revenue Status: LIVE — first $495 sale confirmed 2026-07-11
+Last Updated: 2026-07-31 22:39:36 UTC
+Revenue Status: LIVE - first $495 sale confirmed 2026-07-11
 
 ---
 
-# PROJECT 1 — PINGCLOSE.COM
+# PROJECT 1 - PINGCLOSE.COM
 Diagnostic platform. Finds problems. Never fixes them.
 
 ---
 
-## SECTION A — FRONT PAGE (pingclose.com homepage)
-Everything the visitor sees before they submit their URL.
-Current state: Single column, H1 says "Want the Fastest Website on the Block?", form collects URL/email/phone, stats strip shows 53%/74/<1s, sample report preview on right.
-Goal: Two columns on desktop, wider on mobile, stronger H1, CSS diagnostic art, city-aware messaging.
+## Current Priority Order
+
+1. PC-SEC11 and PC-E4 - phone-only submissions bypass verification logic and crash; the isolated fix exists, but Jim explicitly chose to hold the final fix until phone verification is designed and built.
+2. PC-C11 - report page shows permanent zero or placeholder values if opened before PageSpeed finishes.
+3. PC-C12 - validate the PageSpeed retry logic already coded and get approval for the `pagespeed_retry_count` migration.
+4. PC-SEC9, PC-SEC12, PC-SEC7, PC-SEC13, PC-SEC15, and PC-SEC8 - unresolved security decisions or gaps.
+5. Supabase security-advisor findings - identified but not fully investigated.
+6. PC-STRAT2 plus PC-E4 - choose the phone/SMS provider and build mandatory phone verification.
+7. PC-SEC10 follow-up - if independent PingClose-context proof is still required, re-check final old-key invalidation after the cross-project migration work.
+8. PC-A11 through PC-A13 and PC-CQ1 through PC-CQ3 - design, FAQ, and code-quality follow-up work.
+9. PC-STRAT1 - planning only; do not start implementation without a dedicated strategy session.
 
 ---
 
-### PC-A1 — Homepage design overhaul
+## SECTION A - FRONT PAGE
+Everything the visitor sees before they submit their URL.
+
+---
+
+### PC-A1 - Homepage design overhaul
 Status: OPEN
-Description: Redesign homepage layout. Desktop: two columns — left has H1 + form + trust signals, right has CSS diagnostic art / sample score widget. Mobile: full width, stacked, wider padding. Every line of content needs more substance — no thin single-line items. Cleaner typography hierarchy. Matches Linear/Vercel aesthetic.
+Description: Redesign the homepage layout. Desktop should be two columns with stronger content density and clearer hierarchy; mobile should stack cleanly and feel intentional.
 Files: app/HomeClient.tsx, app/page.tsx
 
 ---
 
-### PC-A2 — New H1 — keyword-driven, search-intent first
-Status: OPEN
-Description: Replace "Want the Fastest Website on the Block?" with a keyword-driven H1 that meets searchers where they are. Leading candidate: "Free Website Speed Test — See Every Problem Hurting Your Local Business." City-aware version in PC-A5. Must be above the fold, largest text on page, no images above fold.
+### PC-A2 - New H1
+Status: DONE (2026-07-16)
+Description: H1 changed to "Ping Your Website to See How Many Clicks You Are Losing." Repositions the page around clicks instead of raw speed.
+Commit: bb844bb
 Files: app/HomeClient.tsx
 
 ---
 
-### PC-A3 — CSS diagnostic art / above-fold visual anchor
+### PC-A3 - CSS diagnostic art / above-fold visual anchor
 Status: OPEN
-Description: Replace the empty right column with a CSS-only animated diagnostic widget. Shows a fake-but-realistic audit running: score ticking up, checks appearing one by one (Speed ✓, Schema ✓, Mobile ✓). No images, no heavy JS. Pure CSS animation. Communicates "this tool is alive and smart" instantly.
+Description: Replace the empty right column with a CSS-only diagnostic visual that makes the product feel alive without adding image weight.
 Files: app/HomeClient.tsx
 
 ---
 
-### PC-A4 — Phone field label fix
-Status: OPEN
-Description: Change "Get a call back within minutes" label on phone field — Jim said this stops 25% of signups. Replace with something that feels optional and benefit-focused, not threatening. Candidate: "Cell phone (we'll text you your results)."
+### PC-A4 - Phone field label fix
+Status: DONE (2026-07-16)
+Description: Removed "Get a call back within minutes." Added helper copy under the email and phone fields explaining verification instead of a sales callback.
+Commit: bb844bb
 Files: app/HomeClient.tsx
 
 ---
 
-### PC-A5 — IP geolocation city detection
-ID: PC-TASK-010
+### PC-A5 - IP geolocation city detection
 Status: OPEN
-Description: Detect visitor's city silently on homepage load using ipapi.co (free up to 1,000/day). Powers dynamic H1 and city confirmation widget.
+Description: Detect the visitor's city on load so the page can personalize the headline and downstream competitor context.
 Files: app/HomeClient.tsx
 
 ---
 
-### PC-A6 — Dynamic H1 with visitor's city
-ID: PC-TASK-011
+### PC-A6 - Dynamic H1 with visitor city
 Status: OPEN
-Description: "See Why St. Louis Competitors Are Getting More Clicks Than You." Falls back to PC-A2 national H1 if city unknown.
-Files: app/HomeClient.tsx
-Dependencies: PC-A5
-
----
-
-### PC-A7 — City confirmation widget
-ID: PC-TASK-012
-Status: OPEN
-Description: "Are you a local business in St. Louis, MO? Yes / Not my city." Confirmed city powers DataForSEO competitor search on the report.
+Description: Use city detection to swap in a location-specific H1 when available.
 Files: app/HomeClient.tsx
 Dependencies: PC-A5
 
 ---
 
-## SECTION B — CHECK PAGE (loading/collecting info)
-The page the visitor sees after submitting their URL while the audit runs.
-Goal: Keep them engaged, set expectations, show progress.
+### PC-A7 - City confirmation widget
+Status: OPEN
+Description: Confirm the detected city and use that confirmation to drive competitor context later in the funnel.
+Files: app/HomeClient.tsx
+Dependencies: PC-A5
 
 ---
 
-### PC-B1 — Check page content and design review
+### PC-A8 - "Click monitor" byline
+Status: DONE (2026-07-16)
+Description: Added "We are a click monitor. The faster you are, the more clicks you receive." below the logo.
+Commit: bb844bb
+Files: app/HomeClient.tsx
+
+---
+
+### PC-A9 - Direct $495 price on pricing page
+Status: DONE (2026-07-16)
+Description: Added "$495 to correct your speed - additional fixes available a la carte" directly on PingClose's pricing page.
+Commit: bb844bb
+Files: app/pricing/page.tsx
+
+---
+
+### PC-A10 - Mobile grid bug on pricing page
+Status: DONE (2026-07-16)
+Description: Pricing cards had no responsive breakpoint and were being squeezed into unusable phone-width columns. Fixed with a shared `.responsive-grid-2col` class.
+Commit: bb844bb
+Files: app/globals.css, app/pricing/page.tsx
+
+---
+
+### PC-A11 - Below-the-fold images
 Status: OPEN
-Description: Review current check page. Add: list of what is being checked (74 signals), estimated time remaining, trust signals. Ensure no blinking or layout shift while results load.
+Description: Add below-the-fold visuals that explain something real. No Canva-style decoration. Jim still needs to point at the specific look or pattern he wants.
+Files: app/HomeClient.tsx
+
+---
+
+### PC-A12 - FAQ page mobile-responsive check
+Status: OPEN
+Description: Jim reported a mobile-only FAQ issue. Desktop verification looked fine, but after the real pricing-page mobile bug was found, the FAQ page still needs a real mobile re-check.
+Files: app/faq/FaqClient.tsx
+
+---
+
+### PC-A13 - FAQ content expansion
+Status: OPEN - WAITING
+Description: Jim wants stronger FAQ coverage informed by competitor material. Direct scraping was blocked; waiting on Jim to paste the reference material he wants used.
+Files: app/faq/FaqClient.tsx
+
+---
+
+## SECTION B - CHECK PAGE
+The page the visitor sees while the audit runs.
+
+---
+
+### PC-B1 - Check page content and design review
+Status: OPEN
+Description: Improve the wait screen with clearer progress, expectation-setting, and trust signals.
 Files: app/check/page.tsx
 
 ---
 
-## SECTION C — CUSTOMER REPORT PAGE
+### PC-B2 - Honest 90-second countdown / lock on report button
+Status: OPEN - DESIGNED, NOT BUILT
+Description: Prevent users from opening the report too early. Show an honest "up to 90 seconds" countdown and unlock early if the audit actually finishes sooner.
+Files: app/check/page.tsx
+Dependencies: PC-C11
+
+---
+
+### PC-B3 - Content-heavy early warning heuristic
+Status: OPEN - DESIGNED, NOT BUILT
+Description: Use the fast HTML scan to warn early when a page looks image-heavy, video-heavy, or generally slow before PageSpeed finishes.
+Files: lib/agents/htmlAgent.ts, app/check/page.tsx
+
+---
+
+## SECTION C - CUSTOMER REPORT PAGE
 Everything the customer sees on their report. This is the sales page.
 
 ---
 
-### PC-C1 — Plain English report labels
-ID: PC-TASK-018
+### PC-C1 - Plain English report labels
 Status: OPEN
-Description: Rewrite every metric label. Each box: plain name (big) + technical acronym (small, dimmed) + one sentence on what it means for their business. Fix thresholds: Requests goes red at 80 not 50. Fix hardcoded "49 problems" to show actual count. Merge duplicate Schema sections into one. Build this AFTER new report content sections are added so labels describe real data.
+Description: Rewrite report labels so each metric explains the business impact in plain language and reflects real thresholds/data.
 Files: app/report/[id]/page.tsx
 
 ---
 
-### PC-C2 — Social Presence Agent + findings on report
-ID: PC-TASK-024
+### PC-C2 - Social Presence Agent + findings on report
 Status: OPEN
-Description: New agent scrapes customer homepage for social/directory profiles. Flags every missing or unoptimized presence as a finding. Checks: Google Business Profile, Facebook, Instagram, LinkedIn, TikTok, YouTube, Pinterest, Yelp, BBB, Angi, Thumbtack, Apple Maps, Bing Places, Facebook Pixel, GA4, Google Search Console, Google Tag Manager, LocalBusiness schema sameAs links. Every missing one = a finding on the report.
-Files: lib/agents/socialPresenceAgent (new), app/report/[id]/page.tsx
+Description: Add a social/directory presence agent and turn missing presences into report findings.
+Files: lib/agents/socialPresenceAgent, app/report/[id]/page.tsx
 
 ---
 
-### PC-C3 — Location extraction from customer website
-ID: PC-TASK-021
+### PC-C3 - Location extraction from customer website
 Status: OPEN
-Description: During audit, scrape customer homepage and footer for city, state, address, phone area code. Feeds into Jim alert email and DataForSEO competitor lookup.
-Files: lib/agents/htmlAgent (extend)
+Description: Pull city, state, address, and phone-area context from the customer site for alerts and competitor logic.
+Files: lib/agents/htmlAgent.ts
 
 ---
 
-### PC-C4 — Nearest major city calculation
-ID: PC-TASK-022
+### PC-C4 - Nearest major city calculation
 Status: OPEN
-Description: "Chesterfield, MO — 19 miles west of St. Louis." Gives Jim instant geographic context before he dials. Shows on admin report.
-Files: lib/ (new utility)
+Description: Show geographic context such as "19 miles west of St. Louis" for Jim's workflow.
+Files: lib/
 Dependencies: PC-C3
 
 ---
 
-### PC-C5 — DataForSEO click comparison on report
-ID: PC-TASK-013
+### PC-C5 - DataForSEO click comparison on report
 Status: OPEN
-Description: Wire the built DataForSEO agent into the report. Show: customer's primary keyword, their rank, #1 competitor domain, competitor monthly clicks vs customer monthly clicks. Gut punch number front and center. Show clicks TODAY clearly — the "after fix" projection comes in PC-C6.
+Description: Put the built DataForSEO agent onto the report and surface the click gap in a way that sells the fix.
 Files: app/report/[id]/page.tsx
 Dependencies: PC-C1, PC-C3
 
 ---
 
-### PC-C6 — Report value close section
-ID: PC-TASK-025
+### PC-C6 - Report value close section
 Status: OPEN
-Description: Below the click gap, show: (1) Projected clicks after fix — "At rank #1 you would receive an estimated X clicks/month." (2) Agency comparison — "Agencies charge $1,500 and take 6 weeks. We fix it in 72 hours for $495 — with a checklist of every item completed." (3) Speed-to-opportunity bridge — "At PingClose we can make your site faster — and faster sites get more clicks. But once you see your full results, you'll be shocked at what happens when you attack the open opportunities your competitors don't even know exist." (4) $495 CTA button. Build AFTER PC-C5 so real click numbers are available.
+Description: Add the projected upside, agency comparison, and $495 close once real click-gap data is available.
 Files: app/report/[id]/page.tsx
 Dependencies: PC-C5
 
 ---
 
-### PC-C7 — Talk to a Person button
-ID: PC-TASK-020
+### PC-C7 - Talk to a Person button
 Status: OPEN
-Description: Prominent button on report page. Shows Jim's number (314) 517-2533. Clicking it sends Jim an instant alert email with full customer context. Build with other report page items.
+Description: Add a prominent contact action with Jim's number and immediate context forwarding.
 Files: app/report/[id]/page.tsx
 Dependencies: PC-C6
 
 ---
 
-### PC-C8 — Free city page offer on report
-ID: PC-TASK-023
+### PC-C8 - Free city page offer on report
 Status: OPEN
-Description: When report shows zero city pages AND customer has bought the $495 fix: "Your competitor has 14 city pages. You have 0. We built you a free one for [city]. Click to see it."
+Description: Offer a free city page when the customer has no city pages and has bought the fix package.
 Files: app/report/[id]/page.tsx
 Dependencies: LSAP-3
 
 ---
 
-### PC-C9 — Full competitive intelligence (top 13)
-ID: PC-TASK-016
+### PC-C9 - Full competitive intelligence
 Status: OPEN
-Description: Expand DataForSEO to show full top 13 local SERP, click distribution for all positions, silent PingClose audit on #1 competitor showing their weaknesses, comparison card, path to #1 in 90 days.
+Description: Expand the competitor story beyond one rank/click gap into top-13 SERP and competitor weakness analysis.
 Dependencies: PC-C5
 
 ---
 
-### PC-C10 — AI chat agent on report
-ID: PC-TASK-019
+### PC-C10 - AI chat agent on report
 Status: OPEN
-Description: Knows the visitor's exact report data and competitor comparison. Answers questions in plain English. Has a hand-off button to Jim.
+Description: Let the visitor ask questions about their exact report and competitor data, with a handoff to Jim.
 Dependencies: PC-C7
 
 ---
 
-## SECTION D — ADMIN REPORT PAGE
-What Jim sees. Customers never see this.
-
----
-
-### PC-D1 — Admin timing panel
-Status: OPEN
-Description: Show all agent durations on Jim's admin view of every report: PageSpeed ms, DataForSEO ms, HTML agent ms, total audit ms. Tells Jim if the system is living on the edge of failure.
-Files: app/report/[id]/page.tsx (admin view)
-
----
-
-### PC-D2 — Nearest major city on admin report
-Status: OPEN
-Description: Show "Chesterfield, MO — 19 miles west of St. Louis" on Jim's copy so he has geographic context before dialing.
-Dependencies: PC-C4
-
----
-
-### PC-D3 — Remove PS API box from customer view
-Status: OPEN
-Description: The PageSpeed API status box is visible to customers. Move it to admin-only view.
+### PC-C11 - Report page shows permanent zeros if opened too early
+Status: OPEN - REAL BUG, CONFIRMED LIVE
+Description: `/report/[id]` fetches once and never polls. If the visitor lands before PageSpeed finishes, they can get frozen placeholder values until they refresh manually.
 Files: app/report/[id]/page.tsx
 
 ---
 
-## SECTION E — ALERTS & NOTIFICATIONS
+### PC-C12 - PageSpeed retry logging and migration
+Status: OPEN - CODED, NOT FULLY FINISHED
+Description: Retry-once logic for transient PageSpeed failures was coded, but it was never properly tested. Jim also wants retry counts recorded in the DB before this is considered done.
+Required Migration: `ALTER TABLE pingclose_audits ADD COLUMN pagespeed_retry_count integer NOT NULL DEFAULT 0;`
+Files: lib/agents/pagespeedAgent/fetchPageSpeed.ts, app/api/pagespeed-agent/route.ts
 
 ---
 
-### PC-E1 — Jim alert email on FAIL audit ✅ DONE
-ID: PC-TASK-009
+## SECTION D - ADMIN REPORT PAGE
+What Jim sees. Customers never see this.
+
+---
+
+### PC-D1 - Admin timing panel
+Status: OPEN
+Description: Show the duration of each agent and the total audit time.
+Files: app/report/[id]/page.tsx
+
+---
+
+### PC-D2 - Nearest major city on admin report
+Status: OPEN
+Description: Add geographic context for outbound calls.
+Dependencies: PC-C4
+
+---
+
+### PC-D3 - Remove PageSpeed API box from customer view
+Status: OPEN
+Description: Move the API-status box to admin-only view.
+Files: app/report/[id]/page.tsx
+
+---
+
+## SECTION E - ALERTS & NOTIFICATIONS
+
+---
+
+### PC-E1 - Jim alert email on FAIL audit
 Status: DONE
+Description: Alert email already shipped.
+Commit: ad8b484
 Files: lib/reportDelivery.ts, lib/email.ts
 
 ---
 
-### PC-E2 — AWS SMS text to customer with report link
+### PC-E2 - Customer texting capability
+Status: OPEN - WAITING, PROVIDER PATH NOT SETTLED
+Description: The old AWS-only plan is stale. On 2026-07-19 the live AWS account still showed SMS Sandbox, no verified numbers, no phone numbers, and no registrations. Treat texting as part of the broader provider decision instead of a ready-to-build standalone AWS task.
+Dependencies: PC-STRAT2
+
+---
+
+### PC-E3 - Google Contacts auto-create on FAIL audit
 Status: OPEN
-Description: Send customer a text with link to their report immediately after audit completes. Awaiting AWS SMS Sandbox exit approval (submitted 2026-07-12, 24-48h turnaround).
+Description: Create a Google Contact with name, phone, domain, score, and report link. On 2026-07-21 no Google Contacts connector was available in the tool list.
 Dependencies: PC-E1
 
 ---
 
-### PC-E3 — Google Contacts auto-create on FAIL audit
-Status: OPEN
-Description: Auto-create a Google Contact with: name, phone, domain, score, report link in Notes. Dedup by phone number. Skip Jim's own email.
-Dependencies: PC-E1
+### PC-E4 - Mandatory dual verification (email and phone)
+Status: OPEN - DECIDED 2026-07-19, NOT BUILT
+Description: Jim decided both email and phone must be required and actually verified before an audit runs. Needs phone verification storage, send/verify routes, rate limiting, and a homepage flow that mirrors email verification.
+Dependencies: PC-STRAT2
 
 ---
 
-# PROJECT 2 — LOCALSEOAEOPRO.COM
+### PC-E5 - Event forwarding from phone system into PingClose notifications
+Status: OPEN
+Description: Pipe calls, texts, or voicemail events from the chosen phone system into the existing notification flow Jim already relies on.
+Dependencies: PC-STRAT2
+
+---
+
+## SECTION F - SECURITY
+Security findings and follow-up from the 2026-07-16 and 2026-07-19 sessions.
+
+---
+
+### PC-SEC1 - Admin routes brute-force bypass
+Status: DONE
+Description: Consolidated the four admin-authenticated routes behind one shared helper so all of them use the same rate-limited auth path.
+Commit: 7779613
+Files: lib/adminRateLimiter.ts, app/api/admin/login/route.ts, app/api/admin/audits/route.ts, app/api/setup/route.ts, app/api/setup/test/route.ts
+
+---
+
+### PC-SEC2 - Timing-safe password comparison
+Status: DONE
+Description: Replaced plain `===` password comparison with a timing-safe check.
+Commit: 7779613
+Files: lib/adminRateLimiter.ts
+
+---
+
+### PC-SEC3 - Leftover POC endpoints removed
+Status: DONE
+Description: Deleted unauthenticated `/api/poc/agent` and `/api/poc/dispatcher` production scaffolding.
+Commit: 7779613
+Files: app/api/poc/agent/route.ts, app/api/poc/dispatcher/route.ts
+
+---
+
+### PC-SEC4 - SSRF gap in audit routes
+Status: DONE
+Description: Added SSRF target validation for private, loopback, link-local, and cloud-metadata addresses.
+Commit: 7779613
+Files: lib/ssrfGuard.ts, app/api/audit/route.ts, app/api/audit/fast/route.ts
+
+---
+
+### PC-SEC5 - No rate limiting on `/api/audit/fast`
+Status: DONE
+Description: Added IP-based rate limiting to the fast audit route.
+Commit: 7779613
+Files: lib/rateLimiter.ts, app/api/audit/fast/route.ts
+
+---
+
+### PC-SEC6 - Email verification never enforced server-side
+Status: DONE
+Description: `/api/audit` now checks for a verified email server-side instead of trusting the UI flow alone.
+Commit: cdf4a82
+Files: app/api/audit/route.ts
+
+---
+
+### PC-SEC7 - `/api/dataforseo-keywords` is public and unauthenticated
+Status: OPEN
+Description: Every call costs money. Decision still needed on whether this route should be public at all.
+Files: app/api/dataforseo-keywords/route.ts
+
+---
+
+### PC-SEC8 - Resend key returned in plaintext from `/api/setup`
+Status: OPEN - DECISION NEEDED
+Description: Admin-only, but still worth deciding whether to mask the key rather than returning the full value.
+Files: app/api/setup/route.ts
+
+---
+
+### PC-SEC9 - Rate limiter and related checks fail open if Supabase is unavailable
+Status: OPEN - DECISION NEEDED
+Description: Confirmed in local development with placeholder credentials. Needs a deliberate choice about fail-open versus fail-closed behavior.
+Files: lib/adminRateLimiter.ts, lib/rateLimiter.ts
+
+---
+
+### PC-SEC10 - Leaked Supabase service_role key closure
+Status: OPEN - OPERATIONAL FIX DONE, FINAL SENSITIVITY REMAINS
+Description: PingClose was moved onto a new dedicated secret key, Vercel was updated, production was redeployed, and live end-to-end behavior was re-tested. The remaining sensitivity is final old-key invalidation: that depended on LocalSEOAEOPro migrating off the shared legacy JWT key path, and later PingClose session notes carried forward re-verification concerns rather than a fresh independent proof from this context.
+Files: Supabase dashboard, Vercel environment, LocalSEOAEOPro Supabase client if final legacy-key retirement is revisited
+
+---
+
+### PC-SEC11 - Phone-only submissions bypass verification and crash
+Status: OPEN - ROOT CAUSE CONFIRMED
+Description: Phone-only submits skip the email verification branch and then crash in `isVIP(undefined)` when rate limiting runs. The thrown error is swallowed by the outer handler and returned as a generic 500. Jim explicitly chose to hold the isolated fix until PC-E4 is tackled.
+Files: app/api/audit/route.ts, lib/rateLimiter.ts
+
+---
+
+### PC-SEC12 - No rate limit on `/api/send-code`
+Status: OPEN
+Description: Verification-code emails can be spam-triggered and can burn Resend usage.
+Files: app/api/send-code/route.ts
+
+---
+
+### PC-SEC13 - Add CAPTCHA to admin login
+Status: OPEN
+Description: A provider-independent CAPTCHA would reduce brute-force risk even if the DB-backed limiter fails open.
+Files: app/api/admin/login/route.ts, app/admin/page.tsx
+
+---
+
+### PC-SEC14 - Admin login requires TOTP
+Status: DONE (2026-07-19)
+Description: Admin auth now requires the shared password plus a live 6-digit TOTP code. Residual future-scope gaps remain: still one shared admin identity, no sessions, and no per-user audit trail.
+Commit: 94459ae
+Files: lib/totp.ts, lib/adminRateLimiter.ts, app/api/admin/login/route.ts, app/api/admin/audits/route.ts, app/api/setup/route.ts, app/api/setup/test/route.ts, app/admin/page.tsx
+
+---
+
+### PC-SEC15 - Audit MFA on actual cloud provider accounts
+Status: OPEN
+Description: Separate from PingClose's own admin login. Check MFA on AWS, Supabase, Vercel, GitHub, and Resend accounts.
+Files: Account settings, not repo code
+
+---
+
+## SECTION G - CODE QUALITY
+Quality findings from the 2026-07-16 audit that were intentionally deferred.
+
+---
+
+### PC-CQ1 - No centralized design tokens
+Status: OPEN
+Description: The app still has many hardcoded color values and inconsistent inline styling instead of shared tokens.
+Files: App-wide
+
+---
+
+### PC-CQ2 - Emoji used as functional icons
+Status: OPEN
+Description: Emoji are still serving as the icon system, which conflicts with the stated brand direction.
+Files: App-wide
+
+---
+
+### PC-CQ3 - Files exceed the project's own 200-line rule
+Status: OPEN
+Description: Several core files are far larger than the repo's stated size guideline and should be split intentionally.
+Files: app/check/page.tsx, app/HomeClient.tsx, app/faq/FaqClient.tsx, app/admin/page.tsx, app/pricing/page.tsx, lib/email.ts
+
+---
+
+## SECTION H - STRATEGIC DECISIONS
+Do not implement these without a dedicated planning session.
+
+---
+
+### PC-STRAT1 - Merge LocalSEOAEOPro into PingClose
+Status: OPEN - PLANNING ONLY
+Description: Jim raised the idea of collapsing the two-brand funnel into one unified product before either site builds search equity. This is a brand and funnel decision first, not just a code migration.
+
+---
+
+### PC-STRAT2 - Phone / SMS / voice provider decision
+Status: OPEN
+Description: Decide between raw AWS infrastructure and OpenPhone/Quo-style business phone tooling. Twilio is permanently excluded. OpenPhone/Quo pricing was checked; webhook/API depth was not yet verified.
+
+---
+
+### PC-FUTURE-2 - Voice calling setup
+Status: OPEN - EXPLICITLY DEFERRED
+Description: Real voice call routing is future scope after PC-STRAT2. Do not start while phone verification itself is still undecided.
+Dependencies: PC-STRAT2
+
+---
+
+# PROJECT 2 - LOCALSEOAEOPRO.COM
 Fix delivery service. Fixes what PingClose finds. $495 flat.
 
 ---
 
-### LSAP-1 — $495 fix package landing page
-ID: LSAP-TASK-001
+### LSAP-1 - $495 fix package landing page
 Status: OPEN
-Description: Landing page listing exactly what is fixed for $495. Clear CTA. This is where Jim sends customers after the call. Must include: full list of fixes, 72-hour turnaround promise, agency price comparison ($1,500 / 6 weeks vs $495 / 72 hours), checklist guarantee.
-Why: Jim has no professional page to send customers to right now.
-Files: LocalSEOAEOPro.com (separate project)
+Description: Build the clear sales page Jim can send customers to after the call.
+Files: LocalSEOAEOPro.com
 
 ---
 
-### LSAP-2 — Secure WordPress login submission
-ID: LSAP-TASK-002
+### LSAP-2 - Secure WordPress login submission
 Status: OPEN
-Description: Encrypted form on LocalSEOAEOPro.com. Customer submits WordPress admin URL, username, password. Jim gets notified when credentials arrive. With WP access LocalSEOAEOPro can fix nearly everything without the customer doing anything.
-Files: LocalSEOAEOPro.com (separate project)
+Description: Encrypted form for customer WordPress credentials, with notification to Jim.
+Files: LocalSEOAEOPro.com
 Dependencies: LSAP-1
 
 ---
 
-### LSAP-3 — Jim's fix tracking checklist
-ID: LSAP-TASK-003
+### LSAP-3 - Jim's fix tracking checklist
 Status: OPEN
-Description: When customer submits WP login, Jim gets a checklist of every fix from their PingClose report. Each item has a checkbox. When all checked, system sends customer a "Your site is fixed — run PingClose again" email with their report link.
-Files: LocalSEOAEOPro.com (separate project)
+Description: Checklist of promised fixes that can drive the completion email once everything is done.
+Files: LocalSEOAEOPro.com
 Dependencies: LSAP-2
 
 ---
 
-### LSAP-4 — City Page SuperAgent
-ID: LSAP-TASK-004
+### LSAP-4 - City Page SuperAgent
 Status: OPEN
-Description: Input: keyword + city. Output: complete optimized city page in 60 seconds. Includes AI-researched local content, AI-generated images, LocalBusiness schema, FAQ schema, optimized title/H1/meta, internal links. Auto-submit to Google Search Console for crawling.
-Why: First page free. 20 pages at $150 = $3,000. One customer pays for the whole package.
-Files: LocalSEOAEOPro.com (separate project)
+Description: Generate optimized city pages quickly as part of the upsell path.
+Files: LocalSEOAEOPro.com
 
 ---
 
-### LSAP-5 — 20 city package offer page
-ID: LSAP-TASK-005
+### LSAP-5 - 20 city package offer page
 Status: OPEN
-Description: After the free city page is live and customer sees it in GA4, offer 20 cities at $150/page = $3,000. Include projected clicks per page, time to rank, proof from the free page.
-Files: LocalSEOAEOPro.com (separate project)
-Dependencies: LSAP-4, PC-14
+Description: Upsell from the free page into a multi-city package once proof exists.
+Files: LocalSEOAEOPro.com
+Dependencies: LSAP-4
 
 ---
 
-# PROJECT 3 — STLPAYPRO
+### LSAP-6 - Migrate browser client off legacy Supabase anon key
+Status: OPEN
+Description: Critical shared-infrastructure follow-up from the service_role key leak. LocalSEOAEOPro still depended on the legacy JWT-based browser key path, which blocked clean retirement of the old shared secret pair.
+Files: LocalSEOAEOPro Supabase client and related auth wiring
+
+---
+
+# PROJECT 3 - STLPAYPRO
 Payment processing platform.
 
 ---
@@ -285,7 +542,7 @@ Payment processing platform.
 
 ---
 
-# PROJECT 4 — ALARMINSPECT.COM
+# PROJECT 4 - ALARMINSPECT.COM
 Alarm inspection platform.
 
 ---
@@ -294,32 +551,32 @@ Alarm inspection platform.
 
 ---
 
-# PROJECT 5 — OTHER / CROSS-PROJECT
+# PROJECT 5 - OTHER / CROSS-PROJECT
 
 ---
 
-### OTHER-1 — AWS SMS text to customer with report link
+### OTHER-1 - Customer texting / phone-verification capability
 Status: OPEN
-Description: Send customer a text with link to their report immediately after audit completes. Awaiting AWS SMS Sandbox exit approval (submitted 2026-07-12, 24-48h turnaround).
-Dependencies: PC-2
+Description: Cross-project placeholder for the shared phone/SMS decision. The old AWS-only framing is no longer reliable; the real blocker is provider choice plus 10DLC setup.
 
 ---
 
-### OTHER-2 — Google Contacts auto-create on FAIL audit
+### OTHER-2 - Google Contacts auto-create on FAIL audit
 Status: OPEN
-Description: When audit is FAIL, auto-create a Google Contact with: name, phone, domain, score, report link in Notes. Dedup by phone number. Skip Jim's own email.
-Dependencies: PC-2
+Description: Auto-create a contact with the customer context. Connector availability still needs to exist in the active tool environment.
 
 ---
 
 ## CARRY-FORWARD OPEN ITEMS
 
-- **SELF-HEALING** — All agents must be self-healing. DataForSEO: DONE. Still needed: PageSpeed, HTML, Hosting, Preflight, Resend.
-- **OPEN-1** — PageSpeed API auto-retry on 429/error. Target <0.1% audit failure rate.
-- **OPEN-3** — Daily synthetic-user monitor. Site was broken for a week and nobody knew.
-- **OPEN-4** — passes_one_second DB backfill. All rows before 2026-07-09 have wrong values.
-- **PC-TASK-003** — Remove VIP_EMAILS hardcoded list from send-code/route.ts.
-- **PHONE LABEL** — "Get a call back within minutes" on homepage form needs to be changed. Jim: "That will stop 25% of the people."
+- SELF-HEALING - DataForSEO is done. PageSpeed retry-once logic exists but is not fully closed. HTML, Hosting, Preflight, and Resend still need their own self-healing pass.
+- OPEN-1 - PageSpeed auto-retry is now represented by PC-C12. Retry-once for transient generic failures was coded; 429/quota behavior still needs deliberate handling.
+- OPEN-3 - Daily synthetic-user monitor. The site was broken for days before and no automation caught it.
+- OPEN-4 - `passes_one_second` backfill. Rows before 2026-07-09 still need correction.
+- PC-TASK-003 - Remove the hardcoded VIP email list carefully; it is now reused both in `send-code` and through `isVIP()` for the server-side verification path.
+- PC-FUTURE-1 - Adaptive countdown on the wait screen remains deferred until there is enough real timing data to avoid lying to customers.
+- PC-CONNECTOR-1 - The failing `@21st-dev/magic` banner is an app-level connector setting, not a PingClose code issue.
+- DEPLOY FOLLOW-UP - If needed, re-confirm the READY state of deployment `dpl_HEb8qeYriXCDYL2ZiHk1xMJkRUuL` and any later push/deploy effects that were only recorded, not independently re-verified, in MASTER_BRAIN.
 
 ---
 
@@ -330,13 +587,19 @@ Dependencies: PC-2
 | PC-TASK-C001 | Fix check page blinking | 5b49c0a | 2026-07-03 |
 | PC-TASK-C002 | Fix pagespeed-agent Vercel 90s timeout | b61e313, e825fdd | 2026-07-03 |
 | PC-TASK-C003 | Add 90s hard stop to PageSpeed polling | ed18a07 | 2026-07-03 |
-| PC-TASK-C004 | Redesign report page — Linear/Vercel aesthetic | 35459df | 2026-07-03 |
-| PC-TASK-C005 | Create Master Brain system | — | 2026-07-04 |
-| PC-TASK-C006 | Fix RESEND_API_KEY BOM — lib/cleanSecret.ts | 3851b1f | 2026-07-07 |
-| PC-TASK-C007 | Fix broken builds — commit preflightCheck.ts | 5f97274 | 2026-07-07 |
-| PC-TASK-C008 | Fix emails showing fake 0/100 scores | 29faf32–31576b4 | 2026-07-08 |
-| PC-TASK-C009 | Fix speed thresholds — SUPERSTAR/PASS/FAIL | 034784b–eb8d824 | 2026-07-09 |
-| PC-TASK-C010 | Sync local repo with GitHub after preflightCheck conflict | — | 2026-07-12 |
-| PC-TASK-C011 | DataForSEO agent — keywords + local SERP + self-healing retry | — | 2026-07-12 |
-| PC-TASK-C012 | Phone number field on signup form | 2ad395b | 2026-07-12 |
+| PC-TASK-C004 | Redesign report page | 35459df | 2026-07-03 |
+| PC-TASK-C005 | Create Master Brain system | - | 2026-07-04 |
+| PC-TASK-C006 | Fix RESEND_API_KEY BOM with secret cleaning | 3851b1f | 2026-07-07 |
+| PC-TASK-C007 | Fix broken builds around `preflightCheck.ts` | 5f97274 | 2026-07-07 |
+| PC-TASK-C008 | Fix emails showing fake 0/100 scores | 29faf32-31576b4 | 2026-07-08 |
+| PC-TASK-C009 | Fix speed thresholds: SUPERSTAR / PASS / FAIL | 034784b-eb8d824 | 2026-07-09 |
+| PC-TASK-C010 | Sync local repo with GitHub after conflict cleanup | - | 2026-07-12 |
+| PC-TASK-C011 | DataForSEO agent: keywords + local SERP + self-healing retry | - | 2026-07-12 |
+| PC-TASK-C012 | Add phone field on signup form | 2ad395b | 2026-07-12 |
 | PC-TASK-C013 | Jim alert email with clickable phone | ad8b484 | 2026-07-12 |
+| PC-TASK-C014 | Security bundle: admin-auth bypass, timing-safe compare, POC removal, SSRF guard, `/api/audit/fast` rate limit | 7779613 | 2026-07-16 |
+| PC-TASK-C015 | Enforce email verification server-side in `/api/audit` | cdf4a82 | 2026-07-16 |
+| PC-TASK-C016 | Homepage copy reposition, verification helper copy, pricing-page $495 offer, pricing mobile-grid fix | bb844bb | 2026-07-16 |
+| PC-TASK-C017 | Sync `projects/pingclose/TASKS.md` with new security, code-quality, and strategy sections | 48dd8e7, 9419927 | 2026-07-16 |
+| PC-TASK-C018 | Require TOTP authenticator code alongside admin password | 94459ae | 2026-07-19 |
+| PC-TASK-C019 | Add sequential-only Ultra Mode methodology to `CLAUDE.md` (local-only) | 8c21eee | 2026-07-21 |
