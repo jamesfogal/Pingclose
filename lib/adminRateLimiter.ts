@@ -16,14 +16,18 @@ export async function checkAdminLoginRateLimit(ip: string): Promise<{ limited: b
 
     if (error) {
       console.error('ADMIN_RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
-      return { limited: false };
+      // Fail-closed (Jim's decision, PC-SEC9): if we can't verify attempt
+      // history, block rather than risk unlimited brute force on the admin
+      // password. Costs Jim access to /admin during a Supabase outage, but
+      // he already accepted that tradeoff.
+      return { limited: true };
     }
 
     return { limited: !!count && count >= MAX_ATTEMPTS };
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
     console.error('ADMIN_RATE_LIMIT_FAIL:', msg);
-    return { limited: false };
+    return { limited: true };
   }
 }
 
@@ -35,7 +39,7 @@ export async function recordAdminLoginAttempt(ip: string): Promise<void> {
   }
 }
 
-function timingSafeCompare(a: string, b: string): boolean {
+export function timingSafeCompare(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
   // Compare against a same-length buffer first so a length mismatch doesn't

@@ -152,6 +152,53 @@ export async function sendLimitNotification(email: string, attemptNumber: number
   });
 }
 
+// ── PageSpeed Failure Alert ──────────────────────────────────────
+export async function sendPageSpeedFailureAlert(params: {
+  reportId: string;
+  url: string;
+  status: 'timeout' | 'error';
+  reason: string | null;
+}) {
+  const { reportId, url, status, reason } = params;
+  const reportUrl = `${siteUrl}/report/${reportId}`;
+  const escapeHtml = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+  // hostname parse can fall back to the raw url if it's malformed — escape either way before embedding in HTML
+  const hostname = escapeHtml((() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })());
+  const label = status === 'timeout' ? 'TIMED OUT' : 'ERRORED';
+  // reason can echo raw text from Google's API or the preflight check — escape before embedding in HTML
+  const safeReason = escapeHtml(reason || 'Unknown');
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: `PingClose Alerts <${fromEmail}>`,
+    to: NOTIFY_EMAIL,
+    subject: `🚨 PageSpeed ${label} — ${hostname}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head><meta charset="utf-8"></head>
+        <body style="margin:0;padding:0;background:#0B0E16;font-family:system-ui,sans-serif;">
+          <div style="max-width:500px;margin:0 auto;padding:40px 24px;">
+            <div style="font-size:24px;font-weight:800;color:#10D9A0;margin-bottom:8px;">PingClose</div>
+            <div style="font-size:14px;color:#64748B;margin-bottom:32px;">System Alert</div>
+            <div style="background:#0D1528;border:1px solid #F8717140;border-radius:12px;padding:24px;margin-bottom:24px;">
+              <div style="font-size:18px;font-weight:700;color:#F87171;margin-bottom:16px;">🚨 PageSpeed ${label}</div>
+              <div style="font-size:16px;color:#94A3B8;margin-bottom:8px;">
+                <strong style="color:#F1F5F9;">${hostname}</strong> could not get a real speed score.
+              </div>
+              <div style="font-size:15px;color:#64748B;">Reason: ${safeReason}</div>
+              <div style="font-size:15px;color:#64748B;margin-top:4px;">Report ID: ${reportId}</div>
+            </div>
+            <div style="text-align:center;">
+              <a href="${reportUrl}" style="display:inline-block;background:#10D9A0;color:#0B0E16;font-size:16px;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;">View Report →</a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+}
+
 // ── Jim's Lead Notification Email ────────────────────────────────
 export async function sendLeadNotification(params: {
   reportId: string;

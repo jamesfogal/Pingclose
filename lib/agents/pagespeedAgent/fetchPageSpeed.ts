@@ -1,6 +1,14 @@
 // Only external API surface for this agent: Google PageSpeed Insights v5 (mobile + desktop = 2 calls)
 const ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 const TIMEOUT_MS = 75_000;
+// Retry gets a much shorter budget than the first attempt: it only ever
+// fires for a fast HTTP error response (see fetchStrategy below — a real
+// timeout never retries), and Google's transient errors clear within a few
+// seconds when they clear at all. Giving the retry another full 75s risked
+// preflight(10s) + first-attempt(~fast fail) + retry(75s) landing at or past
+// this route's 90s Vercel maxDuration, which kills the function outright
+// instead of returning the graceful timeout/error response.
+const RETRY_TIMEOUT_MS = 20_000;
 
 interface RawFetchResult {
   ok: boolean;
@@ -8,11 +16,12 @@ interface RawFetchResult {
   json: Record<string, unknown> | null;
   quotaExceeded: boolean;
   error?: string;
+  retried: boolean;
 }
 
-async function fetchStrategyOnce(url: string, strategy: 'mobile' | 'desktop', apiKey: string): Promise<RawFetchResult> {
+async function fetchStrategyOnce(url: string, strategy: 'mobile' | 'desktop', apiKey: string, timeoutMs: number = TIMEOUT_MS): Promise<RawFetchResult> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const res = await fetch(
@@ -24,10 +33,10 @@ async function fetchStrategyOnce(url: string, strategy: 'mobile' | 'desktop', ap
     if (!res.ok) {
       const message = (json as { error?: { message?: string } } | null)?.error?.message || `HTTP ${res.status}`;
       const quotaExceeded = res.status === 429 || /quota/i.test(message);
-      return { ok: false, status: res.status, json: null, quotaExceeded, error: message };
+      return { ok: false, status: res.status, json: null, quotaExceeded, error: message, retried: false };
     }
 
-    return { ok: true, status: res.status, json: json as Record<string, unknown>, quotaExceeded: false };
+    return { ok: true, status: res.status, json: json as Record<string, unknown>, quotaExceeded: false, retried: false };
   } catch (err) {
     const timedOut = err instanceof Error && err.name === 'AbortError';
     return {
@@ -35,7 +44,8 @@ async function fetchStrategyOnce(url: string, strategy: 'mobile' | 'desktop', ap
       status: 0,
       json: null,
       quotaExceeded: false,
-      error: timedOut ? `PageSpeed request timed out after ${TIMEOUT_MS}ms` : (err instanceof Error ? err.message : String(err)),
+      error: timedOut ? `PageSpeed request timed out after ${timeoutMs}ms` : (err instanceof Error ? err.message : String(err)),
+      retried: false,
     };
   } finally {
     clearTimeout(timer);
@@ -53,20 +63,23 @@ async function fetchStrategy(url: string, strategy: 'mobile' | 'desktop', apiKey
   if (first.ok || first.quotaExceeded || first.status === 0) return first;
 
   console.warn(`PAGESPEED_RETRY: ${strategy} failed (${first.error}), retrying once`);
-  return fetchStrategyOnce(url, strategy, apiKey);
+  const retried = await fetchStrategyOnce(url, strategy, apiKey, RETRY_TIMEOUT_MS);
+  return { ...retried, retried: true };
 }
 
 export async function fetchPageSpeed(url: string, apiKey: string): Promise<
-  | { ok: true; mobile: Record<string, unknown>; desktop: Record<string, unknown> }
-  | { ok: false; error: string; quotaExceeded: boolean; status?: number }
+  | { ok: true; mobile: Record<string, unknown>; desktop: Record<string, unknown>; retryCount: number }
+  | { ok: false; error: string; quotaExceeded: boolean; status?: number; retryCount: number }
 > {
   const [mobile, desktop] = await Promise.all([
     fetchStrategy(url, 'mobile', apiKey),
     fetchStrategy(url, 'desktop', apiKey),
   ]);
 
-  if (!mobile.ok) return { ok: false, error: mobile.error || 'Mobile PageSpeed request failed', quotaExceeded: mobile.quotaExceeded, status: mobile.status };
-  if (!desktop.ok) return { ok: false, error: desktop.error || 'Desktop PageSpeed request failed', quotaExceeded: desktop.quotaExceeded, status: desktop.status };
+  const retryCount = (mobile.retried ? 1 : 0) + (desktop.retried ? 1 : 0);
 
-  return { ok: true, mobile: mobile.json!, desktop: desktop.json! };
+  if (!mobile.ok) return { ok: false, error: mobile.error || 'Mobile PageSpeed request failed', quotaExceeded: mobile.quotaExceeded, status: mobile.status, retryCount };
+  if (!desktop.ok) return { ok: false, error: desktop.error || 'Desktop PageSpeed request failed', quotaExceeded: desktop.quotaExceeded, status: desktop.status, retryCount };
+
+  return { ok: true, mobile: mobile.json!, desktop: desktop.json!, retryCount };
 }

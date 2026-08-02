@@ -13,18 +13,18 @@ export { buildFallbackResult } from './fallbackResult';
 export async function runPageSpeedAgent(url: string): Promise<PageSpeedAgentResponse> {
   const apiKey = process.env.PAGESPEED_API_KEY;
   if (!apiKey) {
-    return { ok: false, error: 'PAGESPEED_API_KEY not configured', quotaExceeded: false };
+    return { ok: false, error: 'PAGESPEED_API_KEY not configured', quotaExceeded: false, retryCount: 0 };
   }
 
   const fetched = await fetchPageSpeed(url, apiKey);
   if (!fetched.ok) {
-    return { ok: false, error: fetched.error, quotaExceeded: fetched.quotaExceeded, status: fetched.status };
+    return { ok: false, error: fetched.error, quotaExceeded: fetched.quotaExceeded, status: fetched.status, retryCount: fetched.retryCount };
   }
 
   try {
     const data = parsePageSpeed(fetched.mobile, fetched.desktop);
-    return { ok: true, data };
+    return { ok: true, data, retryCount: fetched.retryCount };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'PageSpeed parse failed', quotaExceeded: false };
+    return { ok: false, error: err instanceof Error ? err.message : 'PageSpeed parse failed', quotaExceeded: false, retryCount: fetched.retryCount };
   }
 }

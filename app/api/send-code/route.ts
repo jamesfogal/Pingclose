@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { cleanSecret } from '@/lib/cleanSecret';
+import { assertPublicHostname } from '@/lib/ssrfGuard';
+import { getClientIp } from '@/lib/adminRateLimiter';
+import { checkEmailCodeRateLimit, checkIpCodeRateLimit } from '@/lib/rateLimiter';
 
 const VIP_EMAILS = ['jim@pingclose.com', 'james.fogal@gmail.com', 'james.fogal@citywidealarms.com'];
 
 export async function POST(req: NextRequest) {
   try {
     const { email, url } = await req.json();
+    const ip = getClientIp(req);
 
     if (!email || !url) {
       return NextResponse.json({ error: 'Email and URL are required.' }, { status: 400 });
@@ -29,8 +33,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Please enter a valid website address.' }, { status: 400 });
     }
 
-    // Check if URL is actually reachable
+    // Rate limit before doing any network fetch — one inbox getting spammed,
+    // or one IP cycling through many different addresses (PC-SEC12)
+    const [emailLimit, ipLimit] = await Promise.all([
+      checkEmailCodeRateLimit(email),
+      checkIpCodeRateLimit(ip),
+    ]);
+    if (emailLimit.limited || ipLimit.limited) {
+      return NextResponse.json({ error: 'Too many verification codes requested. Please try again later.' }, { status: 429 });
+    }
+
+    // Check if URL is actually reachable — guard against SSRF first, this
+    // route previously fetched the customer-submitted URL with no check
+    // that it doesn't resolve to a private/loopback/link-local/cloud-metadata
+    // address (same guard already used by /api/audit and /api/audit/fast)
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+    try {
+      await assertPublicHostname(new URL(normalizedUrl).hostname);
+    } catch {
+      return NextResponse.json({ error: "We couldn't reach that website. Please check the URL and try again." }, { status: 400 });
+    }
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
@@ -61,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     // Store code — delete any previous unverified codes for this email first
     await supabase.from('email_verifications').delete().eq('email', email.toLowerCase()).eq('verified', false);
-    await supabase.from('email_verifications').insert({ email: email.toLowerCase(), code, expires_at: expiresAt });
+    await supabase.from('email_verifications').insert({ email: email.toLowerCase(), code, expires_at: expiresAt, ip_address: ip });
 
     // Send code via Resend
     const resendKey = cleanSecret(process.env.RESEND_API_KEY);

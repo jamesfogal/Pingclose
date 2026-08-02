@@ -7,7 +7,7 @@ export function isVIP(email: string): boolean {
   return VIP_EMAILS.includes(email.toLowerCase());
 }
 
-export async function checkRateLimit(email: string): Promise<{ limited: boolean }> {
+export async function checkRateLimit(email: string): Promise<{ limited: boolean; reason?: 'limit' | 'error' }> {
   if (isVIP(email)) return { limited: false };
 
   try {
@@ -20,17 +20,21 @@ export async function checkRateLimit(email: string): Promise<{ limited: boolean 
 
     if (error) {
       console.error('RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
-      return { limited: false };
+      // Fail-closed (Jim's decision, PC-SEC9): /api/audit needs Supabase to
+      // save the row anyway, so this costs almost nothing in practice, and
+      // it closes the gap where a transient error on just this check let
+      // audits through uncounted.
+      return { limited: true, reason: 'error' };
     }
 
     if (count && count >= 5) {
       try { await sendLimitNotification(email, count + 1); } catch { /* non-blocking */ }
-      return { limited: true };
+      return { limited: true, reason: 'limit' };
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
     console.error('RATE_LIMIT_FAIL:', msg);
-    return { limited: false };
+    return { limited: true, reason: 'error' };
   }
 
   return { limited: false };
@@ -54,6 +58,11 @@ export async function checkIpRateLimit(ip: string): Promise<{ limited: boolean }
 
     if (error) {
       console.error('IP_RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
+      // Deliberately stays fail-open (Jim's decision, PC-SEC9, 2026-08-01) —
+      // unlike the admin login and email-based limiters, this one guards
+      // /api/audit/fast, which has no other Supabase dependency. Fail-closed
+      // here would mean an unrelated Supabase outage takes down a feature
+      // that doesn't need Supabase to do its actual work.
       return { limited: false };
     }
 
@@ -62,6 +71,62 @@ export async function checkIpRateLimit(ip: string): Promise<{ limited: boolean }
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
     console.error('IP_RATE_LIMIT_FAIL:', msg);
     return { limited: false };
+  }
+}
+
+// Guards /api/send-code (PC-SEC12) — that route had zero rate limiting,
+// email or IP. Two separate caps: a tight per-email limit stops harassing
+// one inbox with repeated code emails; a looser per-IP limit stops cycling
+// through many different target addresses from one source. Both fail-closed
+// on a Supabase error, matching PC-SEC9's reasoning — this route can't send
+// a code without writing to email_verifications anyway, so failing closed
+// costs almost nothing extra.
+const EMAIL_CODE_MAX_PER_HOUR = 3;
+const IP_CODE_MAX_PER_DAY     = 15;
+
+export async function checkEmailCodeRateLimit(email: string): Promise<{ limited: boolean }> {
+  if (isVIP(email)) return { limited: false };
+
+  try {
+    const windowStart = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count, error } = await supabase
+      .from('email_verifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('email', email.toLowerCase())
+      .gte('created_at', windowStart);
+
+    if (error) {
+      console.error('EMAIL_CODE_RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
+      return { limited: true };
+    }
+
+    return { limited: !!count && count >= EMAIL_CODE_MAX_PER_HOUR };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('EMAIL_CODE_RATE_LIMIT_FAIL:', msg);
+    return { limited: true };
+  }
+}
+
+export async function checkIpCodeRateLimit(ip: string): Promise<{ limited: boolean }> {
+  try {
+    const windowStart = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error } = await supabase
+      .from('email_verifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip_address', ip)
+      .gte('created_at', windowStart);
+
+    if (error) {
+      console.error('IP_CODE_RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
+      return { limited: true };
+    }
+
+    return { limited: !!count && count >= IP_CODE_MAX_PER_DAY };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error('IP_CODE_RATE_LIMIT_FAIL:', msg);
+    return { limited: true };
   }
 }
 

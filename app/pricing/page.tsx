@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Pricing — Free Speed Test + LocalSEOAEOPro Fix Options",
-  description: "PingClose speed tests are free. For full-site fixes — lazy loading, schema markup, and page optimization — see LocalSEOAEOPro pricing.",
+  title: "Pricing — Free Speed Test + Full Site Fix",
+  description: "PingClose speed tests are free. For full-site fixes — lazy loading, schema markup, and page optimization — see pricing below.",
   alternates: { canonical: "https://pingclose.com/pricing" },
   openGraph: {
     title: "PingClose Pricing",
-    description: "Free above-the-fold speed test. Full-site fixes at LocalSEOAEOPro.",
+    description: "Free above-the-fold speed test. Full-site fixes available from PingClose.",
     url: "https://pingclose.com/pricing",
   },
 };
@@ -21,7 +21,7 @@ const schema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   "name": "Web Page Speed Monitor by PingClose",
-  "description": "PingClose tests your website's above-the-fold load speed for free. Goal: under 1 second. For full-site fixes, visit LocalSEOAEOPro.",
+  "description": "PingClose tests your website's above-the-fold load speed for free. Goal: under 1 second. Full-site fixes also available from PingClose.",
   "url": "https://pingclose.com/pricing"
 };
 
@@ -101,7 +101,7 @@ export default function PricingPage() {
             </h1>
             <p style={{ fontSize: 19, color: "#CBD5E1", margin: "0 auto 24px", maxWidth: 560, lineHeight: 1.6 }}>
               Free above-the-fold speed test. Goal: load in under 1 second.<br />
-              PingClose finds the problems. LocalSEOAEOPro fixes them.
+              PingClose finds the problems — and fixes them.
             </p>
             <Link href="/" className="btn-teal" style={{
               display: "inline-block",
@@ -124,7 +124,7 @@ export default function PricingPage() {
             Pricing to Test Your Website for Speed
           </h2>
           <p style={{ fontSize: 18, color: "#64748B", textAlign: "center", margin: "0 0 32px", lineHeight: 1.6 }}>
-            PingClose tells you your above-the-fold score. LocalSEOAEOPro makes it pass.
+            PingClose tells you your above-the-fold score — and makes it pass.
           </p>
 
           <div className="responsive-grid-2col" style={{ gap: 16, marginBottom: 24 }}>
@@ -157,9 +157,9 @@ export default function PricingPage() {
               </Link>
             </div>
 
-            {/* Fix column — LocalSEOAEOPro */}
+            {/* Fix column — PingClose Full Fix */}
             <div className="card-hover" style={{ background: "#A78BFA10", border: "2px solid #A78BFA40", borderRadius: 12, padding: "28px 24px" }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>LocalSEOAEOPro — Full Fix</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>PingClose — Full Fix</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above + Below the Fold</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9", marginBottom: 4 }}>$495</div>
               <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>to correct your speed — additional fixes available à la carte</div>
@@ -176,14 +176,14 @@ export default function PricingPage() {
                   <span style={{ fontSize: 16, color: "#F1F5F9", fontWeight: 600 }}>{text}</span>
                 </div>
               ))}
-              <a href="https://localseoaeopro.com/pricing" className="btn-purple" style={{
+              <a href="tel:+13145172533" className="btn-purple" style={{
                 display: "block", textAlign: "center", marginTop: 20,
                 background: "#A78BFA", color: "#0B0E16",
                 fontSize: 16, fontWeight: 700,
                 padding: "12px 20px", borderRadius: 10,
                 textDecoration: "none"
               }}>
-                See Fix Pricing at LocalSEOAEOPro →
+                Get This Fixed — Call (314) 517-2533 →
               </a>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function PricingPage() {
               Free speed tools — including PingClose — measure what loads in your visitor&apos;s first screen. That&apos;s the above-the-fold benchmark. But your visitors scroll. Every image, section, and element below the fold needs to lazy load — meaning it should only load when the visitor reaches it, not all at once when the page opens.
             </p>
             <p style={{ fontSize: 16, color: "#94A3B8", margin: 0, lineHeight: 1.7 }}>
-              When below-the-fold content loads all at once, your mobile data usage spikes, your score drops, and Google sees a slow site. LocalSEOAEOPro fixes lazy loading on every page and installs proper schema markup throughout your entire site — not just the homepage — so Google can read and rank every page correctly.
+              When below-the-fold content loads all at once, your mobile data usage spikes, your score drops, and Google sees a slow site. PingClose fixes lazy loading on every page and installs proper schema markup throughout your entire site — not just the homepage — so Google can read and rank every page correctly.
             </p>
           </div>
         </div>
@@ -264,8 +264,8 @@ export default function PricingPage() {
             <Link href="/faq" className="link-subtle" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
               Have questions? Read our FAQ →
             </Link>
-            <a href="https://localseoaeopro.com/pricing" className="link-purple" style={{ fontSize: 16, color: "#A78BFA", textDecoration: "none" }}>
-              See fix pricing at LocalSEOAEOPro →
+            <a href="tel:+13145172533" className="link-purple" style={{ fontSize: 16, color: "#A78BFA", textDecoration: "none" }}>
+              Call for fix pricing →
             </a>
           </div>
         </div>

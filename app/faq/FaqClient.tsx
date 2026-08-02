@@ -370,12 +370,12 @@ export default function FAQPage() {
             Ping My Site — It&apos;s Free →
           </Link>
           <div style={{ marginTop: 16 }}>
-            <a href="https://localseoaeopro.com" target="_blank" rel="noopener noreferrer"
+            <a href="/pricing"
               style={{ fontSize: 16, color: "#475569", textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#94A3B8"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#475569"; }}
             >
-              LocalSEOAEOPro fixes every problem PingClose finds →
+              PingClose fixes every problem it finds →
             </a>
           </div>
         </div>

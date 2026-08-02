@@ -66,5 +66,5 @@ export interface PageSpeedResult {
 
 // Standardized response envelope — every caller checks `.ok` first, never throws past this boundary
 export type PageSpeedAgentResponse =
-  | { ok: true; data: PageSpeedResult }
-  | { ok: false; error: string; quotaExceeded: boolean; status?: number };
+  | { ok: true; data: PageSpeedResult; retryCount: number }
+  | { ok: false; error: string; quotaExceeded: boolean; status?: number; retryCount: number };

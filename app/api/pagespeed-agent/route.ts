@@ -6,15 +6,36 @@ import { runPageSpeedAgent, buildFallbackResult } from '@/lib/agents/pagespeedAg
 import { runPreflightCheck } from '@/lib/agents/pagespeedAgent/preflightCheck';
 import { scoreAudit } from '@/lib/auditScorer';
 import { deliverReport } from '@/lib/reportDelivery';
+import { sendPageSpeedFailureAlert } from '@/lib/email';
 import { assertPublicHostname } from '@/lib/ssrfGuard';
+import { isVIP } from '@/lib/rateLimiter';
 import type { TechStackResult } from '@/lib/htmlAudit';
 
 export async function POST(req: NextRequest) {
-  const { reportId, url, deliveryEmail = false, agencySignal = false } = await req.json();
+  const { reportId, deliveryEmail = false, agencySignal = false } = await req.json();
 
-  if (!reportId || !url) {
-    return NextResponse.json({ error: 'reportId and url required' }, { status: 400 });
+  if (!reportId) {
+    return NextResponse.json({ error: 'reportId required' }, { status: 400 });
   }
+
+  // Fetch existing row to retrieve techResult stored in full_report, plus the
+  // real email/phone/url on file — never trust delivery contact info OR the
+  // target URL from the request body, since this route has no auth and
+  // anyone who knows a reportId could otherwise redirect report emails to an
+  // address they choose, or overwrite a real report's scores with results
+  // for an unrelated URL of their choosing.
+  const { data: existing, error: fetchError } = await supabase
+    .from('pingclose_audits')
+    .select('url, full_report, email, phone, ip_address, pagespeed_status, pagespeed_started_at, pagespeed_completed_at, manual_retry_count')
+    .eq('id', reportId)
+    .single();
+
+  if (fetchError || !existing) {
+    console.error('PAGESPEED_AGENT: fetch failed', fetchError?.message);
+    return NextResponse.json({ error: 'row not found' }, { status: 404 });
+  }
+
+  const url = existing.url as string;
 
   try {
     await assertPublicHostname(new URL(url).hostname);
@@ -24,24 +45,55 @@ export async function POST(req: NextRequest) {
 
   console.log('PAGESPEED_AGENT: starting for', reportId, url);
 
-  // Fetch existing row to retrieve techResult stored in full_report, plus the
-  // real email/phone on file — never trust delivery contact info from the
-  // request body, since this route has no auth and anyone who knows a
-  // reportId could otherwise redirect report emails to an address they choose.
-  const { data: existing, error: fetchError } = await supabase
-    .from('pingclose_audits')
-    .select('full_report, email, phone')
-    .eq('id', reportId)
-    .single();
+  // A resolved status already on the row (not 'pending') means this call is a
+  // manual retry, not the original automatic run fired by /api/audit's after().
+  const isManualRetry = !!existing.pagespeed_status && existing.pagespeed_status !== 'pending';
 
-  if (fetchError || !existing) {
-    console.error('PAGESPEED_AGENT: fetch failed', fetchError?.message);
-    return NextResponse.json({ error: 'row not found' }, { status: 404 });
+  // Guard against spamming this route directly — the customer-facing "Retry
+  // Speed Check" button only disables itself client-side while in flight, so
+  // enforce it here too using timestamps already on the row. Blocks two
+  // cases: a run already in progress, and retrying again too soon after one
+  // just finished.
+  const now = Date.now();
+  const startedAtMs   = existing.pagespeed_started_at   ? new Date(existing.pagespeed_started_at as string).getTime()   : 0;
+  const completedAtMs = existing.pagespeed_completed_at ? new Date(existing.pagespeed_completed_at as string).getTime() : 0;
+
+  if (startedAtMs && startedAtMs > completedAtMs && now - startedAtMs < 90_000) {
+    return NextResponse.json({ error: 'A speed check is already running for this report. Please wait.' }, { status: 429 });
+  }
+  if (completedAtMs && now - completedAtMs < 30_000) {
+    return NextResponse.json({ error: 'Please wait a moment before retrying again.' }, { status: 429 });
   }
 
   const email = existing.email as string | null;
   const phone = existing.phone as string | null;
+  const ipAddress = existing.ip_address as string | null;
   const techResult = (existing.full_report as Record<string, unknown>)?.tech as TechStackResult;
+
+  // Daily retry cap for manual retries only — 5 total retries or 3 distinct
+  // websites retried in a rolling 24h window, whichever hits first. Jim (VIP
+  // emails) is exempt. Keyed by email when known, IP for phone-only leads.
+  if (isManualRetry && !(email && isVIP(email))) {
+    const identityKey = email?.toLowerCase() || ipAddress;
+    if (identityKey) {
+      // Filtered by pagespeed_completed_at (updates on every retry, not just
+      // the original run) so a retry on an old report still counts — created_at
+      // would only catch reports submitted in the last 24h, missing retries
+      // on anything older.
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: recent } = email
+        ? await supabase.from('pingclose_audits').select('id, manual_retry_count').eq('email', identityKey).gte('pagespeed_completed_at', since)
+        : await supabase.from('pingclose_audits').select('id, manual_retry_count').eq('ip_address', identityKey).gte('pagespeed_completed_at', since);
+
+      if (recent) {
+        const totalRetries = recent.reduce((sum, r) => sum + (r.manual_retry_count || 0), 0);
+        const distinctSitesRetried = recent.filter(r => (r.manual_retry_count || 0) > 0).length;
+        if (totalRetries >= 5 || distinctSitesRetried >= 3) {
+          return NextResponse.json({ error: "You've reached today's retry limit. Please try again tomorrow, or contact us if this keeps happening." }, { status: 429 });
+        }
+      }
+    }
+  }
 
   // Pre-flight: DNS, HTTP status, redirects, TTFB, Cloudflare — before calling Google
   const preflight = await runPreflightCheck(url);
@@ -134,6 +186,12 @@ export async function POST(req: NextRequest) {
   const completedAt  = new Date().toISOString();
   const durationMs   = Date.now() - startMs;
 
+  // Only a manual retry that actually resolves (ok or error) consumes the
+  // customer's daily quota — a timeout isn't their fault, so it's free.
+  const newManualRetryCount = isManualRetry && pagespeedStatus !== 'timeout'
+    ? (existing.manual_retry_count || 0) + 1
+    : (existing.manual_retry_count || 0);
+
   const { error: updateError } = await supabase
     .from('pingclose_audits')
     .update({
@@ -141,6 +199,8 @@ export async function POST(req: NextRequest) {
       pagespeed_completed_at:  completedAt,
       pagespeed_duration_ms:   durationMs,
       pagespeed_error_reason:  pagespeedErrorReason,
+      pagespeed_retry_count:   agentResult.retryCount,
+      manual_retry_count:      newManualRetryCount,
       mobile_score: speedResult.mobileScore,
       desktop_score: speedResult.desktopScore,
       ttfb: speedResult.ttfb,
@@ -164,6 +224,17 @@ export async function POST(req: NextRequest) {
   if (updateError) {
     console.error('PAGESPEED_AGENT: update failed', updateError.message);
     return NextResponse.json({ error: 'update failed', detail: updateError.message }, { status: 500 });
+  }
+
+  // Alert Jim immediately when PageSpeed genuinely failed to produce a score —
+  // the routine lead-notification email below only ever says "calculating",
+  // it never distinguishes a real failure from one still in progress.
+  if (pagespeedStatus === 'timeout' || pagespeedStatus === 'error') {
+    try {
+      await sendPageSpeedFailureAlert({ reportId, url, status: pagespeedStatus, reason: pagespeedErrorReason });
+    } catch (alertErr) {
+      console.error('PAGESPEED_AGENT: failure alert email failed', alertErr);
+    }
   }
 
   // Send report + lead emails now that real scores exist

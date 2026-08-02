@@ -44,8 +44,11 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || '0.0.0.0';
 
     console.log('STEP1: checkRateLimit');
-    const { limited } = await checkRateLimit(email);
+    const { limited, reason } = await checkRateLimit(email);
     if (limited) {
+      if (reason === 'error') {
+        return NextResponse.json({ error: 'Something went wrong on our end. Please try again in a few minutes.' });
+      }
       return NextResponse.json({ limit: true, message: "You've run 5 free audits today. Come back tomorrow for more!" });
     }
 

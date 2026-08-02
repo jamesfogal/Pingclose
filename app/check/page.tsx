@@ -399,17 +399,32 @@ function CheckContent() {
         {/* ── CTA ─────────────────────────────────────────────────────── */}
         {reportReady ? (
           <div>
-            <a href={`/report/${reportReady}`} style={{
-              display: "block",
-              background: speedData ? "#10D9A0" : "#0D9E75",
-              color: "#0B0E16",
-              fontSize: 18, fontWeight: 700, padding: "18px",
-              borderRadius: 10, textDecoration: "none", textAlign: "center",
-              animation: "fadeSlideIn 0.4s ease-out",
-              border: speedData ? "2px solid #10D9A0" : "2px solid transparent",
-            }}>
-              {speedData ? "PageSpeed Complete — View Full Report →" : "View Your Full Report →"}
-            </a>
+            {speedData ? (
+              <a href={`/report/${reportReady}`} style={{
+                display: "block",
+                background: "#10D9A0",
+                color: "#0B0E16",
+                fontSize: 18, fontWeight: 700, padding: "18px",
+                borderRadius: 10, textDecoration: "none", textAlign: "center",
+                animation: "fadeSlideIn 0.4s ease-out",
+                border: "2px solid #10D9A0",
+              }}>
+                Your Report Is Ready →
+              </a>
+            ) : (
+              <div aria-disabled="true" style={{
+                display: "block",
+                background: "#0D9E75",
+                opacity: 0.55,
+                color: "#0B0E16",
+                fontSize: 18, fontWeight: 700, padding: "18px",
+                borderRadius: 10, textAlign: "center",
+                border: "2px solid transparent",
+                cursor: "not-allowed",
+              }}>
+                Gathering Data From Google — Almost Done…
+              </div>
+            )}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10, fontSize: 16, color: "#64748B" }}>
               {!speedData && (
                 <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#FBBF24", flexShrink: 0, animation: "blink 1.6s ease-in-out infinite" }} />
@@ -421,7 +436,7 @@ function CheckContent() {
               )}
               {speedData && (speedData.pageSpeedStatus === 'TIMEOUT' || speedData.pageSpeedStatus === 'ERROR') && (
                 <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
-                <span style={{ color: "#F87171" }}>Performance analysis unavailable</span></>
+                <span style={{ color: "#F87171" }}>Performance analysis unavailable — view report for details</span></>
               )}
             </div>
           </div>

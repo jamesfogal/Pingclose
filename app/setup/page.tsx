@@ -5,6 +5,7 @@ export default function SetupPage() {
   const [password, setPassword] = useState('');
   const [authed, setAuthed] = useState(false);
   const [resendKey, setResendKey] = useState('');
+  const [currentKeyMasked, setCurrentKeyMasked] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +24,10 @@ export default function SetupPage() {
         headers: { 'x-admin-password': password },
       });
       const d = await r.json();
-      if (d.resend_api_key) setResendKey(d.resend_api_key);
+      // GET now returns a masked value (PC-SEC8) — display-only, never
+      // pre-filled into the editable input, so an unmodified "Save" can't
+      // overwrite the real key with the masked placeholder text.
+      if (d.resend_api_key) setCurrentKeyMasked(d.resend_api_key);
     } else {
       setError('Wrong password');
     }
@@ -41,8 +45,16 @@ export default function SetupPage() {
     });
     const d = await res.json();
     setSaving(false);
-    if (d.ok) setSaved(true);
-    else setError(d.error || 'Save failed');
+    if (d.ok) {
+      setSaved(true);
+      // Re-fetch so the masked display reflects the key that was just saved
+      const r = await fetch('/api/setup', { headers: { 'x-admin-password': password } });
+      const fresh = await r.json();
+      if (fresh.resend_api_key) setCurrentKeyMasked(fresh.resend_api_key);
+      setResendKey('');
+    } else {
+      setError(d.error || 'Save failed');
+    }
   }
 
   async function handleTest() {
@@ -121,13 +133,18 @@ export default function SetupPage() {
           <div style={{ fontSize: '16px', color: '#475569', marginBottom: '20px' }}>
             Get your key from <a href="https://resend.com/api-keys" target="_blank" rel="noreferrer" style={{ color: '#10D9A0' }}>resend.com/api-keys</a> — starts with <code style={{ background: '#1F2937', padding: '2px 6px', borderRadius: '4px' }}>re_</code>
           </div>
+          {currentKeyMasked && (
+            <div style={{ fontSize: '16px', color: '#64748B', marginBottom: '16px' }}>
+              Current key: <code style={{ background: '#1F2937', padding: '2px 6px', borderRadius: '4px', color: '#94A3B8' }}>{currentKeyMasked}</code>
+            </div>
+          )}
           <form onSubmit={handleSave}>
             <div style={{ marginBottom: '16px' }}>
               <input
                 type="text"
                 value={resendKey}
                 onChange={e => setResendKey(e.target.value)}
-                placeholder="re_xxxxxxxxxxxxxxxx"
+                placeholder={currentKeyMasked ? 'Enter a new key to replace it' : 're_xxxxxxxxxxxxxxxx'}
                 style={inputStyle}
               />
             </div>
@@ -158,10 +175,10 @@ export default function SetupPage() {
         <div style={{ background: '#111827', border: '1px solid #1F2937', borderRadius: '12px', padding: '24px' }}>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', marginBottom: '16px', textTransform: 'uppercase' }}>Current Status</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', color: '#94A3B8' }}>
-            <span style={{ color: resendKey.startsWith('re_') ? '#10D9A0' : '#F87171' }}>
-              {resendKey.startsWith('re_') ? '✅' : '❌'}
+            <span style={{ color: currentKeyMasked.startsWith('re_') ? '#10D9A0' : '#F87171' }}>
+              {currentKeyMasked.startsWith('re_') ? '✅' : '❌'}
             </span>
-            Resend API Key {resendKey.startsWith('re_') ? 'configured' : 'not set'}
+            Resend API Key {currentKeyMasked.startsWith('re_') ? 'configured' : 'not set'}
           </div>
         </div>
 

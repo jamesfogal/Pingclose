@@ -218,6 +218,8 @@ export default function ReportPage() {
   const params  = useParams();
   const [audit, setAudit]   = useState<Audit | null>(null);
   const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
+  const [retryMessage, setRetryMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/report?id=${params.id}`)
@@ -225,6 +227,48 @@ export default function ReportPage() {
       .then(data => { setAudit(data); setLoading(false); playDone(); })
       .catch(() => setLoading(false));
   }, [params.id]);
+
+  // If PageSpeed hadn't finished when this page was fetched, poll instead of
+  // freezing on placeholder zeros — same 3s/90s pattern the /check page uses.
+  useEffect(() => {
+    if (!audit || audit.pagespeed_status !== 'pending') return;
+    let polls = 0;
+    const id = setInterval(async () => {
+      polls++;
+      try {
+        const r = await fetch(`/api/report?id=${params.id}`);
+        const data = await r.json();
+        if (data.pagespeed_status && data.pagespeed_status !== 'pending') {
+          setAudit(data);
+          clearInterval(id);
+          return;
+        }
+      } catch { /* ignore network blips */ }
+      if (polls >= 30) clearInterval(id);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [audit, params.id]);
+
+  async function retryPageSpeed() {
+    if (!audit || retrying) return;
+    setRetrying(true);
+    setRetryMessage(null);
+    try {
+      const res = await fetch('/api/pagespeed-agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportId: audit.id, deliveryEmail: false }),
+      });
+      if (res.status === 429) {
+        const data = await res.json().catch(() => null);
+        setRetryMessage(data?.error || 'Please wait a moment before retrying again.');
+      } else {
+        const r = await fetch(`/api/report?id=${params.id}`);
+        setAudit(await r.json());
+      }
+    } catch { /* status stays timeout/error — button re-enables for another try */ }
+    setRetrying(false);
+  }
 
   if (loading) return (
     <main style={{ minHeight: "100vh", background: "#0B0E16", display: "flex", alignItems: "center", justifyContent: "center", color: "#CBD5E1", fontFamily: "system-ui, sans-serif", fontSize: 18 }}>
@@ -311,6 +355,29 @@ export default function ReportPage() {
 
       {/* ── MAIN CONTENT ─────────────────────────────────────────────────────── */}
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "48px 24px 80px" }}>
+
+        {/* PageSpeed didn't finish — offer a retry without redoing the whole audit */}
+        {(audit.pagespeed_status === 'timeout' || audit.pagespeed_status === 'error') && (
+          <Card variant="yellow" style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#FBBF24", marginBottom: 8 }}>⚠ Google&apos;s Speed Check Didn&apos;t Finish</div>
+            <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 20, lineHeight: 1.6 }}>
+              {audit.pagespeed_status === 'timeout'
+                ? "Google's PageSpeed service didn't respond in time. This is usually temporary and not a problem with your site."
+                : "Google's PageSpeed service returned an error. This is usually temporary and not a problem with your site."}
+            </div>
+            <button onClick={retryPageSpeed} disabled={retrying} style={{
+              background: retrying ? "#1E3050" : "#FBBF24",
+              color: retrying ? "#64748B" : "#0B0E16",
+              border: "none", borderRadius: 10, padding: "14px 28px",
+              fontSize: 17, fontWeight: 700, cursor: retrying ? "not-allowed" : "pointer",
+            }}>
+              {retrying ? "Retrying…" : "Retry Speed Check"}
+            </button>
+            {retryMessage && (
+              <div style={{ fontSize: 16, color: "#FBBF24", marginTop: 14 }}>{retryMessage}</div>
+            )}
+          </Card>
+        )}
 
         {/* Load time hero + timeline */}
         {audit.lcp > 0 && <LoadTimeHero ttfb={audit.ttfb} fcp={audit.fcp} lcp={audit.lcp} />}
@@ -889,15 +956,15 @@ export default function ReportPage() {
           ) : (
             <>
               <div style={{ fontSize: 20, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.5, marginBottom: 10 }}>We can have 49 of these problems fixed in 24 hours.</div>
-              <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 32, lineHeight: 1.7 }}>98% of the changes on this report are done within 48 hours.<br />Citations take longer — but everything else moves fast.<br /><strong style={{ color: "#F1F5F9" }}>Click the link below to get started at LocalSEOAEOPro.com.</strong></div>
+              <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 32, lineHeight: 1.7 }}>98% of the changes on this report are done within 48 hours.<br />Citations take longer — but everything else moves fast.<br /><strong style={{ color: "#F1F5F9" }}>Click below to get started.</strong></div>
             </>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 14 }}>
-            <a href="https://localseoaeopro.com" target="_blank" rel="noreferrer"
+            <a href="/pricing"
               style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A050", borderRadius: 12, textDecoration: "none" }}>
               <span style={{ fontSize: 32 }}>🚀</span>
-              <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", lineHeight: 1.3 }}>Fix These Problems at LocalSEOAEOPro.com →</span>
-              <span style={{ fontSize: 17, color: "#CBD5E1", lineHeight: 1.6 }}>PingClose found them. LocalSEOAEOPro fixes them.</span>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", lineHeight: 1.3 }}>Get These Problems Fixed — $495 →</span>
+              <span style={{ fontSize: 17, color: "#CBD5E1", lineHeight: 1.6 }}>PingClose found them. PingClose fixes them.</span>
             </a>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none" }}>
