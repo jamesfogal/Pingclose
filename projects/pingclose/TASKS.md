@@ -9,9 +9,9 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 
 ## QUICK STATUS — read this first
 
-**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #47, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom.
+**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #48, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom.
 
-**Status as of 2026-08-02, ~4:00 PM CDT:** #1-9, #11, #13-17, #19-23, #43-47 are 🟩 done. #10 intentionally paused (holding for #37). #12 (untested retry logic) and #18 (manual MFA check, waiting on Jim) still open. #24 superseded, #42 partially decided. #25/#26/#27/#28 and #29-41 remain open — #26/#27/#28 explicitly deferred by Jim 2026-08-01, not stalled.
+**Status as of 2026-08-02, ~5:45 PM CDT:** #1-9, #11, #13-17, #19-23, #43-48 are 🟩 done. #10 intentionally paused (holding for #37). #12 (untested retry logic) and #18 (manual MFA check, waiting on Jim) still open. #24 superseded, #42 partially decided. #25/#26/#27/#28 and #29-41 remain open — #26/#27/#28 explicitly deferred by Jim 2026-08-01, not stalled. **New this update:** #48 (PageSpeed dual-attempt racing) shipped and live-verified. A "see both results" migration was proposed to Jim (4 new nullable columns on pingclose_audits) but is NOT yet approved or built — see PC-C13 notes. Phone verification (#37/PC-E4) re-confirmed still fully unbuilt, blocked on #25.
 
 ---
 
@@ -320,10 +320,11 @@ Dependencies: PC-E1
 ---
 
 ### PC-E4 — Mandatory dual verification (email AND phone)
-Status: OPEN — decided 2026-07-19, not built
+Status: OPEN — decided 2026-07-19, not built. Re-confirmed still not built 2026-08-02: verified directly against current app/api/audit/route.ts — it only requires url + at least one of email/phone (not both), and only email is ever checked against a verified row; no phone_verifications table, no phone-verify route, no phone-related file anywhere in the repo (full-repo search, zero matches). A phone-only submission today gets a report with zero verification of anything.
 Description: Jim's decision: both email and phone must be required fields and both must be actually verified (real code sent and confirmed) before an audit runs — "Required for security," and also for lead-quality/follow-up purposes ("know who is looking at someone's website"). Today only email is genuinely verified (send-code/verify-code); phone is just an unverified text field. Needs: a phone_verifications table (or equivalent) mirroring email_verifications, new send/verify routes using whichever SMS provider is chosen (see PC-STRAT2), rate limiting on those new routes, and a frontend change making phone a required field with its own code-entry step. Twilio is permanently excluded as a provider (Jim's standing rule, all projects). Migration SQL needs Jim's explicit sign-off per the project's migration rule before running.
+**Microcopy decided 2026-08-02** (for the form, once both fields are required): "Both are required — we verify each one so your report goes to the right person, and only you." Leads with the actual reason (verification/right-person, not delivery redundancy) per Jim's preference after comparing two options.
 Files: app/api/audit/route.ts, app/HomeClient.tsx, app/check/page.tsx, new send-phone-code/verify-phone-code routes, new migration
-Dependencies: PC-STRAT2
+Dependencies: PC-STRAT2 (blocked on #25 — Jim's OpenPhone/Quo signup + 10DLC registration, still not done as of last check)
 
 ---
 

@@ -1548,3 +1548,85 @@ Jim: "Can we deploy and then retest this. This is the only true way we know if i
 ### PROCESS NOTE FOR THIS ENTRY
 
 Same standard as every prior entry for PART 1 onward (this session's own content): word-for-word where practical, exact commit hashes and file paths, Jim's exact quotes preserved rather than paraphrased, no root-cause or capability claims stated beyond what was actually confirmed via real tool output this session. The PC-2026-08-01-001 entry immediately above this one is explicitly exempted from the word-for-word standard and says so in its own header, per Jim's "No fake data" instruction — reconstructed from written evidence only, not invented. Written by Claude at Jim's explicit request ("Update the MD file with 100% of the conversations since the last update"), appended once, not edited retroactively.
+
+-------------------------------------------------
+
+### ADDENDUM — SAME SESSION (PC-2026-08-02-001) CONTINUED
+
+The above process note was written mid-session, not at its actual end. Per this file's own "never delete or reorder" rule, that note is left exactly as written rather than edited — the content below continues the same session (same date, same unbroken conversation) rather than opening a new session ID.
+
+-------------------------------------------------
+
+### PART 10 — REAL CUSTOMER TEST SURFACES A REAL RELIABILITY GAP
+
+Jim ran a real test on citywidealarms.com (his own business) after the deploy above and it failed. Jim: "I just did a test on citywidealarms and it failed the page speed test. I tried to click it and it told me to wait to do it. Then I came back and clicked it and it gave data in about 5 seconds... There is no way it filed in 90 seconds. How long before it failed and was that sent to me?" Claude pulled the real Vercel runtime logs rather than guess: the original automatic run started 21:46:16 UTC and ran the full 75.275 seconds before genuinely timing out (Google's API itself never responded) — confirmed real, not a display bug. A failure-alert email dispatch to `jim@pingclose.com` was logged with no error, though no explicit positive-confirmation log line exists for that specific email (flagged to Jim as worth him confirming directly, distinguished from the customer-report email which does log positively). Jim's retry at 21:48:00 hit the existing 30-second cooldown (429) — he retried only ~29s after the timeout resolved. His successful retry at 21:52:38 took 21.2 seconds (real DB value), not the "~5 seconds" he perceived.
+
+-------------------------------------------------
+
+### PART 11 — DATA-DRIVEN INVESTIGATION BEFORE DESIGNING A FIX
+
+Jim proposed killing any attempt that hadn't finished by 45 seconds and starting over, framed explicitly as a data-free guess: "We do not have enough date to know the average length but would it be smarter to kill it at 45 seconds and go onto a new one?" Rather than accept or reject the number on instinct, Claude queried real historical data across all 62 `pingclose_audits` rows with a recorded `pagespeed_duration_ms`: successful runs (n=55) ranged 8.6s-70.7s (median 21.6s, p90 33.6s, p95 37.8s, p99 56.6s); errors (n=5) ranged 18.5s-48.3s; genuine timeouts (n=2) both landed almost exactly on the 75s ceiling (75.1s, 75.3s). This data directly ruled out the 45-second cutoff — a real successful run took 70.7s, which a 45s kill would have discarded as a false failure. Presented to Jim with the full table before any design decision was made.
+
+-------------------------------------------------
+
+### PART 12 — PARALLEL-RACE DESIGN AGREED AND BUILT
+
+Jim, after seeing the data: "If we can run two speed chaecks at the same time should that just be what we do? The first one to complete is used?" Claude validated this as a better design than the sequential-retry idea floated earlier, explained the real reason the existing 75s timeout isn't pushed closer to Vercel's 90s ceiling (needs buffer to gracefully write a timeout result before the platform force-kills the function — the exact PC-C11 bug in a different form otherwise), and flagged two real tradeoffs before building: 2x PageSpeed API cost per audit, and a race-condition guard needed so the losing attempt can't overwrite the winner. Jim: "In an effort to provide the reliability that Google cannot guarantee I think this is the best solution... This report lands us our first $495.00 so we are probably only going to get one shot at this so lets build it right and then recommit everything to show this as fixed completely."
+
+Built in `lib/agents/pagespeedAgent/index.ts`: `runPageSpeedAgent()` now fires two independent `attemptOnce()` calls via a new `raceForFirstSuccess()` helper — resolves immediately on the first `ok:true`, only resolves with a failure once both have settled and both failed. `PAGESPEED_RACE` logging added (settle order, timing, winner) for real observability. Verified in two stages before calling it done: (1) an isolated synthetic-promise test (`race_test.mjs`, 3/3 cases passed — slow-success correctly beats fast-failure, fast-success doesn't wait on a slow failure, both-fail correctly waits for both) proving the control flow itself is bug-free, independent of any real network behavior; (2) `npx tsc --noEmit` and `npm run build` both clean.
+
+Committed as `93ccdef` ("Race two independent PageSpeed attempts, take the first success (PC-C13)"), pushed, auto-deployed by Vercel as `dpl_Aa7jZYjRnRUhRxeiW37RHPENTmim` (`READY`, live on `www.pingclose.com`). Live-tested against production exactly as done for the prior fix: inserted one temporary test row, POSTed to the real endpoint, confirmed via real Vercel runtime logs (`PAGESPEED_RACE: attempt #1 settled at 16911ms, ok=true` / `winner is attempt #1`) and the real database row afterward (mobile 100, desktop 100, LCP 787ms — genuine data for `example.com`). Test row deleted. Explicitly disclosed to Jim, not hidden: this one test only proved the success path directly; the both-fail path can't be forced against real Google traffic on demand (same class of limitation already on record for task #12), though its control-flow correctness was independently proven by the synthetic test in stage (1) above.
+
+TASKS.md item #48/PC-C13 added documenting all of this, committed in the same commit as the code.
+
+-------------------------------------------------
+
+### PART 13 — "SEE BOTH RESULTS" — PROPOSED, NOT YET BUILT
+
+Jim: "I want to see both results. Its critical to see if we actually are doing anything. Its also a way to tell customers that we have overcome the results error that many times plagues other companies... If we dont have real results we do not publish them." Claude proposed capturing the losing attempt's outcome too (using the same `after()` background-completion pattern already used elsewhere in this codebase, so Vercel doesn't cut it off) and proposed an exact migration for Jim's approval:
+
+    ALTER TABLE pingclose_audits
+      ADD COLUMN pagespeed_race_loser_status text,
+      ADD COLUMN pagespeed_race_loser_mobile_score integer,
+      ADD COLUMN pagespeed_race_loser_desktop_score integer,
+      ADD COLUMN pagespeed_race_loser_duration_ms integer;
+
+**This migration has NOT been approved or run as of this entry.** No code for this feature has been written. This is an open proposal only — flagged clearly here so a future session does not assume it exists.
+
+-------------------------------------------------
+
+### PART 14 — DOUBLE OPT-IN / PHONE VERIFICATION STATUS CHECKED
+
+Separately, Jim asked whether email+phone double opt-in verification was working, noting he couldn't tell himself: "I cannot see that because I have admin privelages." Claude checked the actual current code rather than relying on memory: `app/api/audit/route.ts:22` requires only `url` and *at least one* of email/phone, not both; only email is ever checked against a verified row (line 30); a full-repo search for anything phone-verification-related returned zero files — no table, no route, nothing. Confirmed and reported plainly: a phone-only submission today gets a report with zero verification of anything. This matches the already-open TASKS.md #37/PC-E4, re-confirmed rather than assumed still accurate.
+
+-------------------------------------------------
+
+### PART 15 — MICROCOPY DECIDED, STALE MEMORY CORRECTED
+
+Jim drafted required-field microcopy and asked for a read: "Both of these fields are required. Your email is a backup just in case your report cannot be text to you. ... Is that soft enough or too long." Claude flagged the typo ("text" -> "texted"), noted the "backup" framing undersells the real reason (verification/lead-quality, per Jim's own original 2026-07-19 decision) and invites an obvious "then why do I need both" pushback, and offered two shortened alternatives. Jim picked: "Both are required — we verify each one so your report goes to the right person, and only you." Saved into TASKS.md's PC-E4 entry.
+
+While doing this, Claude noticed its own persistent memory (`project_pingclose_aws_sns_phone_verification.md`) still said AWS SNS was the decided SMS provider (dated 2026-07-18) — stale against TASKS.md's own more recent record showing the decision moved to OpenPhone/Quo, with AWS 10DLC origination explicitly abandoned (TASKS.md item #39). Corrected that memory file directly rather than leaving it to mislead a future session, with a SUPERSEDED marker rather than silently rewriting history.
+
+Jim asked to create a task for building phone verification, gated on his own OpenPhone/Quo 10DLC registration completing (briefly said "email" then corrected himself: "Verified on our phone....sorry"). Confirmed this was already exactly how TASKS.md #37 was structured (Dependencies: blocked on #25), so no new item was needed — just confirmed the existing structure already matches his intent.
+
+-------------------------------------------------
+
+### PART 16 — SESSION WRAP-UP
+
+Jim: "Lets update our MD.task file and our MD File and lets commit them once more and I will have Codex summarize it and come back tomorrow to put in big day." This entry and the corresponding TASKS.md updates (items #47, #48, the PC-E4 microcopy/status note) are that update, committed together per the established workflow: Claude records raw history, Codex/ChatGPT summarizes on Jim's side, Jim approves direction going into the next session.
+
+-------------------------------------------------
+
+### OPEN ITEMS CARRIED FORWARD (updates PART "OPEN ITEMS" above — see TASKS.md for the authoritative per-item record)
+
+1. PC-C13 (racing) is live and proven for the success path; the both-fail path remains logically-verified-only, same disclosed limitation as #12.
+2. The "see both results" migration (PART 13) is proposed only — not approved, not run, no code written. Needs Jim's yes before anything happens here.
+3. #37/PC-E4 (phone verification) confirmed still fully unbuilt as of this session, blocked on #25 (Jim's own OpenPhone/Quo signup + 10DLC registration) — not a code task.
+4. The PageSpeed failure-alert email (PART 10) was logged as attempted with no error, but never got an explicit positive-confirmation log the way the customer report email does — worth Jim independently confirming it actually lands in his `jim@pingclose.com` inbox.
+5. All items from the previous OPEN ITEMS list (end of the original PC-2026-08-02-001 entry above) remain open and are not repeated here.
+
+-------------------------------------------------
+
+### PROCESS NOTE FOR THIS ADDENDUM
+
+Same standard as the rest of this session's entries: word-for-word where practical, exact commit hashes, Jim's exact quotes (including a self-correction preserved as it happened, not cleaned up) preserved rather than paraphrased. Written at Jim's explicit request to update this file "once more" before ending the session for the day.
