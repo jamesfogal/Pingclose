@@ -1,3 +1,19 @@
+import tls from 'node:tls';
+
+// ALPN is negotiated during the TLS handshake itself, before any HTTP
+// response exists — it's the only reliable way to know if a connection
+// actually used HTTP/2. Response headers like Alt-Svc only advertise an
+// *alternative* upgrade path and are frequently absent even on live h2.
+function detectAlpnProtocol(hostname: string, port: number, timeoutMs = 5000): Promise<string | null> {
+  return new Promise((resolve) => {
+    const socket = tls.connect({ host: hostname, port, servername: hostname, ALPNProtocols: ['h2', 'http/1.1'], timeout: timeoutMs });
+    const finish = (result: string | null) => { socket.removeAllListeners(); socket.destroy(); resolve(result); };
+    socket.once('secureConnect', () => finish(socket.alpnProtocol || null));
+    socket.once('error', () => finish(null));
+    socket.once('timeout', () => finish(null));
+  });
+}
+
 export interface HtmlAgentResult {
   html: string;
   headers: Record<string, string>;
@@ -65,14 +81,24 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
 
   let html = '';
   let headers: Record<string, string> = {};
+  let alpnProtocol: string | null = null;
 
   try {
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PingClose/1.0; +https://pingclose.com)' },
-      signal: AbortSignal.timeout(12000)
-    });
+    const isHttpsUrl = url.startsWith('https');
+    const alpnPromise = isHttpsUrl
+      ? detectAlpnProtocol(new URL(url).hostname, Number(new URL(url).port) || 443).catch(() => null)
+      : Promise.resolve(null);
+
+    const [res, alpn] = await Promise.all([
+      fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PingClose/1.0; +https://pingclose.com)' },
+        signal: AbortSignal.timeout(12000)
+      }),
+      alpnPromise,
+    ]);
     html = await res.text();
     res.headers.forEach((value, key) => { headers[key.toLowerCase()] = value; });
+    alpnProtocol = alpn;
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
     console.error('AGENT_FAIL: HtmlAgent —', msg);
@@ -115,10 +141,13 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
   else if (html.includes('woocommerce') || html.includes('wc-')) { ecommerce = 'WooCommerce'; }
   else if (html.includes('bigcommerce')) { ecommerce = 'BigCommerce'; }
 
-  // HTTP version
-  let httpVersion = 'HTTP/1.1';
+  // HTTP version — real ALPN result from the TLS handshake, not a guess.
+  // HTTP/3 (QUIC/UDP) can't be seen by a TCP ALPN probe, so Alt-Svc is the
+  // only client-visible signal for it and stays valid as a check.
+  let httpVersion = 'Unknown';
+  if (alpnProtocol === 'h2') { httpVersion = 'HTTP/2'; }
+  else if (alpnProtocol === 'http/1.1') { httpVersion = 'HTTP/1.1'; }
   if (headers['alt-svc']?.includes('h3')) { httpVersion = 'HTTP/3'; }
-  else if (headers['alt-svc']?.includes('h2')) { httpVersion = 'HTTP/2'; }
 
   const serverIp = headers['x-real-ip'] || headers['x-forwarded-for']?.split(',')[0] || '';
   const isHttps = url.startsWith('https');
