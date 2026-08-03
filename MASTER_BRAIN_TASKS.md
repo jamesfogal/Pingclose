@@ -1,27 +1,25 @@
 # MASTER_BRAIN_TASKS - All Projects
 ## Permanent Task Tracker
 
-Last Updated: 2026-07-31 22:39:36 UTC
+Last Updated: 2026-08-02 23:18:42 UTC
 Revenue Status: LIVE - first $495 sale confirmed 2026-07-11
 
 ---
 
 # PROJECT 1 - PINGCLOSE.COM
-Diagnostic platform. Finds problems. Never fixes them.
+One platform - finds problems and fixes them. LocalSEOAEOPro is being folded in, not treated as a separate brand.
 
 ---
 
 ## Current Priority Order
 
-1. PC-SEC11 and PC-E4 - phone-only submissions bypass verification logic and crash; the isolated fix exists, but Jim explicitly chose to hold the final fix until phone verification is designed and built.
-2. PC-C11 - report page shows permanent zero or placeholder values if opened before PageSpeed finishes.
-3. PC-C12 - validate the PageSpeed retry logic already coded and get approval for the `pagespeed_retry_count` migration.
-4. PC-SEC9, PC-SEC12, PC-SEC7, PC-SEC13, PC-SEC15, and PC-SEC8 - unresolved security decisions or gaps.
-5. Supabase security-advisor findings - identified but not fully investigated.
-6. PC-STRAT2 plus PC-E4 - choose the phone/SMS provider and build mandatory phone verification.
-7. PC-SEC10 follow-up - if independent PingClose-context proof is still required, re-check final old-key invalidation after the cross-project migration work.
-8. PC-A11 through PC-A13 and PC-CQ1 through PC-CQ3 - design, FAQ, and code-quality follow-up work.
-9. PC-STRAT1 - planning only; do not start implementation without a dedicated strategy session.
+1. PC-SEC11 and PC-E4 - phone-only submissions still skip verification and crash; Jim explicitly chose to hold the isolated fix until full phone verification is built.
+2. PC-C12 and PC-C13 follow-up - retry logging is shipped and dual-attempt racing is live, but the retry failure path still lacks real proof and the "see both results" migration is still unapproved.
+3. PC-SEC15 plus the failure-alert confirmation gap - cloud-account MFA and actual inbox confirmation of PageSpeed failure alerts still need manual checks.
+4. PC-STRAT2 plus PC-E4 and PC-E5 - finish OpenPhone/Quo signup + 10DLC and verify webhook/API depth before building phone verification or phone-event forwarding.
+5. PC-SEC10 follow-up plus OPEN-3 and OPEN-4 - remaining operational resilience work: optional independent key-retirement recheck, synthetic-user monitoring, and the `passes_one_second` backfill.
+6. PC-A11 through PC-A13 and PC-CQ1 through PC-CQ3 - deferred design, FAQ, and code-quality follow-up work.
+7. PC-STRAT1 - the brand decision is made; the remaining work is the actual LSAP feature port into PingClose.
 
 ---
 
@@ -236,17 +234,25 @@ Dependencies: PC-C7
 ---
 
 ### PC-C11 - Report page shows permanent zeros if opened too early
-Status: OPEN - REAL BUG, CONFIRMED LIVE
-Description: `/report/[id]` fetches once and never polls. If the visitor lands before PageSpeed finishes, they can get frozen placeholder values until they refresh manually.
+Status: DONE (2026-08-01)
+Description: `/report/[id]` used to fetch once and freeze on placeholder values if the visitor landed before PageSpeed finished. Fixed with polling that refreshes pending audits every 3 seconds and gives up gracefully after 90 seconds instead of spinning forever. This became the base for the manual retry flow and related hardening.
 Files: app/report/[id]/page.tsx
 
 ---
 
 ### PC-C12 - PageSpeed retry logging and migration
-Status: OPEN - CODED, NOT FULLY FINISHED
-Description: Retry-once logic for transient PageSpeed failures was coded, but it was never properly tested. Jim also wants retry counts recorded in the DB before this is considered done.
-Required Migration: `ALTER TABLE pingclose_audits ADD COLUMN pagespeed_retry_count integer NOT NULL DEFAULT 0;`
-Files: lib/agents/pagespeedAgent/fetchPageSpeed.ts, app/api/pagespeed-agent/route.ts
+Status: PARTIALLY DONE - logging shipped 2026-08-01, retry-once logic itself still untested
+Description: Retry-once logic for transient Google-side failures existed first, but on 2026-08-01 the real logging layer was finally built around it. `fetchPageSpeed.ts` now returns per-strategy retry flags, the agent threads them upward, and `/api/pagespeed-agent` writes a real `pagespeed_retry_count` value on each audit. The migration was run and verified live. What is still open is the original reliability proof: the retry-once path itself has never been confirmed against a real forced Google-side failure.
+Required Migration: `ALTER TABLE pingclose_audits ADD COLUMN pagespeed_retry_count integer NOT NULL DEFAULT 0;` - run and verified live on 2026-08-01
+Files: lib/agents/pagespeedAgent/fetchPageSpeed.ts, lib/agents/pagespeedAgent/types.ts, lib/agents/pagespeedAgent/index.ts, app/api/pagespeed-agent/route.ts
+
+---
+
+### PC-C13 - Dual-attempt PageSpeed racing
+Status: DONE (2026-08-02)
+Description: After a real `citywidealarms.com` timeout proved customers could hit a dead end, PingClose switched from one PageSpeed attempt to two independent attempts in parallel and now accepts the first success. The 45-second kill-and-restart idea was rejected with real historical duration data before building. Success-path behavior was live-verified in production; both-fail behavior still only has synthetic control-flow proof. Separate follow-up: the proposed "see both results" loser-attempt storage is not approved or built.
+Commit: 93ccdef
+Files: lib/agents/pagespeedAgent/index.ts, lib/agents/pagespeedAgent/fetchPageSpeed.ts
 
 ---
 
@@ -303,8 +309,8 @@ Dependencies: PC-E1
 ---
 
 ### PC-E4 - Mandatory dual verification (email and phone)
-Status: OPEN - DECIDED 2026-07-19, NOT BUILT
-Description: Jim decided both email and phone must be required and actually verified before an audit runs. Needs phone verification storage, send/verify routes, rate limiting, and a homepage flow that mirrors email verification.
+Status: OPEN - DECIDED 2026-07-19, RE-CONFIRMED UNBUILT 2026-08-02
+Description: Jim decided both email and phone must be required and actually verified before an audit runs. On 2026-08-02 this was re-checked directly against the codebase: `/api/audit` still accepts `url` plus at least one of email/phone, only email is ever checked against a verified row, and there is still no phone-verification table or phone-verify route anywhere in the repo. Needs phone verification storage, send/verify routes, rate limiting, and a homepage flow that mirrors email verification. Form microcopy chosen on 2026-08-02 for the eventual required-fields state: "Both are required - we verify each one so your report goes to the right person, and only you."
 Dependencies: PC-STRAT2
 
 ---
@@ -370,22 +376,25 @@ Files: app/api/audit/route.ts
 ---
 
 ### PC-SEC7 - `/api/dataforseo-keywords` is public and unauthenticated
-Status: OPEN
-Description: Every call costs money. Decision still needed on whether this route should be public at all.
+Status: DONE (2026-08-01)
+Description: Route was dead-but-reachable and cost money per call. It is now gated behind an internal shared secret using timing-safe comparison. Nothing in the live app calls it yet, so this was closed defensively before wiring the feature into the report.
+Commit: 5fb0fc6
 Files: app/api/dataforseo-keywords/route.ts
 
 ---
 
 ### PC-SEC8 - Resend key returned in plaintext from `/api/setup`
-Status: OPEN - DECISION NEEDED
-Description: Admin-only, but still worth deciding whether to mask the key rather than returning the full value.
+Status: DONE (2026-08-01)
+Description: `/api/setup` now masks secrets on read, and the setup UI no longer risks overwriting a real key with the masked placeholder text. The fix was verified live against the real dev setup.
+Commit: 5fb0fc6
 Files: app/api/setup/route.ts
 
 ---
 
 ### PC-SEC9 - Rate limiter and related checks fail open if Supabase is unavailable
-Status: OPEN - DECISION NEEDED
-Description: Confirmed in local development with placeholder credentials. Needs a deliberate choice about fail-open versus fail-closed behavior.
+Status: DONE (2026-08-01)
+Description: The split decision was made and built. Admin login and the email-based `/api/audit` limiter now fail closed on Supabase errors; the IP-only `/api/audit/fast` limiter deliberately stays fail open because that route has no other Supabase dependency.
+Commit: 5fb0fc6
 Files: lib/adminRateLimiter.ts, lib/rateLimiter.ts
 
 ---
@@ -433,6 +442,22 @@ Files: Account settings, not repo code
 
 ---
 
+### PC-SEC16 - Hard cap on the PageSpeed retry action
+Status: DONE (2026-08-01)
+Description: The manual "Retry Speed Check" action now has a 30-second cooldown, in-flight guard, and daily per-identity caps so a public retry endpoint cannot burn unlimited PageSpeed calls. The supporting `manual_retry_count` migration was run and verified live.
+Commit: 5fb0fc6
+Files: app/api/pagespeed-agent/route.ts, app/report/[id]/page.tsx
+
+---
+
+### PC-SEC20 - Retry endpoint trusted a client-supplied URL
+Status: DONE (2026-08-02)
+Description: `/api/pagespeed-agent` used to trust `url` from the client request instead of the stored report row, letting one caller overwrite another report's scores and burn the original owner's retry quota. Fixed by deriving the URL from the database row, moving the SSRF check to that stored value, removing `url` from the client contract, escaping the failure-alert hostname fallback, and tightening the retry timeout budget so the route stays clear of Vercel's hard cap.
+Commit: 5fb0fc6
+Files: app/api/pagespeed-agent/route.ts, app/report/[id]/page.tsx, lib/email.ts, lib/agents/pagespeedAgent/fetchPageSpeed.ts
+
+---
+
 ## SECTION G - CODE QUALITY
 Quality findings from the 2026-07-16 audit that were intentionally deferred.
 
@@ -465,8 +490,8 @@ Do not implement these without a dedicated planning session.
 ---
 
 ### PC-STRAT1 - Merge LocalSEOAEOPro into PingClose
-Status: OPEN - PLANNING ONLY
-Description: Jim raised the idea of collapsing the two-brand funnel into one unified product before either site builds search equity. This is a brand and funnel decision first, not just a code migration.
+Status: DECIDED 2026-08-01 - FUNCTIONAL PORT STILL OPEN
+Description: Jim decided PingClose will be the only brand going forward and that LocalSEOAEOPro is being folded into it. The first follow-up shipped immediately: live LocalSEOAEOPro links/copy were removed from PingClose's pricing, report, and FAQ pages. What remains open is the actual feature port: fix-delivery, secure credential intake, fix tracking, city-page generation, and the rest of the LSAP backlog are still not inside PingClose.
 
 ---
 
@@ -484,7 +509,7 @@ Dependencies: PC-STRAT2
 ---
 
 # PROJECT 2 - LOCALSEOAEOPRO.COM
-Fix delivery service. Fixes what PingClose finds. $495 flat.
+Legacy fix-delivery backlog now being folded into PingClose.
 
 ---
 
@@ -569,14 +594,14 @@ Description: Auto-create a contact with the customer context. Connector availabi
 
 ## CARRY-FORWARD OPEN ITEMS
 
-- SELF-HEALING - DataForSEO is done. PageSpeed retry-once logic exists but is not fully closed. HTML, Hosting, Preflight, and Resend still need their own self-healing pass.
-- OPEN-1 - PageSpeed auto-retry is now represented by PC-C12. Retry-once for transient generic failures was coded; 429/quota behavior still needs deliberate handling.
+- SELF-HEALING - DataForSEO is done. PageSpeed dual-attempt racing is live, but retry/failure observability is still not fully closed. HTML, Hosting, Preflight, and Resend still need their own self-healing pass.
+- OPEN-1 - PageSpeed reliability is now split across PC-C12 and PC-C13. Retry-once logging is live, the dual-attempt race is live, the success path is production-proven, but the both-fail path still lacks real traffic proof and loser-attempt storage is only a proposal.
 - OPEN-3 - Daily synthetic-user monitor. The site was broken for days before and no automation caught it.
 - OPEN-4 - `passes_one_second` backfill. Rows before 2026-07-09 still need correction.
 - PC-TASK-003 - Remove the hardcoded VIP email list carefully; it is now reused both in `send-code` and through `isVIP()` for the server-side verification path.
 - PC-FUTURE-1 - Adaptive countdown on the wait screen remains deferred until there is enough real timing data to avoid lying to customers.
 - PC-CONNECTOR-1 - The failing `@21st-dev/magic` banner is an app-level connector setting, not a PingClose code issue.
-- DEPLOY FOLLOW-UP - If needed, re-confirm the READY state of deployment `dpl_HEb8qeYriXCDYL2ZiHk1xMJkRUuL` and any later push/deploy effects that were only recorded, not independently re-verified, in MASTER_BRAIN.
+- ALERT FOLLOW-UP - The PageSpeed failure-alert email was logged as attempted during the `citywidealarms.com` timeout investigation, but actual inbox delivery was not independently confirmed.
 
 ---
 
@@ -603,3 +628,5 @@ Description: Auto-create a contact with the customer context. Connector availabi
 | PC-TASK-C017 | Sync `projects/pingclose/TASKS.md` with new security, code-quality, and strategy sections | 48dd8e7, 9419927 | 2026-07-16 |
 | PC-TASK-C018 | Require TOTP authenticator code alongside admin password | 94459ae | 2026-07-19 |
 | PC-TASK-C019 | Add sequential-only Ultra Mode methodology to `CLAUDE.md` (local-only) | 8c21eee | 2026-07-21 |
+| PC-TASK-C020 | Report-page polling, send-code/dataforseo/setup hardening, fail-closed limiter decisions, retry caps, and `/api/pagespeed-agent` URL-binding fix | 5fb0fc6 | 2026-08-02 |
+| PC-TASK-C021 | Dual-attempt PageSpeed racing, first success wins | 93ccdef | 2026-08-02 |

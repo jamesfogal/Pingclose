@@ -2,16 +2,16 @@
 One platform — finds problems and fixes them (decided 2026-08-01, see #42/PC-STRAT1; LocalSEOAEOPro is being folded in, not a separate brand).
 Never mention PingClose's internal methodology — reveal findings, hide how the analysis works.
 
-Last Updated: 2026-08-02
+Last Updated: 2026-08-03
 Status: LIVE — first $495 sale confirmed 2026-07-11
 
 ---
 
 ## QUICK STATUS — read this first
 
-**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #48, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom.
+**Simple rules (locked in 2026-07-19, not changing again):** one flat list, #1 to #64, top to bottom. Every item keeps its number forever — nothing moves, nothing gets reordered, nothing gets reshuffled when something new comes in or something completes. ❌ = critical, marked in place wherever it sits. 🟩 = done, checked in place. Every item shows a **start date** (when found) and, once closed, a **completed date**. Work top to bottom.
 
-**Status as of 2026-08-02, ~5:45 PM CDT:** #1-9, #11, #13-17, #19-23, #43-48 are 🟩 done. #10 intentionally paused (holding for #37). #12 (untested retry logic) and #18 (manual MFA check, waiting on Jim) still open. #24 superseded, #42 partially decided. #25/#26/#27/#28 and #29-41 remain open — #26/#27/#28 explicitly deferred by Jim 2026-08-01, not stalled. **New this update:** #48 (PageSpeed dual-attempt racing) shipped and live-verified. A "see both results" migration was proposed to Jim (4 new nullable columns on pingclose_audits) but is NOT yet approved or built — see PC-C13 notes. Phone verification (#37/PC-E4) re-confirmed still fully unbuilt, blocked on #25.
+**Status as of 2026-08-02, ~5:45 PM CDT:** #1-9, #11, #13-17, #19-23, #43-48 are 🟩 done. #10 intentionally paused (holding for #37). #12 (untested retry logic) and #18 (manual MFA check, waiting on Jim) still open. #24 superseded, #42 partially decided. #25/#26/#27/#28 and #29-41 remain open — #26/#27/#28 explicitly deferred by Jim 2026-08-01, not stalled. **New this update:** #48 (PageSpeed dual-attempt racing) shipped and live-verified. A "see both results" migration was proposed to Jim (4 new nullable columns on pingclose_audits) but is NOT yet approved or built — see PC-C13 notes. Phone verification (#37/PC-E4) re-confirmed still fully unbuilt, blocked on #25. **2026-08-03: GBPAgent superagent (Google Business Profile + website combined audit) designed and added to the main list as #49-64 (tags PC-GBP-1 through PC-GBP-16, full detail in SECTION I). Nothing built yet — #49 (vendor accounts) and #50 (migration approval) are the first blockers, work top to bottom from there same as the rest of the list.**
 
 ---
 
@@ -64,6 +64,24 @@ Status: LIVE — first $495 sale confirmed 2026-07-11
 47. 🟩❌ `/api/pagespeed-agent` trusted a client-supplied `url` instead of the report's actual stored URL (PC-SEC20) — start: 2026-08-02 · completed: 2026-08-02. Found during a security re-audit of the prior 48 hours' uncommitted work (requested by Jim before committing anything). The route (built 2026-06-30, unchanged until today) took `reportId` AND `url` from the request body and never checked they matched. Anyone who knew any valid `reportId` could POST a different `url` and the server would overwrite that report's real scores/`full_report` with results for an unrelated site, while burning the *original report owner's* daily retry quota (#46) instead of the caller's. Not introduced this session, but this session's new customer-facing "Retry Speed Check" button (#11/#46) put this endpoint directly in front of every report visitor for the first time, raising real exposure. Fixed: route now derives `url` from the stored `pingclose_audits` row (added `url` to the existing `.select()`) and no longer reads `url` from the request body at all; SSRF check moved to run against the stored URL, after the row fetch. Frontend retry call in app/report/[id]/page.tsx updated to stop sending `url` (server ignores it now regardless). Also fixed in the same pass: `lib/email.ts`'s `sendPageSpeedFailureAlert` had an unescaped HTML-injection fallback (hostname parse failure fell back to the raw unescaped url) — now runs through the same escape helper as the reason field. Separately, verified the 90s timeout chain end-to-end per Jim's request: preflight (10s) + PageSpeed's first attempt (75s) + a same-length retry could total ~86-90s against this route's 90s Vercel `maxDuration`, right at the edge of getting killed mid-request instead of returning a clean error. Tightened: the retry attempt (only fires on a real HTTP error, never on an actual timeout) now gets a 20s budget instead of another full 75s, in `lib/agents/pagespeedAgent/fetchPageSpeed.ts`. TypeScript clean, build clean.
 48. 🟩 PageSpeed reliability: run two independent attempts in parallel, first success wins (PC-C13) — start: 2026-08-02 · completed: 2026-08-02. Triggered by Jim hitting a real 75-second timeout on a live citywidealarms.com test (customer had to know to click retry — most visitors wouldn't). Investigated with real data before designing a fix: queried all 62 historical `pagespeed_duration_ms` rows — successful runs range 8.6s-70.7s (median 21.6s, p99 56.6s), confirmed genuine timeouts always hit the full 75s ceiling. This ruled out Jim's first instinct (kill and restart at 45s) — the data shows a real successful run took 70.7s, so a 45s cutoff would have discarded a legitimate success. Final design (Jim: "The pursuit of perfection is worth it... lets build it right"): `runPageSpeedAgent()` in `lib/agents/pagespeedAgent/index.ts` now fires two fully independent attempts at once and resolves on whichever succeeds first; only reports failure if both fail. Since ~3% of individual attempts historically failed, two failing together should be far rarer (though not fully independent if a specific site is the cause). Also typically faster for customers, not just more reliable — takes the quicker of two variable-latency results instead of always waiting on one. Explicit accepted tradeoff: doubles PageSpeed API calls per audit (4 instead of 2) — a non-issue at current volume (~60 audits total), flagged for revisit if volume grows. Race control-flow verified with an isolated synthetic-promise test (3/3 cases passed: slow-success correctly beats fast-failure, fast-success resolves without waiting on a slow failure, both-fail correctly waits for both) before wiring in real PageSpeed calls. Added `PAGESPEED_RACE` logging (attempt settle order/timing, winner) for real observability going forward. TypeScript clean, build clean.
 Files: lib/agents/pagespeedAgent/index.ts
+
+49. ⬜ GBP Superagent: vendor account setup — Google Places API + billing, Veriphone, Lob (PC-GBP-1) — start: 2026-08-03. Jim's own action, cannot be done by Claude. Blocks #52, #53, #56, #57.
+50. ⬜ GBP Superagent: draft pingclose_gbp_audits migration, get Jim's separate explicit yes, run it (PC-GBP-2) — start: 2026-08-03. SQL already drafted and explained column-by-column in the 2026-08-03 session.
+51. ⬜ GBP Superagent: NAP extraction from existing HTML scrape (PC-GBP-3) — start: 2026-08-03. No dependencies, safe to build first. Must ship with hardened JSON.parse (try/catch, size cap, explicit field picks, no object spreading).
+52. ⬜ GBP Superagent: discovery agent — find candidate GBP listing, never auto-picks below confidence threshold (PC-GBP-4) — start: 2026-08-03. Depends on #49, #51.
+53. ⬜ GBP Superagent: profile data agent — Places Details, field-masked for cost control (PC-GBP-5) — start: 2026-08-03. Depends on #49, #52.
+54. ⬜ GBP Superagent: category alignment agent — the critical GBP-vs-website mismatch check, most important finding in the feature (PC-GBP-6) — start: 2026-08-03. Depends on #53.
+55. ⬜ GBP Superagent: website/GBP consistency agent — NAP + schema diff (PC-GBP-7) — start: 2026-08-03. Depends on #51, #53.
+56. ⬜ GBP Superagent: phone compliance agent — Veriphone line-type lookup (PC-GBP-8) — start: 2026-08-03. Depends on #49, #53. Correctly-hedged copy only — Google does not ban mobile/VoIP numbers, only premium-rate ones.
+57. ⬜ GBP Superagent: address compliance agent — Lob, PO-Box/CMRA hard-fail + residential informational-only (PC-GBP-9) — start: 2026-08-03. Depends on #49, #53.
+58. ⬜ GBP Superagent: competitor gap agent, reuses existing DataForSEO local-pack logic, no new API call (PC-GBP-10) — start: 2026-08-03. Depends on #53.
+59. ⬜ GBP Superagent: findings normalizer/scoring, critical-mismatch cap so it can't be buried (PC-GBP-11) — start: 2026-08-03. Depends on #54-58.
+60. ⬜ GBP Superagent: orchestrator + GBP-specific spend cap that applies even to VIP (PC-GBP-12) — start: 2026-08-03. Depends on #51-59.
+61. ⬜ GBP Superagent: API route + wire into /api/audit's existing after() block (PC-GBP-13) — start: 2026-08-03. Depends on #60.
+62. ⬜ GBP Superagent: report page section, category-mismatch warning pinned above the score (PC-GBP-14) — start: 2026-08-03. Depends on #50, #59.
+63. ⬜ GBP Superagent: security hardening rollup — re-check every item before shipping (PC-GBP-15) — start: 2026-08-03. Cuts across #51, #60.
+64. ⬜ GBP Superagent: Level 2 owner-authorized deep scan — future, do NOT start yet (PC-GBP-16) — start: 2026-08-03. Deferred until #49-63 are live and Jim explicitly opens this gate.
+Files: lib/agents/gbpAgent/ (new directory, see SECTION I below for full detail on every item above)
 
 ---
 
@@ -519,6 +537,140 @@ Dependencies: none — blocks PC-E4, PC-E5, PC-FUTURE-2
 Status: OPEN — explicitly deferred, future task
 Description: Actual voice calling (people calling the business number and it ringing/routing somewhere) is out of scope for the current phone-verification work. If AWS is chosen, this means standing up Amazon Connect (a separate, bigger product). If OpenPhone/Quo is chosen, voice may already be included in the app. Real design questions deferred: does a call ring Jim's cell, go to voicemail, need an auto-attendant/IVR? Do not start until PC-STRAT2 is decided and Jim is ready to spec this out.
 Dependencies: PC-STRAT2
+
+---
+
+## SECTION I — GBP SUPERAGENT (Google Business Profile) — planned 2026-08-03, not started
+
+Context: a bad Google Business Profile undercuts an otherwise-good website — Jim wants a combined GBP + website audit built as a superagent living inside PingClose (not a separate product), per `GBPAgent_PingClose_Master_Build_Prompt_2026-08-03.md`. Scope is Stage 1 only (Level 1 public scan, no OAuth) — Level 2 (owner-authorized deep scan, performance metrics, review management) is explicitly deferred, see PC-GBP-16. Every task below is tagged **PC-GBP** so this thread can be picked back up from any session, in order.
+
+Vendor decisions made 2026-08-03 (real pricing checked, not guessed):
+  - GBP discovery/profile data → Google Places API (Jim's choice over reusing the existing DataForSEO account)
+  - Phone line-type check → Veriphone (1,000 lookups/month free tier)
+  - Address compliance check (PO Box/CMRA + residential/commercial) → Lob (300 US verifications/month free tier; confirmed via their docs to return both `cmra` and `rdi` fields in one call — beat Smarty, which needed a $50/mo minimum for the same coverage)
+  - Twilio is not and will never be under consideration (Jim's standing rule, all projects)
+
+Important correction baked into the design: Google's own documented Business Profile policy does **not** ban mobile/VoIP phone numbers — it bans premium-rate numbers and prefers (not requires) a local line over a central call-center number. PC-GBP-8 must reflect that: "this appears to be a mobile line" is diagnostic context, not a violation claim.
+
+---
+
+### PC-GBP-1 — Vendor account setup (Jim's own action)
+Status: OPEN — blocks PC-GBP-4, 5, 8, 9
+Description: Claude cannot create accounts or enter payment details. Jim needs to: (1) create a Google Cloud project, enable the Places API, set up billing, generate an API key restricted to server IP + Places API only; (2) create a Veriphone account, grab the API key; (3) create a Lob account, grab the API key, and confirm in their live dashboard/sandbox that a real US verification response actually includes `cmra` and `rdi` on the free tier (not gated to a paid plan). Keys go in `.env.local` as `GOOGLE_PLACES_API_KEY`, `VERIPHONE_API_KEY`, `LOB_API_KEY`.
+Files: .env.local, .env.local.example
+
+---
+
+### PC-GBP-2 — Migration: pingclose_gbp_audits table
+Status: OPEN — SQL drafted and explained column-by-column in-session 2026-08-03; needs Jim's separate explicit written yes before it runs, per the project's migration rule (not bundled into approving the design itself)
+Description: New table keyed by `audit_id` referencing `pingclose_audits(id)`, rather than widening the existing 50+-column table further. Holds discovery result, profile snapshot, compliance verdicts, findings, and cost/provenance tracking. Reproduce the exact SQL from the 2026-08-03 session when ready to run — don't re-draft from scratch.
+Files: new migration (no migrations folder exists yet — run once via Supabase MCP, same pattern as every other migration in this file)
+
+---
+
+### PC-GBP-3 — NAP extraction from existing HTML scrape
+Status: OPEN — no dependencies, safe to build first
+Description: `htmlAgent.ts` already fetches the page and sets `hasLocalBusinessSchema` as a boolean only — it never parses the actual JSON-LD fields. New file parses `<script type="application/ld+json">` blocks already present in the HTML htmlAgent already fetched (no new network call) for name/telephone/address/url, falling back to footer-text regex scanning when no schema exists. Labels the result `schema` / `footer-text` / `none` per the build prompt's "label every field" rule.
+Security requirement (found in the 2026-08-03 design review, must be built in from the start, not bolted on after): every `JSON.parse` call wrapped in try/catch matching the existing `AGENT_FAIL:` pattern; input size capped before parsing; only known string fields picked by explicit property access — never spread the parsed object onto anything (prototype-pollution risk from untrusted third-party HTML).
+Files: lib/agents/gbpAgent/extractNap.ts (new), lib/agents/gbpAgent/types.ts (new)
+
+---
+
+### PC-GBP-4 — Discovery agent (find the candidate GBP listing)
+Status: OPEN — depends on PC-GBP-1 (Places key), PC-GBP-3 (NAP input)
+Description: Google Places Find Place, scored by name/domain/address match. Never auto-selects below the confidence threshold — returns `needsConfirmation: true` and the candidate list instead of guessing, per the build prompt's explicit requirement.
+Files: lib/agents/gbpAgent/discover.ts (new)
+
+---
+
+### PC-GBP-5 — Profile data agent
+Status: OPEN — depends on PC-GBP-1, PC-GBP-4
+Description: Google Places Details, field-masked to only what's needed (name, address, phone, types, hours, status, rating, review count, Maps URL) to control cost. Every field labeled public/unavailable.
+Files: lib/agents/gbpAgent/profileData.ts (new)
+
+---
+
+### PC-GBP-6 — Category alignment agent (the "CategoryKiller" check)
+Status: OPEN — depends on PC-GBP-5, reuses techResult (title/H1/meta/schema) already computed by htmlAgent
+Description: Compares GBP primary/additional category against what the website actually emphasizes. Produces one of 8 outcome codes from the build prompt (CATEGORY_ALIGNED, PRIMARY_CATEGORY_MISMATCH, etc.) with severity. This is the single most important finding in the whole feature — a confirmed mismatch must be pinned above the aggregate score in the UI (see PC-GBP-14), never buried.
+Files: lib/agents/gbpAgent/categoryAlignment.ts (new)
+
+---
+
+### PC-GBP-7 — Website/GBP consistency agent
+Status: OPEN — depends on PC-GBP-3, PC-GBP-5
+Description: NAP + schema consistency between GBP and the website. Distinguishes harmless formatting differences from real contradictions. Explicitly does NOT flag a missing public address as a defect for a legitimate service-area business.
+Files: lib/agents/gbpAgent/consistency.ts (new)
+
+---
+
+### PC-GBP-8 — Phone compliance agent
+Status: OPEN — depends on PC-GBP-1 (Veriphone key), PC-GBP-5 (GBP phone number)
+Description: Veriphone line-type lookup (mobile/landline/VoIP/toll-free/premium). Premium-rate = hard fail per Google's actual documented policy. Everything else reported as diagnostic context with correctly hedged language — see the correction note at the top of this section. Do not ship copy claiming Google bans mobile/cell numbers; it doesn't.
+Files: lib/agents/gbpAgent/phoneCompliance.ts (new)
+
+---
+
+### PC-GBP-9 — Address compliance agent
+Status: OPEN — depends on PC-GBP-1 (Lob key + free-tier field confirmation), PC-GBP-5 (GBP address)
+Description: Lob verification, reads `cmra` (PO Box/mailbox rental → hard fail, Google explicitly disallows) and `rdi` (residential → informational only, never an accusation; owner-staffed home addresses are allowed and PingClose has no way to verify staffing publicly).
+Files: lib/agents/gbpAgent/addressCompliance.ts (new)
+
+---
+
+### PC-GBP-10 — Competitor gap agent
+Status: OPEN — depends on PC-GBP-5
+Description: Reuses the existing DataForSEO local-pack logic (lib/agents/dataforSEOAgent/localSerp.ts, already built for PC-C5/C9) — no new external call. Keyword/location inputs derived from techResult.primaryKeyword and the city/state parsed from the GBP profile's own address, so no new intake-form fields are needed.
+Files: lib/agents/gbpAgent/competitorGap.ts (new)
+
+---
+
+### PC-GBP-11 — Findings normalizer / scoring
+Status: OPEN — depends on PC-GBP-6 through PC-GBP-10
+Description: Normalizes every check into a flat GbpFinding[] array (same spirit as the existing lib/auditScorer.ts issue list). Applies the critical-mismatch cap so a category mismatch can't be hidden under a good aggregate score. Dedupes overlapping findings; category-alignment findings take precedence.
+Files: lib/agents/gbpAgent/scoreAndReport.ts (new)
+
+---
+
+### PC-GBP-12 — Orchestrator + GBP-specific spend cap
+Status: OPEN — depends on all of the above
+Description: Sequences discovery → profile → checks → scoring. Never throws on partial failure (matches every existing agent's AGENT_FAIL: catch-and-return-default pattern).
+Security requirement (found in the 2026-08-03 design review, must ship with this file, not after): a GBP-specific daily call/dollar cap, enforced fail-closed, that applies **even to VIP emails** — unlike lib/rateLimiter.ts's isVIP() bypass, which is fine for the existing free-tier PageSpeed audits but would allow unbounded spend across 4 paid GBP APIs per audit if inherited as-is.
+Files: lib/agents/gbpAgent/orchestrator.ts (new)
+
+---
+
+### PC-GBP-13 — API route + wiring into /api/audit
+Status: OPEN — depends on PC-GBP-12
+Description: New app/api/gbp-agent/route.ts, same shape as the existing pagespeed-agent route. Wired into app/api/audit/route.ts's existing after() block (~5 line addition), same pattern already used for pagespeed-agent.
+Files: app/api/gbp-agent/route.ts (new), app/api/audit/route.ts
+
+---
+
+### PC-GBP-14 — Report page section
+Status: OPEN — depends on PC-GBP-2, PC-GBP-11
+Description: New app/report/[id]/GbpSection.tsx (kept as its own file rather than growing the already-1006-line report page further, see PC-CQ3). Shows: profile found/confirm-needed banner, category-mismatch warning pinned above the score, phone/address compliance rows, competitor gap, evidence expanders. Data fetched server-side the same way the rest of the report page already reads pingclose_audits — never via a client-side Supabase call, to match the new table's service-role-only RLS policy.
+Files: app/report/[id]/GbpSection.tsx (new), app/report/[id]/page.tsx
+
+---
+
+### PC-GBP-15 — Security hardening checklist (rollup, don't lose these)
+Status: OPEN — tracked here so these don't get dropped once individual files are built
+Description: Findings from the 2026-08-03 design-stage security review, each owned by a task above but listed together as a re-check before this ships:
+  - GBP-specific spend cap applies even to VIP (PC-GBP-12)
+  - JSON-LD parsing hardened: try/catch, size cap, explicit field picks, no object spreading (PC-GBP-3)
+  - All 3 new API keys run through lib/cleanSecret.ts on read, same as existing keys
+  - Google Places calls never log the full request URL (key is a `?key=` query param) — path only
+  - All 3 new vendor calls are server-side only, never reachable from the browser
+  - pingclose_gbp_audits RLS policy matches pingclose_audits (service-role only), and the report page reads it server-side, never via client-side anon key
+Files: cuts across PC-GBP-3, PC-GBP-12, plus lib/cleanSecret.ts usage in the new agent files
+
+---
+
+### PC-GBP-16 — Level 2: owner-authorized deep scan (future, not Stage 1)
+Status: OPEN — explicitly deferred, separate future approval gate
+Description: OAuth-based connected scan — performance metrics, search-keyword impressions, authorized review-management data. Do not start until Stage 1 (PC-GBP-1 through PC-GBP-15) is live and Jim explicitly wants to open this gate. Needs its own OAuth consent/disconnect/token-revocation flow and encrypted refresh-token storage before any of it is safe to build.
+Dependencies: PC-GBP-1 through PC-GBP-15
 
 ---
 
