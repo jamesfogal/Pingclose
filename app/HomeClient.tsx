@@ -1,26 +1,8 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Stage = "form" | "verifying" | "verified";
-
-function useCountUp(target: number, duration = 1400) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    let start: number | null = null;
-    let raf: number;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / duration, 1);
-      const ease = 1 - (1 - p) ** 3;
-      setVal(Math.round(ease * target));
-      if (p < 1) { raf = requestAnimationFrame(step); }
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-  return val;
-}
 
 export default function Home() {
   const router = useRouter();
@@ -34,8 +16,6 @@ export default function Home() {
   const [urlFocused,   setUrlFocused]   = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [phoneFocused, setPhoneFocused] = useState(false);
-  const mobileScore  = useCountUp(73,  1400);
-  const desktopScore = useCountUp(89, 1700);
 
   function playPing() {
     try { new Audio("/sounds/ping.mp3").play(); } catch { /* ignore */ }
@@ -107,6 +87,35 @@ export default function Home() {
 
   return (
     <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
+      <style>{`
+        input::placeholder { color: #6B7280; }
+        * { box-sizing: border-box; }
+        .hero-grid  { grid-template-columns: 1fr 1fr; }
+        .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        .preview-card { display: block; }
+        @media (max-width: 768px) {
+          .hero-grid    { grid-template-columns: 1fr !important; }
+          .stats-grid   { grid-template-columns: 1fr !important; }
+          .preview-card { display: none !important; }
+        }
+        @media (hover: hover) and (pointer: fine) {
+          a:active { transform: scale(0.97); }
+        }
+        @media (prefers-reduced-motion: no-preference) {
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+          }
+          @keyframes growUp {
+            from { transform: scaleY(0.92); opacity: 0; }
+            to   { transform: scaleY(1);    opacity: 1; }
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes pulse  { 50% { opacity: 0.6; } }
+          @keyframes growUp { from { opacity: 0; } to { opacity: 1; } }
+        }
+      `}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       {/* ── ABOVE THE FOLD ──────────────────────────────────────── */}
@@ -263,22 +272,6 @@ export default function Home() {
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#34D399" }} />
                   <span style={{ fontSize: 16, color: "#374151", marginLeft: 6, fontFamily: "monospace" }}>pingclose.com/report/abc123</span>
                 </div>
-                {/* Scores */}
-                <div style={{ padding: "18px 20px", borderBottom: "1px solid #1E3050" }}>
-                  <div style={{ fontSize: 16, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Performance Scores</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                    {[
-                      { label: "📱 Mobile", score: mobileScore, color: "#FBBF24" },
-                      { label: "🖥️ Desktop", score: desktopScore, color: "#10D9A0" },
-                    ].map(({ label, score, color }) => (
-                      <div key={label} style={{ background: "#0B0E16", borderRadius: 10, padding: "14px 10px", textAlign: "center" }}>
-                        <div style={{ fontSize: 16, color: "#64748B", marginBottom: 6 }}>{label}</div>
-                        <div style={{ fontSize: 42, fontWeight: 800, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{score}</div>
-                        <div style={{ fontSize: 16, color: "#475569", marginTop: 2 }}>/100</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
                 {/* Verdict */}
                 <div style={{ padding: "12px 20px", borderBottom: "1px solid #1E3050", display: "flex", alignItems: "center", gap: 8, background: "#F8717108" }}>
                   <span>❌</span>
@@ -408,40 +401,6 @@ export default function Home() {
           </button>
         </div>
       </section>
-
-      <style>{`
-        input::placeholder { color: #6B7280; }
-        * { box-sizing: border-box; }
-        .hero-grid  { grid-template-columns: 1fr 1fr; }
-        .stats-grid { grid-template-columns: repeat(3, 1fr); }
-        .preview-card { display: block; }
-        @media (max-width: 768px) {
-          .hero-grid    { grid-template-columns: 1fr !important; }
-          .stats-grid   { grid-template-columns: 1fr !important; }
-          .preview-card { display: none !important; }
-        }
-        @media (hover: hover) and (pointer: fine) {
-          a:active { transform: scale(0.97); }
-        }
-        @media (prefers-reduced-motion: no-preference) {
-          @keyframes ping {
-            75%, 100% { transform: scale(2.5); opacity: 0; }
-          }
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.4; }
-          }
-          @keyframes growUp {
-            from { transform: scaleY(0.92); opacity: 0; }
-            to   { transform: scaleY(1);    opacity: 1; }
-          }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          @keyframes ping   { 75%, 100% { opacity: 0; } }
-          @keyframes pulse  { 50% { opacity: 0.6; } }
-          @keyframes growUp { from { opacity: 0; } to { opacity: 1; } }
-        }
-      `}</style>
     </main>
   );
 }
