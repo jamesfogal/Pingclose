@@ -95,6 +95,30 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Atomic claim, not just the timestamp checks above. This route is public
+  // and unauthenticated (called via a plain fetch from /api/audit's after(),
+  // no internal secret) — the checks above read the row, then decide, then
+  // write, which leaves a window where concurrent requests can all read
+  // "not in flight" before any of them commits their claim. Since #48 races
+  // two independent PageSpeed attempts (4 Google API calls per invocation
+  // now, not 2), that race is real money: N concurrent requests against one
+  // freshly-submitted reportId, fired before /api/audit's own automatic
+  // call ever sets pagespeed_started_at, would all pass every guard above.
+  // Postgres serializes concurrent UPDATEs to the same row — only the
+  // request whose expected-current-value still matches after the row lock
+  // is granted actually updates anything, so exactly one wins regardless of
+  // how many requests arrive at once.
+  const claimQuery = supabase.from('pingclose_audits').update({ pagespeed_started_at: new Date().toISOString() }).eq('id', reportId);
+  const { data: claimed, error: claimError } = await (
+    existing.pagespeed_started_at
+      ? claimQuery.eq('pagespeed_started_at', existing.pagespeed_started_at as string)
+      : claimQuery.is('pagespeed_started_at', null)
+  ).select('id');
+
+  if (claimError || !claimed || claimed.length === 0) {
+    return NextResponse.json({ error: 'A speed check is already running for this report, or was just retried. Please wait a moment.' }, { status: 429 });
+  }
+
   // Pre-flight: DNS, HTTP status, redirects, TTFB, Cloudflare — before calling Google
   const preflight = await runPreflightCheck(url);
   console.log(
