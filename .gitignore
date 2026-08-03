@@ -30,8 +30,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — real secrets never committed, but .env*.example template
+# files SHOULD be (they're documentation, no real values) — the broad
+# .env* pattern below was silently excluding them too, meaning this repo's
+# env-var documentation has never actually been shared via git
 .env*
+!.env*.example
 
 # vercel
 .vercel
@@ -45,11 +49,9 @@ next-env.d.ts
 # Local Netlify folder
 .netlify
 
-.env*
 
 # local credential scratch files — never commit
 .dflogin.tmp
 .dfpassword.tmp
 *.tmp
 
-.env*
