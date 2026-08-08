@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { colors, fontSize } from '@/lib/designTokens';
 
 export default function SetupPage() {
   const [password, setPassword] = useState('');
@@ -72,20 +73,20 @@ export default function SetupPage() {
   const inputStyle = {
     width: '100%',
     padding: '12px 16px',
-    background: '#0B0E16',
-    border: '1px solid #1F2937',
+    background: colors.void,
+    border: `1px solid ${colors.border}`,
     borderRadius: '8px',
-    color: '#F1F5F9',
-    fontSize: '16px',
+    color: colors.textPrimary,
+    fontSize: `${fontSize.label}px`,
     boxSizing: 'border-box' as const,
   };
 
   const btnStyle = {
     padding: '12px 32px',
-    background: '#10D9A0',
-    color: '#0B0E16',
+    background: colors.signal,
+    color: colors.void,
     fontWeight: 700,
-    fontSize: '16px',
+    fontSize: `${fontSize.label}px`,
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -93,15 +94,15 @@ export default function SetupPage() {
 
   if (!authed) {
     return (
-      <main style={{ minHeight: '100vh', background: '#0B0E16', color: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main style={{ minHeight: '100vh', background: colors.void, color: colors.textPrimary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: '100%', maxWidth: '400px', padding: '40px 24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#10D9A0' }}>PingClose</div>
-            <div style={{ fontSize: '16px', color: '#64748B', marginTop: '8px' }}>Platform Setup</div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: colors.signal }}>PingClose</div>
+            <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: '8px' }}>Platform Setup</div>
           </div>
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '13px', color: '#64748B', display: 'block', marginBottom: '8px' }}>ADMIN PASSWORD</label>
+              <label style={{ fontSize: fontSize.label, color: colors.textSecondary, display: 'block', marginBottom: '8px' }}>ADMIN PASSWORD</label>
               <input
                 type="password"
                 value={password}
@@ -111,7 +112,7 @@ export default function SetupPage() {
                 autoFocus
               />
             </div>
-            {error && <div style={{ color: '#F87171', fontSize: '16px', marginBottom: '12px' }}>{error}</div>}
+            {error && <div style={{ color: colors.statusFail, fontSize: fontSize.label, marginBottom: '12px' }}>{error}</div>}
             <button type="submit" style={{ ...btnStyle, width: '100%' }}>Enter Setup</button>
           </form>
         </div>
@@ -120,22 +121,22 @@ export default function SetupPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0B0E16', color: '#F1F5F9', padding: '40px 24px' }}>
+    <main style={{ minHeight: '100vh', background: colors.void, color: colors.textPrimary, padding: '40px 24px' }}>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{ fontSize: '28px', fontWeight: 800, color: '#10D9A0' }}>PingClose</div>
-          <div style={{ fontSize: '16px', color: '#64748B', marginTop: '8px' }}>Platform Setup</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: colors.signal }}>PingClose</div>
+          <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: '8px' }}>Platform Setup</div>
         </div>
 
         {/* Resend API Key */}
-        <div style={{ background: '#111827', border: '1px solid #1F2937', borderRadius: '12px', padding: '28px', marginBottom: '24px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', marginBottom: '8px', textTransform: 'uppercase' }}>Resend API Key</div>
-          <div style={{ fontSize: '16px', color: '#475569', marginBottom: '20px' }}>
-            Get your key from <a href="https://resend.com/api-keys" target="_blank" rel="noreferrer" style={{ color: '#10D9A0' }}>resend.com/api-keys</a> — starts with <code style={{ background: '#1F2937', padding: '2px 6px', borderRadius: '4px' }}>re_</code>
+        <div style={{ background: colors.surfaceInset, border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '28px', marginBottom: '24px' }}>
+          <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: '0.08em', marginBottom: '8px', textTransform: 'uppercase' }}>Resend API Key</div>
+          <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: '20px' }}>
+            Get your key from <a href="https://resend.com/api-keys" target="_blank" rel="noreferrer" style={{ color: colors.signal }}>resend.com/api-keys</a> — starts with <code style={{ background: colors.border, padding: '2px 6px', borderRadius: '4px' }}>re_</code>
           </div>
           {currentKeyMasked && (
-            <div style={{ fontSize: '16px', color: '#64748B', marginBottom: '16px' }}>
-              Current key: <code style={{ background: '#1F2937', padding: '2px 6px', borderRadius: '4px', color: '#94A3B8' }}>{currentKeyMasked}</code>
+            <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: '16px' }}>
+              Current key: <code style={{ background: colors.border, padding: '2px 6px', borderRadius: '4px', color: colors.textSecondary }}>{currentKeyMasked}</code>
             </div>
           )}
           <form onSubmit={handleSave}>
@@ -148,8 +149,8 @@ export default function SetupPage() {
                 style={inputStyle}
               />
             </div>
-            {error && <div style={{ color: '#F87171', fontSize: '16px', marginBottom: '12px' }}>{error}</div>}
-            {saved && <div style={{ color: '#10D9A0', fontSize: '16px', marginBottom: '12px' }}>✅ Saved successfully</div>}
+            {error && <div style={{ color: colors.statusFail, fontSize: fontSize.label, marginBottom: '12px' }}>{error}</div>}
+            {saved && <div style={{ color: colors.signal, fontSize: fontSize.label, marginBottom: '12px' }}>✅ Saved successfully</div>}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button type="submit" style={btnStyle} disabled={saving}>
                 {saving ? 'Saving...' : 'Save Key'}
@@ -158,13 +159,13 @@ export default function SetupPage() {
                 type="button"
                 onClick={handleTest}
                 disabled={testing}
-                style={{ ...btnStyle, background: '#1E3050', color: '#94A3B8' }}
+                style={{ ...btnStyle, background: colors.border, color: colors.textSecondary }}
               >
                 {testing ? 'Sending...' : 'Send Test Email'}
               </button>
             </div>
             {testResult && (
-              <div style={{ marginTop: '16px', fontSize: '16px', color: testResult.startsWith('✅') ? '#10D9A0' : '#F87171' }}>
+              <div style={{ marginTop: '16px', fontSize: fontSize.label, color: testResult.startsWith('✅') ? colors.signal : colors.statusFail }}>
                 {testResult}
               </div>
             )}
@@ -172,10 +173,10 @@ export default function SetupPage() {
         </div>
 
         {/* Status */}
-        <div style={{ background: '#111827', border: '1px solid #1F2937', borderRadius: '12px', padding: '24px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', marginBottom: '16px', textTransform: 'uppercase' }}>Current Status</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', color: '#94A3B8' }}>
-            <span style={{ color: currentKeyMasked.startsWith('re_') ? '#10D9A0' : '#F87171' }}>
+        <div style={{ background: colors.surfaceInset, border: `1px solid ${colors.border}`, borderRadius: '12px', padding: '24px' }}>
+          <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: '0.08em', marginBottom: '16px', textTransform: 'uppercase' }}>Current Status</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: fontSize.label, color: colors.textSecondary }}>
+            <span style={{ color: currentKeyMasked.startsWith('re_') ? colors.signal : colors.statusFail }}>
               {currentKeyMasked.startsWith('re_') ? '✅' : '❌'}
             </span>
             Resend API Key {currentKeyMasked.startsWith('re_') ? 'configured' : 'not set'}
@@ -183,7 +184,7 @@ export default function SetupPage() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '32px' }}>
-          <a href="/admin" style={{ color: '#475569', fontSize: '16px' }}>← Back to Admin</a>
+          <a href="/admin" style={{ color: colors.textSecondary, fontSize: fontSize.label }}>← Back to Admin</a>
         </div>
       </div>
     </main>

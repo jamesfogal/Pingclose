@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { colors, fontSize } from "@/lib/designTokens";
 
 export const metadata: Metadata = {
   title: "Pricing — Free Speed Test + Full Site Fix",
@@ -12,10 +13,9 @@ export const metadata: Metadata = {
   },
 };
 
-const TEAL = "#10D9A0";
-const NAVY = "#0D1528";
-const BORDER = "#1E3050";
-const RED = "#F87171";
+// Purple is a deliberate exception to the 9-color palette (brand/pingclose-design-philosophy.md):
+// this page uses it to visually separate the paid "Full Fix" tier from the free/teal tier.
+const PURPLE = "#A78BFA";
 
 const schema = {
   "@context": "https://schema.org",
@@ -27,18 +27,18 @@ const schema = {
 
 export default function PricingPage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: colors.void, color: colors.textPrimary, fontFamily: "system-ui, -apple-system, sans-serif" }}>
       <style>{`
         .btn-teal {
           transition: transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1);
         }
-        .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 10px 28px #10D9A040; }
+        .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 10px 28px ${colors.signal}40; }
         .btn-teal:active { transform: scale(0.97); box-shadow: none; }
 
         .btn-purple {
           transition: transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1);
         }
-        .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 10px 28px #A78BFA40; }
+        .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 10px 28px ${PURPLE}40; }
         .btn-purple:active { transform: scale(0.97); box-shadow: none; }
 
         .card-hover {
@@ -47,7 +47,7 @@ export default function PricingPage() {
         .card-hover:hover { transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
 
         .link-subtle { transition: color 160ms cubic-bezier(0.23,1,0.32,1); }
-        .link-subtle:hover { color: #94A3B8 !important; }
+        .link-subtle:hover { color: ${colors.textPrimary} !important; }
 
         .link-purple { transition: color 160ms cubic-bezier(0.23,1,0.32,1); }
         .link-purple:hover { color: #C4B5FD !important; }
@@ -70,7 +70,7 @@ export default function PricingPage() {
           .btn-teal:hover, .btn-purple:hover, .card-hover:hover { transform: none !important; box-shadow: none !important; }
         }
         @media (hover: hover) and (pointer: fine) {
-          .btn-teal:focus-visible, .btn-purple:focus-visible { outline: 2px solid #10D9A0; outline-offset: 3px; }
+          .btn-teal:focus-visible, .btn-purple:focus-visible { outline: 2px solid ${colors.signal}; outline-offset: 3px; }
         }
       `}</style>
 
@@ -80,33 +80,33 @@ export default function PricingPage() {
       />
 
       {/* Header */}
-      <div style={{ background: NAVY, borderBottom: `1px solid ${BORDER}`, padding: "48px 24px 48px" }}>
+      <div style={{ background: colors.surface, borderBottom: `1px solid ${colors.border}`, padding: "48px 24px 48px" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <Link href="/" style={{ fontSize: 24, fontWeight: 800, color: TEAL, textDecoration: "none" }}>
-            Ping<span style={{ color: "#F1F5F9" }}>Close</span>
+          <Link href="/" style={{ fontSize: 24, fontWeight: 800, color: colors.signal, textDecoration: "none" }}>
+            Ping<span style={{ color: colors.textPrimary }}>Close</span>
           </Link>
 
           {/* Hero H1 box */}
           <div style={{
             margin: "28px 0 0",
             padding: "36px 32px 32px",
-            background: "linear-gradient(135deg, #10D9A012 0%, #0D1528 100%)",
-            border: `2px solid ${TEAL}50`,
+            background: `linear-gradient(135deg, ${colors.signal}12 0%, ${colors.surface} 100%)`,
+            border: `2px solid ${colors.signal}50`,
             borderRadius: 16,
-            boxShadow: `0 0 40px ${TEAL}15`
+            boxShadow: `0 0 40px ${colors.signal}15`
           }}>
-            <h1 style={{ fontSize: "clamp(28px, 4.5vw, 48px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1.5px", lineHeight: 1.15, color: "#F9FAFB" }}>
+            <h1 style={{ fontSize: "clamp(28px, 4.5vw, 48px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1.5px", lineHeight: 1.15, color: colors.textPrimary }}>
               Web Page Speed Monitor<br />
-              <span style={{ color: TEAL }}>by PingClose</span>
+              <span style={{ color: colors.signal }}>by PingClose</span>
             </h1>
-            <p style={{ fontSize: 19, color: "#CBD5E1", margin: "0 auto 24px", maxWidth: 560, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 19, color: colors.textSecondary, margin: "0 auto 24px", maxWidth: 560, lineHeight: 1.6 }}>
               Free above-the-fold speed test. Goal: load in under 1 second.<br />
               PingClose finds the problems — and fixes them.
             </p>
             <Link href="/" className="btn-teal" style={{
               display: "inline-block",
-              background: TEAL, color: "#0B0E16",
-              fontSize: 17, fontWeight: 700,
+              background: colors.signal, color: colors.void,
+              fontSize: fontSize.body, fontWeight: 700,
               padding: "14px 32px", borderRadius: 10,
               textDecoration: "none"
             }}>
@@ -123,16 +123,16 @@ export default function PricingPage() {
           <h2 style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 800, margin: "0 0 8px", textAlign: "center", letterSpacing: "-0.5px" }}>
             Pricing to Test Your Website for Speed
           </h2>
-          <p style={{ fontSize: 18, color: "#64748B", textAlign: "center", margin: "0 0 32px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, textAlign: "center", margin: "0 0 32px", lineHeight: 1.6 }}>
             PingClose tells you your above-the-fold score — and makes it pass.
           </p>
 
           <div className="responsive-grid-2col" style={{ gap: 16, marginBottom: 24 }}>
             {/* Free audit column */}
-            <div className="card-hover" style={{ background: TEAL + "08", border: `2px solid ${TEAL}40`, borderRadius: 12, padding: "28px 24px" }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: TEAL, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>Free — PingClose Audit</div>
-              <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above-the-Fold Speed Test</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>Goal: load in under 1 second</div>
+            <div className="card-hover" style={{ background: colors.signal + "08", border: `2px solid ${colors.signal}40`, borderRadius: 12, padding: "28px 24px" }}>
+              <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.signal, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>Free — PingClose Audit</div>
+              <div style={{ fontSize: 19, fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>Above-the-Fold Speed Test</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 20 }}>Goal: load in under 1 second</div>
               {[
                 "Above-the-fold load time",
                 "Mobile score (0–100)",
@@ -142,14 +142,14 @@ export default function PricingPage() {
                 "Pass / fail vs. 1-second benchmark",
               ].map((text, i) => (
                 <div key={i} className="feature-item" style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
-                  <span style={{ color: TEAL, flexShrink: 0, fontWeight: 700 }}>✓</span>
-                  <span style={{ fontSize: 16, color: "#94A3B8" }}>{text}</span>
+                  <span style={{ color: colors.signal, flexShrink: 0, fontWeight: 700 }}>✓</span>
+                  <span style={{ fontSize: fontSize.label, color: colors.textSecondary }}>{text}</span>
                 </div>
               ))}
               <Link href="/" className="btn-teal" style={{
                 display: "block", textAlign: "center", marginTop: 20,
-                background: TEAL, color: "#0B0E16",
-                fontSize: 16, fontWeight: 700,
+                background: colors.signal, color: colors.void,
+                fontSize: fontSize.label, fontWeight: 700,
                 padding: "12px 20px", borderRadius: 10,
                 textDecoration: "none"
               }}>
@@ -158,11 +158,11 @@ export default function PricingPage() {
             </div>
 
             {/* Fix column — PingClose Full Fix */}
-            <div className="card-hover" style={{ background: "#A78BFA10", border: "2px solid #A78BFA40", borderRadius: 12, padding: "28px 24px" }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#A78BFA", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>PingClose — Full Fix</div>
-              <div style={{ fontSize: 19, fontWeight: 700, color: "#F1F5F9", marginBottom: 4 }}>Above + Below the Fold</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#F1F5F9", marginBottom: 4 }}>$495</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 20 }}>to correct your speed — additional fixes available à la carte</div>
+            <div className="card-hover" style={{ background: PURPLE + "10", border: `2px solid ${PURPLE}40`, borderRadius: 12, padding: "28px 24px" }}>
+              <div style={{ fontSize: fontSize.label, fontWeight: 700, color: PURPLE, letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>PingClose — Full Fix</div>
+              <div style={{ fontSize: 19, fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>Above + Below the Fold</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: colors.textPrimary, marginBottom: 4 }}>$495</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 20 }}>to correct your speed — additional fixes available à la carte</div>
               {[
                 "All above-the-fold issues fixed",
                 "Lazy loading on every page below the fold",
@@ -172,14 +172,14 @@ export default function PricingPage() {
                 "Done in 24 hours — flat fee",
               ].map((text, i) => (
                 <div key={i} className="feature-item" style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
-                  <span style={{ color: "#A78BFA", flexShrink: 0, fontWeight: 700 }}>✓</span>
-                  <span style={{ fontSize: 16, color: "#F1F5F9", fontWeight: 600 }}>{text}</span>
+                  <span style={{ color: PURPLE, flexShrink: 0, fontWeight: 700 }}>✓</span>
+                  <span style={{ fontSize: fontSize.label, color: colors.textPrimary, fontWeight: 600 }}>{text}</span>
                 </div>
               ))}
               <a href="tel:+13145172533" className="btn-purple" style={{
                 display: "block", textAlign: "center", marginTop: 20,
-                background: "#A78BFA", color: "#0B0E16",
-                fontSize: 16, fontWeight: 700,
+                background: PURPLE, color: colors.void,
+                fontSize: fontSize.label, fontWeight: 700,
                 padding: "12px 20px", borderRadius: 10,
                 textDecoration: "none"
               }}>
@@ -189,14 +189,14 @@ export default function PricingPage() {
           </div>
 
           {/* Below the fold callout */}
-          <div style={{ background: NAVY, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "24px 28px" }}>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#F1F5F9", marginBottom: 10 }}>
+          <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 12, padding: "24px 28px" }}>
+            <div style={{ fontSize: fontSize.body, fontWeight: 700, color: colors.textPrimary, marginBottom: 10 }}>
               Why below-the-fold matters as much as above it
             </div>
-            <p style={{ fontSize: 16, color: "#94A3B8", margin: "0 0 12px", lineHeight: 1.7 }}>
+            <p style={{ fontSize: fontSize.label, color: colors.textSecondary, margin: "0 0 12px", lineHeight: 1.7 }}>
               Free speed tools — including PingClose — measure what loads in your visitor&apos;s first screen. That&apos;s the above-the-fold benchmark. But your visitors scroll. Every image, section, and element below the fold needs to lazy load — meaning it should only load when the visitor reaches it, not all at once when the page opens.
             </p>
-            <p style={{ fontSize: 16, color: "#94A3B8", margin: 0, lineHeight: 1.7 }}>
+            <p style={{ fontSize: fontSize.label, color: colors.textSecondary, margin: 0, lineHeight: 1.7 }}>
               When below-the-fold content loads all at once, your mobile data usage spikes, your score drops, and Google sees a slow site. PingClose fixes lazy loading on every page and installs proper schema markup throughout your entire site — not just the homepage — so Google can read and rank every page correctly.
             </p>
           </div>
@@ -208,29 +208,29 @@ export default function PricingPage() {
             What PingClose Measures
           </h2>
           <div className="responsive-grid-2col" style={{ gap: 16 }}>
-            <div style={{ background: RED + "10", border: `1px solid ${RED}30`, borderRadius: 12, padding: "24px" }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: RED, marginBottom: 16 }}>❌ What Free Tools Give You</div>
+            <div style={{ background: colors.statusFail + "10", border: `1px solid ${colors.statusFail}30`, borderRadius: 12, padding: "24px" }}>
+              <div style={{ fontSize: fontSize.body, fontWeight: 700, color: colors.statusFail, marginBottom: 16 }}>❌ What Free Tools Give You</div>
               {[
                 "A score",
                 "A list of problems",
                 "No explanation of what matters most",
                 "No fix — just a report",
               ].map((item, i) => (
-                <div key={i} style={{ fontSize: 16, color: "#94A3B8", marginBottom: 10, display: "flex", gap: 10 }}>
-                  <span style={{ color: RED, flexShrink: 0 }}>→</span>{item}
+                <div key={i} style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 10, display: "flex", gap: 10 }}>
+                  <span style={{ color: colors.statusFail, flexShrink: 0 }}>→</span>{item}
                 </div>
               ))}
             </div>
-            <div style={{ background: TEAL + "10", border: `1px solid ${TEAL}30`, borderRadius: 12, padding: "24px" }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: TEAL, marginBottom: 16 }}>✅ What PingClose Gives You</div>
+            <div style={{ background: colors.signal + "10", border: `1px solid ${colors.signal}30`, borderRadius: 12, padding: "24px" }}>
+              <div style={{ fontSize: fontSize.body, fontWeight: 700, color: colors.signal, marginBottom: 16 }}>✅ What PingClose Gives You</div>
               {[
                 "Your above-the-fold score",
                 "Pass / fail vs. 1-second benchmark",
                 "Every issue ranked by severity",
                 "Your top 3 recommendations to clear the hurdle",
               ].map((item, i) => (
-                <div key={i} style={{ fontSize: 16, color: "#94A3B8", marginBottom: 10, display: "flex", gap: 10 }}>
-                  <span style={{ color: TEAL, flexShrink: 0 }}>✓</span>{item}
+                <div key={i} style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 10, display: "flex", gap: 10 }}>
+                  <span style={{ color: colors.signal, flexShrink: 0 }}>✓</span>{item}
                 </div>
               ))}
             </div>
@@ -239,32 +239,32 @@ export default function PricingPage() {
 
         {/* Bottom CTA */}
         <div style={{
-          background: NAVY,
-          border: `1px solid ${BORDER}`,
+          background: colors.surface,
+          border: `1px solid ${colors.border}`,
           borderRadius: 16, padding: "40px 32px",
           textAlign: "center"
         }}>
           <h2 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 12px", letterSpacing: "-0.5px" }}>
             Ready to hear that phone ring?
           </h2>
-          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 28px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, margin: "0 0 28px", lineHeight: 1.6 }}>
             Ping your site. See your score. Know exactly what&apos;s holding you back.<br />
             Free. No account. No credit card. 60 seconds.
           </p>
           <Link href="/" className="btn-teal" style={{
             display: "inline-block",
-            background: TEAL, color: "#0B0E16",
-            fontSize: 18, fontWeight: 700,
+            background: colors.signal, color: colors.void,
+            fontSize: fontSize.bodyLarge, fontWeight: 700,
             padding: "16px 40px", borderRadius: 10,
             textDecoration: "none"
           }}>
             Ping My Site — It&apos;s Free →
           </Link>
           <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
-            <Link href="/faq" className="link-subtle" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
+            <Link href="/faq" className="link-subtle" style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none" }}>
               Have questions? Read our FAQ →
             </Link>
-            <a href="tel:+13145172533" className="link-purple" style={{ fontSize: 16, color: "#A78BFA", textDecoration: "none" }}>
+            <a href="tel:+13145172533" className="link-purple" style={{ fontSize: fontSize.label, color: PURPLE, textDecoration: "none" }}>
               Call for fix pricing →
             </a>
           </div>

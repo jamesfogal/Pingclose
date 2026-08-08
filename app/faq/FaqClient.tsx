@@ -1,10 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-
-const TEAL = "#10D9A0";
-const NAVY = "#0D1528";
-const BORDER = "#1E3050";
+import { colors, fontSize } from "@/lib/designTokens";
 
 const faqs = [
   {
@@ -165,23 +162,23 @@ function CTAButton() {
       textAlign: "center",
       margin: "32px 0",
       padding: "24px",
-      background: NAVY,
-      border: `1px solid ${BORDER}`,
+      background: colors.surface,
+      border: `1px solid ${colors.border}`,
       borderRadius: 12
     }}>
       <Link href="/#top" style={{
         display: "inline-block",
         background: "transparent",
-        border: `2px solid ${TEAL}`,
+        border: `2px solid ${colors.signal}`,
         borderRadius: 8,
         padding: "12px 28px",
-        color: TEAL,
-        fontSize: 17,
+        color: colors.signal,
+        fontSize: fontSize.body,
         fontWeight: 600,
         textDecoration: "none",
         transition: `background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)`,
       }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = TEAL + "15"; }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = colors.signal + "15"; }}
         onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = "transparent"; el.style.transform = ""; }}
         onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
         onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = ""; }}
@@ -212,7 +209,7 @@ export default function FAQPage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: colors.void, color: colors.textPrimary, fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
       <script
         type="application/ld+json"
@@ -220,45 +217,45 @@ export default function FAQPage() {
       />
 
       {/* Header */}
-      <div style={{ background: NAVY, borderBottom: `1px solid ${BORDER}`, padding: "48px 24px 48px" }}>
+      <div style={{ background: colors.surface, borderBottom: `1px solid ${colors.border}`, padding: "48px 24px 48px" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <Link href="/" style={{ fontSize: 24, fontWeight: 800, color: TEAL, textDecoration: "none", letterSpacing: "-0.5px" }}>
-            Ping<span style={{ color: "#F1F5F9" }}>Close</span>
+          <Link href="/" style={{ fontSize: 24, fontWeight: 800, color: colors.signal, textDecoration: "none", letterSpacing: "-0.5px" }}>
+            Ping<span style={{ color: colors.textPrimary }}>Close</span>
           </Link>
 
           {/* Hero H1 box */}
           <div style={{
             margin: "28px 0 0",
             padding: "36px 32px 32px",
-            background: "linear-gradient(135deg, #10D9A012 0%, #0D1528 100%)",
-            border: `2px solid ${TEAL}50`,
+            background: `linear-gradient(135deg, ${colors.signal}12 0%, ${colors.surface} 100%)`,
+            border: `2px solid ${colors.signal}50`,
             borderRadius: 16,
-            boxShadow: `0 0 40px ${TEAL}15`
+            boxShadow: `0 0 40px ${colors.signal}15`
           }}>
-            <h1 style={{ fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1.5px", lineHeight: 1.15, color: "#F9FAFB" }}>
+            <h1 style={{ fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 800, margin: "0 0 16px", letterSpacing: "-1.5px", lineHeight: 1.15, color: colors.textPrimary }}>
               Questions and Answers<br />
-              <span style={{ color: TEAL }}>About Fast Websites</span>
+              <span style={{ color: colors.signal }}>About Fast Websites</span>
             </h1>
-            <p style={{ fontSize: 19, color: "#CBD5E1", margin: "0 0 24px", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 19, color: colors.textSecondary, margin: "0 0 24px", lineHeight: 1.6 }}>
               30 questions local business owners ask about page speed, Google rankings, Core Web Vitals, and local SEO — answered straight.
             </p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 20 }}>
-              <div style={{ fontSize: 16, color: TEAL, background: TEAL + "15", border: `1px solid ${TEAL}30`, borderRadius: 6, padding: "6px 16px" }}>
+              <div style={{ fontSize: fontSize.label, color: colors.signal, background: colors.signal + "15", border: `1px solid ${colors.signal}30`, borderRadius: 6, padding: "6px 16px" }}>
                 ✓ Updated June 2026
               </div>
-              <div style={{ fontSize: 16, color: "#94A3B8", background: "#ffffff08", border: "1px solid #1E3050", borderRadius: 6, padding: "6px 16px" }}>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, background: colors.textPrimary + "08", border: `1px solid ${colors.border}`, borderRadius: 6, padding: "6px 16px" }}>
                 30 questions answered
               </div>
             </div>
             <Link href="/" style={{
               display: "inline-block",
-              background: TEAL, color: "#0B0E16",
-              fontSize: 17, fontWeight: 700,
+              background: colors.signal, color: colors.void,
+              fontSize: fontSize.body, fontWeight: 700,
               padding: "14px 32px", borderRadius: 10,
               textDecoration: "none",
               transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)",
             }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 10px 28px ${TEAL}40`; }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 10px 28px ${colors.signal}40`; }}
             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; }}
             onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
             onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
@@ -276,7 +273,7 @@ export default function FAQPage() {
           <div key={i}>
             {/* FAQ Item */}
             <div style={{
-              borderBottom: `1px solid ${BORDER}`,
+              borderBottom: `1px solid ${colors.border}`,
               padding: "4px 0"
             }}>
               {/* Question */}
@@ -289,16 +286,16 @@ export default function FAQPage() {
                   borderRadius: 8,
                   transition: "background 150ms cubic-bezier(0.23,1,0.32,1)",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A008"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = colors.signal + "08"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-                onMouseDown={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A012"; }}
-                onMouseUp={e => { (e.currentTarget as HTMLElement).style.background = "#10D9A008"; }}
+                onMouseDown={e => { (e.currentTarget as HTMLElement).style.background = colors.signal + "12"; }}
+                onMouseUp={e => { (e.currentTarget as HTMLElement).style.background = colors.signal + "08"; }}
               >
-                <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.4 }}>
+                <span style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: colors.textPrimary, lineHeight: 1.4 }}>
                   {faq.q}
                 </span>
                 <span style={{
-                  fontSize: 22, color: TEAL, flexShrink: 0, marginTop: 2,
+                  fontSize: fontSize.heading, color: colors.signal, flexShrink: 0, marginTop: 2,
                   transform: open === i ? "rotate(45deg)" : "rotate(0deg)",
                   transition: "transform 200ms cubic-bezier(0.23,1,0.32,1)",
                 }}>+</span>
@@ -309,19 +306,19 @@ export default function FAQPage() {
                 <div style={{ paddingBottom: 20, animation: "answerReveal 220ms cubic-bezier(0.23,1,0.32,1) both" }}>
                   {/* Schema answer — direct box */}
                   <div style={{
-                    borderLeft: `3px solid ${TEAL}`,
+                    borderLeft: `3px solid ${colors.signal}`,
                     paddingLeft: 16,
                     marginBottom: 14,
-                    background: TEAL + "08",
+                    background: colors.signal + "08",
                     borderRadius: "0 8px 8px 0",
                     padding: "14px 16px"
                   }}>
-                    <p style={{ fontSize: 17, color: "#F1F5F9", margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
+                    <p style={{ fontSize: fontSize.body, color: colors.textPrimary, margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
                       {faq.schema}
                     </p>
                   </div>
                   {/* Extended content */}
-                  <p style={{ fontSize: 16, color: "#94A3B8", margin: 0, lineHeight: 1.7, paddingLeft: 4 }}>
+                  <p style={{ fontSize: fontSize.label, color: colors.textSecondary, margin: 0, lineHeight: 1.7, paddingLeft: 4 }}>
                     {faq.extended}
                   </p>
                 </div>
@@ -338,8 +335,8 @@ export default function FAQPage() {
         {/* Bottom CTA */}
         <div style={{
           marginTop: 48,
-          background: NAVY,
-          border: `1px solid ${BORDER}`,
+          background: colors.surface,
+          border: `1px solid ${colors.border}`,
           borderRadius: 16,
           padding: "40px 32px",
           textAlign: "center"
@@ -347,22 +344,22 @@ export default function FAQPage() {
           <h2 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 12px", letterSpacing: "-0.5px" }}>
             Ready to hear that phone ring?
           </h2>
-          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 28px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, margin: "0 0 28px", lineHeight: 1.6 }}>
             Find out exactly what's keeping your site from ranking.<br />
             Free. No account needed. Results in 60 seconds.
           </p>
           <Link href="/" style={{
             display: "inline-block",
-            background: TEAL,
-            color: "#0B0E16",
-            fontSize: 18,
+            background: colors.signal,
+            color: colors.void,
+            fontSize: fontSize.bodyLarge,
             fontWeight: 700,
             padding: "16px 40px",
             borderRadius: 10,
             textDecoration: "none",
             transition: "transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms cubic-bezier(0.23,1,0.32,1)",
           }}
-          onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 10px 28px ${TEAL}40`; }}
+          onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-2px)"; el.style.boxShadow = `0 10px 28px ${colors.signal}40`; }}
           onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = ""; }}
           onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
           onMouseUp={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
@@ -371,9 +368,9 @@ export default function FAQPage() {
           </Link>
           <div style={{ marginTop: 16 }}>
             <a href="/pricing"
-              style={{ fontSize: 16, color: "#475569", textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#94A3B8"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#475569"; }}
+              style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none", transition: "color 160ms cubic-bezier(0.23,1,0.32,1)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = colors.textPrimary; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = colors.textSecondary; }}
             >
               PingClose fixes every problem it finds →
             </a>
@@ -396,7 +393,7 @@ export default function FAQPage() {
           }
         }
         @media (hover: hover) and (pointer: fine) {
-          button:focus-visible { outline: 2px solid #10D9A0; outline-offset: 2px; }
+          button:focus-visible { outline: 2px solid ${colors.signal}; outline-offset: 2px; }
         }
       `}</style>
     </main>

@@ -2,6 +2,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { colors, fontSize } from "@/lib/designTokens";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,15 +75,15 @@ function buildSignals(d: FastData): Signal[] {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function statusColor(s: Signal["status"]) {
-  return s === "pass" ? "#10D9A0" : s === "fail" ? "#F87171" : s === "warn" ? "#FBBF24" : "#475569";
+  return s === "pass" ? colors.signal : s === "fail" ? colors.statusFail : s === "warn" ? colors.statusWarn : colors.textSecondary;
 }
 function statusIcon(s: Signal["status"]) {
   return s === "pass" ? "✓" : s === "fail" ? "✗" : s === "warn" ? "!" : "·";
 }
 function fmt(ms: number) { return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`; }
-function scoreColor(n: number) { return n >= 90 ? "#10D9A0" : n >= 50 ? "#FBBF24" : "#F87171"; }
+function scoreColor(n: number) { return n >= 90 ? colors.signal : n >= 50 ? colors.statusWarn : colors.statusFail; }
 function metricColor(ms: number, good: number, poor: number) {
-  return ms <= good ? "#10D9A0" : ms <= poor ? "#FBBF24" : "#F87171";
+  return ms <= good ? colors.signal : ms <= poor ? colors.statusWarn : colors.statusFail;
 }
 
 // ── Logo ─────────────────────────────────────────────────────────────────────
@@ -98,15 +99,15 @@ function Logo({ size = 24 }: { size?: number }) {
               position: "absolute",
               width: arc * scale * 2, height: arc * scale * 2,
               bottom: -(arc * scale), left: -(arc * scale),
-              borderRadius: "50%", border: `${1.4 + i * 0.5}px solid #10D9A0`,
+              borderRadius: "50%", border: `${1.4 + i * 0.5}px solid ${colors.signal}`,
               opacity: 0.28 + i * 0.3,
             }} />
           ))}
         </div>
-        <div style={{ position: "absolute", bottom: -3, left: -3, width: 6, height: 6, background: "#10D9A0", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1)" }} />
+        <div style={{ position: "absolute", bottom: -3, left: -3, width: 6, height: 6, background: colors.signal, borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1)" }} />
       </div>
       <div style={{ fontSize: size, fontWeight: 800, letterSpacing: "-0.5px", fontFamily: "var(--font-geist-sans)" }}>
-        <span style={{ color: "#10D9A0" }}>Ping</span><span style={{ color: "#F1F5F9" }}>Close</span>
+        <span style={{ color: colors.signal }}>Ping</span><span style={{ color: colors.textPrimary }}>Close</span>
       </div>
     </div>
   );
@@ -246,9 +247,9 @@ function CheckContent() {
 
   return (
     <main style={{
-      minHeight: "100vh", background: "#0B0E16",
-      color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif",
-      fontSize: 16, padding: "40px 24px 80px",
+      minHeight: "100vh", background: colors.void,
+      color: colors.textPrimary, fontFamily: "system-ui, -apple-system, sans-serif",
+      fontSize: fontSize.label, padding: "40px 24px 80px",
     }}>
       <style>{`
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -264,9 +265,9 @@ function CheckContent() {
         {/* Scanning header */}
         <div style={{ marginBottom: 36 }}>
           <h1 style={{ fontSize: "clamp(22px, 4vw, 34px)", fontWeight: 800, margin: "0 0 6px", letterSpacing: "-0.5px" }}>
-            Scanning <span style={{ color: "#10D9A0" }}>{hostname}</span>
+            Scanning <span style={{ color: colors.signal }}>{hostname}</span>
           </h1>
-          <p style={{ fontSize: 16, color: "#475569", margin: 0 }}>
+          <p style={{ fontSize: fontSize.label, color: colors.textSecondary, margin: 0 }}>
             {fastData
               ? `${signals.length} signals analyzed — performance scores ${speedData ? (speedData.pageSpeedStatus === 'OK' ? "complete" : "unavailable") : "loading…"}`
               : <span style={{ animation: "blink 1.4s ease-in-out infinite", display: "inline-block" }}>Scanning signals now…</span>
@@ -276,32 +277,32 @@ function CheckContent() {
 
         {/* ── Tech signals ─────────────────────────────────────────────── */}
         <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", color: "#374151", textTransform: "uppercase", marginBottom: 14 }}>
+          <div style={{ fontSize: fontSize.label, fontWeight: 700, letterSpacing: "0.1em", color: colors.textSecondary, textTransform: "uppercase", marginBottom: 14 }}>
             Tech Signals
           </div>
 
-          <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 12, overflow: "hidden" }}>
+          <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 12, overflow: "hidden" }}>
             {signals.length === 0 && (
-              <div style={{ padding: "20px 20px", color: "#374151", fontSize: 16 }}>
+              <div style={{ padding: "20px 20px", color: colors.textSecondary, fontSize: fontSize.label }}>
                 <span style={{ animation: "blink 1.4s ease-in-out infinite", display: "inline-block" }}>Scanning…</span>
               </div>
             )}
             {signals.slice(0, visibleCount).map((sig, i) => (
               <div key={i} style={{
                 display: "flex", alignItems: "baseline", gap: 14, padding: "10px 20px",
-                borderBottom: i < signals.length - 1 ? "1px solid #0B1020" : "none",
+                borderBottom: i < signals.length - 1 ? `1px solid ${colors.void}` : "none",
                 animation: "fadeSlideIn 0.18s ease-out",
               }}>
                 <span style={{
                   width: 22, height: 22, flexShrink: 0, marginTop: 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   background: `${statusColor(sig.status)}15`, borderRadius: 4,
-                  fontSize: 16, fontWeight: 800, color: statusColor(sig.status),
+                  fontSize: fontSize.label, fontWeight: 800, color: statusColor(sig.status),
                 }}>
                   {statusIcon(sig.status)}
                 </span>
-                <span style={{ fontSize: 16, color: "#64748B", width: 200, flexShrink: 0 }}>{sig.label}</span>
-                <span style={{ fontSize: 16, color: sig.status === "fail" ? "#F87171" : sig.status === "warn" ? "#FBBF24" : "#CBD5E1", fontWeight: 500 }}>
+                <span style={{ fontSize: fontSize.label, color: colors.textSecondary, width: 200, flexShrink: 0 }}>{sig.label}</span>
+                <span style={{ fontSize: fontSize.label, color: sig.status === "fail" ? colors.statusFail : sig.status === "warn" ? colors.statusWarn : colors.textSecondary, fontWeight: 500 }}>
                   {sig.value}
                 </span>
               </div>
@@ -312,7 +313,7 @@ function CheckContent() {
         {/* ── Performance scores ───────────────────────────────────────── */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", color: "#374151", textTransform: "uppercase" }}>
+            <div style={{ fontSize: fontSize.label, fontWeight: 700, letterSpacing: "0.1em", color: colors.textSecondary, textTransform: "uppercase" }}>
               Performance Scores
             </div>
             {!speedData && (() => {
@@ -322,27 +323,27 @@ function CheckContent() {
                 ? "We're almost done analyzing your website..."
                 : "Google is taking longer than usual today. Your report is still being prepared.";
               return (
-                <div style={{ fontSize: 16, color: "#94A3B8", display: "flex", alignItems: "center", gap: 6, animation: "blink 1.6s ease-in-out infinite" }}>
-                  <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#FBBF24", flexShrink: 0 }} />
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, display: "flex", alignItems: "center", gap: 6, animation: "blink 1.6s ease-in-out infinite" }}>
+                  <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: colors.statusWarn, flexShrink: 0 }} />
                   {msg}
                 </div>
               );
             })()}
             {speedData && speedData.pageSpeedStatus === 'OK' && (
-              <div style={{ fontSize: 16, color: "#10D9A0", display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
-                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#10D9A0", flexShrink: 0 }} />
+              <div style={{ fontSize: fontSize.label, color: colors.signal, display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: colors.signal, flexShrink: 0 }} />
                 Performance analysis complete.
               </div>
             )}
             {speedData && speedData.pageSpeedStatus === 'TIMEOUT' && (
-              <div style={{ fontSize: 16, color: "#FBBF24", display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
-                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
+              <div style={{ fontSize: fontSize.label, color: colors.statusWarn, display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: colors.statusFail, flexShrink: 0 }} />
                 {"Google's performance service timed out. Your report is still available."}
               </div>
             )}
             {speedData && speedData.pageSpeedStatus === 'ERROR' && (
-              <div style={{ fontSize: 16, color: "#F87171", display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
-                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
+              <div style={{ fontSize: fontSize.label, color: colors.statusFail, display: "flex", alignItems: "center", gap: 6, animation: "fadeSlideIn 0.3s ease-out" }}>
+                <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: colors.statusFail, flexShrink: 0 }} />
                 Performance analysis unavailable. Your report is still available.
               </div>
             )}
@@ -350,16 +351,16 @@ function CheckContent() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {speedMetrics.map(m => (
-              <div key={m.label} style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, padding: "16px 18px" }}>
-                <div style={{ fontSize: 16, color: "#475569", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>{m.label}</div>
+              <div key={m.label} style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 10, padding: "16px 18px" }}>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>{m.label}</div>
                 {m.value !== null ? (
-                  <div style={{ fontSize: 30, fontWeight: 800, color: m.color || "#F1F5F9", lineHeight: 1, animation: "fadeSlideIn 0.3s ease-out" }}>
+                  <div style={{ fontSize: 30, fontWeight: 800, color: m.color || colors.textPrimary, lineHeight: 1, animation: "fadeSlideIn 0.3s ease-out" }}>
                     {m.value}
                   </div>
                 ) : (
                   <div style={{ height: 30, display: "flex", alignItems: "center" }}>
-                    <div style={{ width: 52, height: 5, background: "#1E3050", borderRadius: 3, overflow: "hidden", position: "relative" }}>
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 0%, #10D9A025 50%, transparent 100%)", animation: "shimmer 1.8s linear infinite" }} />
+                    <div style={{ width: 52, height: 5, background: colors.border, borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, transparent 0%, ${colors.signal}25 50%, transparent 100%)`, animation: "shimmer 1.8s linear infinite" }} />
                     </div>
                   </div>
                 )}
@@ -369,13 +370,13 @@ function CheckContent() {
 
           {speedData && speedData.pageSpeedStatus === 'OK' && (() => {
             const tier = speedData.lcp > 0 && speedData.lcp < 1000 ? "superstar" : speedData.lcp > 0 && speedData.lcp <= 2500 ? "pass" : "fail";
-            const tierColor = tier === "superstar" ? "#10D9A0" : tier === "pass" ? "#FBBF24" : "#F87171";
+            const tierColor = tier === "superstar" ? colors.signal : tier === "pass" ? colors.statusWarn : colors.statusFail;
             return (
             <div style={{
               marginTop: 12, padding: "10px 16px",
               background: `${tierColor}10`,
               border: `1px solid ${tierColor}30`,
-              borderRadius: 8, fontSize: 16,
+              borderRadius: 8, fontSize: fontSize.label,
               color: tierColor,
               fontWeight: 600,
               animation: "fadeSlideIn 0.3s ease-out",
@@ -385,12 +386,12 @@ function CheckContent() {
             );
           })()}
           {speedData && speedData.pageSpeedStatus === 'TIMEOUT' && (
-            <div style={{ marginTop: 12, padding: "10px 16px", background: "#FBBF2410", border: "1px solid #FBBF2430", borderRadius: 8, fontSize: 16, color: "#FBBF24", fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
+            <div style={{ marginTop: 12, padding: "10px 16px", background: colors.statusWarn + "10", border: `1px solid ${colors.statusWarn}30`, borderRadius: 8, fontSize: fontSize.label, color: colors.statusWarn, fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
               ⚠ Performance scores unavailable — site took too long to respond
             </div>
           )}
           {speedData && speedData.pageSpeedStatus === 'ERROR' && (
-            <div style={{ marginTop: 12, padding: "10px 16px", background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, fontSize: 16, color: "#F87171", fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
+            <div style={{ marginTop: 12, padding: "10px 16px", background: colors.statusFail + "10", border: `1px solid ${colors.statusFail}30`, borderRadius: 8, fontSize: fontSize.label, color: colors.statusFail, fontWeight: 600, animation: "fadeSlideIn 0.3s ease-out" }}>
               ✗ Performance analysis failed — check the full report for details
             </div>
           )}
@@ -402,12 +403,12 @@ function CheckContent() {
             {speedData ? (
               <a href={`/report/${reportReady}`} style={{
                 display: "block",
-                background: "#10D9A0",
-                color: "#0B0E16",
-                fontSize: 18, fontWeight: 700, padding: "18px",
+                background: colors.signal,
+                color: colors.void,
+                fontSize: fontSize.bodyLarge, fontWeight: 700, padding: "18px",
                 borderRadius: 10, textDecoration: "none", textAlign: "center",
                 animation: "fadeSlideIn 0.4s ease-out",
-                border: "2px solid #10D9A0",
+                border: `2px solid ${colors.signal}`,
               }}>
                 Your Report Is Ready →
               </a>
@@ -416,8 +417,8 @@ function CheckContent() {
                 display: "block",
                 background: "#0D9E75",
                 opacity: 0.55,
-                color: "#0B0E16",
-                fontSize: 18, fontWeight: 700, padding: "18px",
+                color: colors.void,
+                fontSize: fontSize.bodyLarge, fontWeight: 700, padding: "18px",
                 borderRadius: 10, textAlign: "center",
                 border: "2px solid transparent",
                 cursor: "not-allowed",
@@ -425,35 +426,35 @@ function CheckContent() {
                 Gathering Data From Google — Almost Done…
               </div>
             )}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10, fontSize: 16, color: "#64748B" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10, fontSize: fontSize.label, color: colors.textSecondary }}>
               {!speedData && (
-                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#FBBF24", flexShrink: 0, animation: "blink 1.6s ease-in-out infinite" }} />
+                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: colors.statusWarn, flexShrink: 0, animation: "blink 1.6s ease-in-out infinite" }} />
                 Waiting on Google...</>
               )}
               {speedData && speedData.pageSpeedStatus === 'OK' && (
-                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#10D9A0", flexShrink: 0 }} />
-                <span style={{ color: "#10D9A0" }}>Performance analysis complete</span></>
+                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: colors.signal, flexShrink: 0 }} />
+                <span style={{ color: colors.signal }}>Performance analysis complete</span></>
               )}
               {speedData && (speedData.pageSpeedStatus === 'TIMEOUT' || speedData.pageSpeedStatus === 'ERROR') && (
-                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#F87171", flexShrink: 0 }} />
-                <span style={{ color: "#F87171" }}>Performance analysis unavailable — view report for details</span></>
+                <><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: colors.statusFail, flexShrink: 0 }} />
+                <span style={{ color: colors.statusFail }}>Performance analysis unavailable — view report for details</span></>
               )}
             </div>
           </div>
         ) : (
-          <div style={{ padding: "18px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, textAlign: "center", color: "#374151", fontSize: 16 }}>
+          <div style={{ padding: "18px", background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 10, textAlign: "center", color: colors.textSecondary, fontSize: fontSize.label }}>
             {fastData ? "Getting performance scores from Google Lighthouse…" : "Scanning your site…"}
           </div>
         )}
 
         {error && (
-          <div style={{ marginTop: 16, padding: "14px 18px", background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, color: "#F87171", fontSize: 16 }}>
+          <div style={{ marginTop: 16, padding: "14px 18px", background: colors.statusFail + "10", border: `1px solid ${colors.statusFail}30`, borderRadius: 8, color: colors.statusFail, fontSize: fontSize.label }}>
             {error}
           </div>
         )}
 
         <div style={{ textAlign: "center", marginTop: 28 }}>
-          <Link href="/" style={{ fontSize: 16, color: "#374151", textDecoration: "none" }}>← Cancel</Link>
+          <Link href="/" style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none" }}>← Cancel</Link>
         </div>
       </div>
     </main>
@@ -465,7 +466,7 @@ function CheckContent() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main style={{
-      minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9",
+      minHeight: "100vh", background: colors.void, color: colors.textPrimary,
       fontFamily: "system-ui, -apple-system, sans-serif",
       display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
     }}>
@@ -479,8 +480,8 @@ function SkipMsg({ icon, title, body }: { icon: string; title: string; body: str
     <>
       <div style={{ fontSize: 52, marginBottom: 16 }}>{icon}</div>
       <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>{title}</div>
-      <div style={{ fontSize: 18, color: "#94A3B8", marginBottom: 28 }}>{body}</div>
-      <Link href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>← Back to PingClose</Link>
+      <div style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, marginBottom: 28 }}>{body}</div>
+      <Link href="/" style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none" }}>← Back to PingClose</Link>
     </>
   );
 }
@@ -490,16 +491,16 @@ function LimitScreen() {
     <Shell>
       <div style={{ fontSize: 48, marginBottom: 16 }}>⏳</div>
       <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 12 }}>You&apos;ve Been Busy!</div>
-      <div style={{ fontSize: 16, color: "#94A3B8", marginBottom: 24, lineHeight: 1.6 }}>
+      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 24, lineHeight: 1.6 }}>
         You&apos;ve run 5 free audits today — that&apos;s the daily limit. Come back tomorrow for more.
       </div>
-      <div style={{ background: "#111827", border: "1px solid #1F2937", borderRadius: 12, padding: 20, marginBottom: 24 }}>
-        <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8 }}>Need more audits right now?</div>
-        <div style={{ fontSize: 16, color: "#F1F5F9" }}>
-          Call or text <a href="tel:+13145172533" style={{ color: "#10D9A0", fontWeight: 700 }}>(314) 517-2533</a> — Jim Fogal
+      <div style={{ background: colors.surfaceInset, border: `1px solid ${colors.border}`, borderRadius: 12, padding: 20, marginBottom: 24 }}>
+        <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 8 }}>Need more audits right now?</div>
+        <div style={{ fontSize: fontSize.label, color: colors.textPrimary }}>
+          Call or text <a href="tel:+13145172533" style={{ color: colors.signal, fontWeight: 700 }}>(314) 517-2533</a> — Jim Fogal
         </div>
       </div>
-      <Link href="/" style={{ display: "inline-block", background: "#10D9A0", color: "#0B0E16", fontWeight: 700, fontSize: 16, padding: "12px 32px", borderRadius: 8, textDecoration: "none" }}>
+      <Link href="/" style={{ display: "inline-block", background: colors.signal, color: colors.void, fontWeight: 700, fontSize: fontSize.label, padding: "12px 32px", borderRadius: 8, textDecoration: "none" }}>
         Back to PingClose
       </Link>
     </Shell>

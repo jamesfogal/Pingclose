@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { colors, fontSize } from "@/lib/designTokens";
 
 interface ImageDetail {
   url: string; format: string; sizeKb: number;
@@ -71,19 +72,19 @@ interface Audit {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function metricColor(ms: number, type: "ttfb" | "fcp" | "lcp") {
-  if (type === "ttfb") return ms <= 800  ? "#10D9A0" : ms <= 1800 ? "#FBBF24" : "#F87171";
-  if (type === "fcp")  return ms <= 1800 ? "#10D9A0" : ms <= 3000 ? "#FBBF24" : "#F87171";
-  return ms < 1000 ? "#10D9A0" : ms <= 2500 ? "#FBBF24" : "#F87171";
+  if (type === "ttfb") return ms <= 800  ? colors.signal : ms <= 1800 ? colors.statusWarn : colors.statusFail;
+  if (type === "fcp")  return ms <= 1800 ? colors.signal : ms <= 3000 ? colors.statusWarn : colors.statusFail;
+  return ms < 1000 ? colors.signal : ms <= 2500 ? colors.statusWarn : colors.statusFail;
 }
-function scoreColor(n: number) { return n >= 90 ? "#10D9A0" : n >= 50 ? "#FBBF24" : "#F87171"; }
+function scoreColor(n: number) { return n >= 90 ? colors.signal : n >= 50 ? colors.statusWarn : colors.statusFail; }
 function scoreLabel(n: number) { return n >= 90 ? "Fast" : n >= 50 ? "Needs Work" : "Slow"; }
 
 function Metric({ label, value, unit, good, na }: { label: string; value: string | number; unit?: string; good: boolean; na?: boolean }) {
   return (
-    <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 10, padding: "16px 18px" }}>
-      <div style={{ fontSize: 16, color: "#64748B", marginBottom: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: na ? "#475569" : good ? "#10D9A0" : "#F87171" }}>
-        {na ? <span style={{ fontSize: 16 }}>No data</span> : <>{value}{unit && <span style={{ fontSize: 16, color: "#64748B", marginLeft: 3 }}>{unit}</span>}</>}
+    <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 10, padding: "16px 18px" }}>
+      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: na ? colors.textSecondary : good ? colors.signal : colors.statusFail }}>
+        {na ? <span style={{ fontSize: fontSize.label }}>No data</span> : <>{value}{unit && <span style={{ fontSize: fontSize.label, color: colors.textSecondary, marginLeft: 3 }}>{unit}</span>}</>}
       </div>
     </div>
   );
@@ -92,10 +93,10 @@ function Metric({ label, value, unit, good, na }: { label: string; value: string
 function CheckRow({ label, pass, detail, index = 0 }: { label: string; pass: boolean; detail?: string; index?: number }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12, animation: `rowIn 280ms cubic-bezier(0.23,1,0.32,1) ${index * 35}ms both` }}>
-      <span style={{ color: pass ? "#10D9A0" : "#F87171", fontSize: 18, flexShrink: 0, fontWeight: 700, marginTop: 1 }}>{pass ? "✓" : "✗"}</span>
+      <span style={{ color: pass ? colors.signal : colors.statusFail, fontSize: fontSize.bodyLarge, flexShrink: 0, fontWeight: 700, marginTop: 1 }}>{pass ? "✓" : "✗"}</span>
       <div>
-        <span style={{ fontSize: 17, color: pass ? "#CBD5E1" : "#F1F5F9" }}>{label}</span>
-        {detail && <div style={{ fontSize: 16, color: "#94A3B8", marginTop: 4, lineHeight: 1.5 }}>{detail}</div>}
+        <span style={{ fontSize: fontSize.body, color: pass ? colors.textSecondary : colors.textPrimary }}>{label}</span>
+        {detail && <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 4, lineHeight: 1.5 }}>{detail}</div>}
       </div>
     </div>
   );
@@ -104,18 +105,18 @@ function CheckRow({ label, pass, detail, index = 0 }: { label: string; pass: boo
 function Divider({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "48px 0 24px" }}>
-      <span style={{ fontSize: 16, fontWeight: 700, color: "#475569", letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</span>
-      <div style={{ flex: 1, height: 1, background: "#1A2540" }} />
+      <span style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</span>
+      <div style={{ flex: 1, height: 1, background: colors.border }} />
     </div>
   );
 }
 
 function Card({ children, variant = "default", style: extra }: { children: React.ReactNode; variant?: "default" | "red" | "green" | "yellow"; style?: React.CSSProperties }) {
   const v = {
-    default: { bg: "#0D1528",    border: "#1E3050" },
-    red:     { bg: "#F8717108",  border: "#F8717135" },
-    green:   { bg: "#10D9A008",  border: "#10D9A035" },
-    yellow:  { bg: "#FBBF2408",  border: "#FBBF2435" },
+    default: { bg: colors.surface,    border: colors.border },
+    red:     { bg: `${colors.statusFail}08`,  border: `${colors.statusFail}35` },
+    green:   { bg: `${colors.signal}08`,  border: `${colors.signal}35` },
+    yellow:  { bg: `${colors.statusWarn}08`,  border: `${colors.statusWarn}35` },
   }[variant];
   return (
     <div style={{ background: v.bg, border: `1px solid ${v.border}`, borderRadius: 12, padding: 24, marginBottom: 16, ...extra }}>
@@ -151,17 +152,17 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
 
   return (
     <div style={{ marginBottom: 16, animation: "heroIn 500ms cubic-bezier(0.23,1,0.32,1) both" }}>
-      <div style={{ textAlign: "center", padding: "44px 24px 36px", background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, marginBottom: 12 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: "#64748B", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 16 }}>Your site took</div>
+      <div style={{ textAlign: "center", padding: "44px 24px 36px", background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 16, marginBottom: 12 }}>
+        <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 16 }}>Your site took</div>
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 4, marginBottom: 16 }}>
           {lcp > 5000 && <span style={{ fontSize: "clamp(40px,8vw,60px)", marginRight: 4, lineHeight: 1 }}>🔥</span>}
           <span style={{ fontSize: "clamp(72px,14vw,112px)", fontWeight: 900, color: lcpColor, letterSpacing: "-4px", lineHeight: 1, animation: "countIn 600ms cubic-bezier(0.23,1,0.32,1) 100ms both" }}>{lcpSec}</span>
           <span style={{ fontSize: "clamp(32px,6vw,52px)", fontWeight: 700, color: lcpColor, marginBottom: 8, opacity: 0.8 }}>s</span>
           {lcp > 5000 && <span style={{ fontSize: "clamp(40px,8vw,60px)", marginLeft: 4, lineHeight: 1 }}>🔥</span>}
         </div>
-        <div style={{ fontSize: 18, fontWeight: 500, color: "#64748B" }}>to load the main content</div>
+        <div style={{ fontSize: fontSize.bodyLarge, fontWeight: 500, color: colors.textSecondary }}>to load the main content</div>
         <div style={{ marginTop: 36, padding: "0 8px" }}>
-          <div style={{ position: "relative", height: 10, background: "#1E3050", borderRadius: 5 }}>
+          <div style={{ position: "relative", height: 10, background: colors.border, borderRadius: 5 }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${ttfbColor} 0%, ${fcpColor} ${fcpPct}%, ${lcpColor} 100%)`, borderRadius: 5, opacity: 0.85 }} />
             <div style={{ position: "absolute", left: `${ttfbPct}%`, top: "50%", transform: "translate(-50%,-50%)", zIndex: 2 }}>
               <div style={{ width: 3, height: 24, background: "#fff", borderRadius: 2, opacity: 0.9 }} />
@@ -169,20 +170,20 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
             <div style={{ position: "absolute", left: `${fcpPct}%`, top: "50%", transform: "translate(-50%,-50%)", zIndex: 2 }}>
               <div style={{ width: 3, height: 24, background: "#fff", borderRadius: 2, opacity: 0.9 }} />
             </div>
-            <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: lcpColor, border: "3px solid #0D1528", zIndex: 2 }} />
+            <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: lcpColor, border: `3px solid ${colors.surface}`, zIndex: 2 }} />
           </div>
           <div style={{ position: "relative", height: 48, marginTop: 8 }}>
             <div style={{ position: "absolute", left: `${ttfbPct}%`, transform: "translateX(-50%)", textAlign: "center", minWidth: 80 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: ttfbColor }}>{ttfb}ms</div>
-              <div style={{ fontSize: 16, color: "#64748B", fontWeight: 600, letterSpacing: "0.06em" }}>SERVER</div>
+              <div style={{ fontSize: fontSize.label, fontWeight: 700, color: ttfbColor }}>{ttfb}ms</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 600, letterSpacing: "0.06em" }}>SERVER</div>
             </div>
             <div style={{ position: "absolute", left: `${fcpPct}%`, transform: "translateX(-50%)", textAlign: "center", minWidth: 80 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: fcpColor }}>{fcpSec}s</div>
-              <div style={{ fontSize: 16, color: "#64748B", fontWeight: 600, letterSpacing: "0.06em" }}>FIRST PAINT</div>
+              <div style={{ fontSize: fontSize.label, fontWeight: 700, color: fcpColor }}>{fcpSec}s</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 600, letterSpacing: "0.06em" }}>FIRST PAINT</div>
             </div>
             <div style={{ position: "absolute", right: 0, transform: "translateX(0%)", textAlign: "right", minWidth: 80 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: lcpColor }}>{lcpSec}s</div>
-              <div style={{ fontSize: 16, color: "#64748B", fontWeight: 600, letterSpacing: "0.06em" }}>PAGE LOADED</div>
+              <div style={{ fontSize: fontSize.label, fontWeight: 700, color: lcpColor }}>{lcpSec}s</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 600, letterSpacing: "0.06em" }}>PAGE LOADED</div>
             </div>
           </div>
         </div>
@@ -193,11 +194,11 @@ function LoadTimeHero({ ttfb, fcp, lcp }: { ttfb: number; fcp: number; lcp: numb
           { label: "First Content",   sub: "FCP",  value: `${fcpSec}s`,  color: fcpColor,  verdict: fcp  <= 1800 ? "Fast" : fcp  <= 3000 ? "Slow" : "Very Slow" },
           { label: "Page Loaded",     sub: "LCP",  value: `${lcpSec}s`,  color: lcpColor,  verdict: lcp  < 1000  ? "Fast" : lcp  <= 2500 ? "Slow" : "Very Slow" },
         ].map(({ label, sub, value, color, verdict }) => (
-          <div key={sub} style={{ background: "#0D1528", border: `1px solid ${color}40`, borderRadius: 10, padding: "16px 12px", textAlign: "center" }}>
+          <div key={sub} style={{ background: colors.surface, border: `1px solid ${color}40`, borderRadius: 10, padding: "16px 12px", textAlign: "center" }}>
             <div style={{ fontSize: 22, fontWeight: 800, color, marginBottom: 2 }}>{value}</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#64748B", letterSpacing: "0.06em", textTransform: "uppercase" }}>{sub}</div>
-            <div style={{ fontSize: 16, color: "#475569", marginTop: 4 }}>{label}</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color, marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{verdict}</div>
+            <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: "0.06em", textTransform: "uppercase" }}>{sub}</div>
+            <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 4 }}>{label}</div>
+            <div style={{ fontSize: fontSize.label, fontWeight: 700, color, marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>{verdict}</div>
           </div>
         ))}
       </div>
@@ -271,13 +272,13 @@ export default function ReportPage() {
   }
 
   if (loading) return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", display: "flex", alignItems: "center", justifyContent: "center", color: "#CBD5E1", fontFamily: "system-ui, sans-serif", fontSize: 18 }}>
+    <main style={{ minHeight: "100vh", background: colors.void, display: "flex", alignItems: "center", justifyContent: "center", color: colors.textSecondary, fontFamily: "system-ui, sans-serif", fontSize: fontSize.bodyLarge }}>
       <span style={{ animation: "pulse 1.8s ease-in-out infinite" }}>Loading your report…</span>
     </main>
   );
   if (!audit) return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", display: "flex", alignItems: "center", justifyContent: "center", color: "#CBD5E1", fontFamily: "system-ui, sans-serif", fontSize: 18 }}>
-      Report not found. <a href="/" style={{ color: "#10D9A0", marginLeft: 8 }}>Run a new audit →</a>
+    <main style={{ minHeight: "100vh", background: colors.void, display: "flex", alignItems: "center", justifyContent: "center", color: colors.textSecondary, fontFamily: "system-ui, sans-serif", fontSize: fontSize.bodyLarge }}>
+      Report not found. <a href="/" style={{ color: colors.signal, marginLeft: 8 }}>Run a new audit →</a>
     </main>
   );
 
@@ -285,32 +286,32 @@ export default function ReportPage() {
   const speed        = audit.full_report?.speed;
   const tech         = audit.full_report?.tech;
   const speedTier    = audit.lcp > 0 && audit.lcp < 1000 ? "superstar" : audit.lcp > 0 && audit.lcp <= 2500 ? "pass" : "fail";
-  const verdictColor = speedTier === "superstar" ? "#10D9A0" : speedTier === "pass" ? "#FBBF24" : "#F87171";
+  const verdictColor = speedTier === "superstar" ? colors.signal : speedTier === "pass" ? colors.statusWarn : colors.statusFail;
 
   const hostingVerdictColor = () => {
     switch (tech?.hostingVerdict) {
-      case "dead-zone":     return "#F87171";
-      case "speed-limiter": return "#FBBF24";
+      case "dead-zone":     return colors.statusFail;
+      case "speed-limiter": return colors.statusWarn;
       case "acceptable":    return "#FCD34D";
-      case "race-ready":    return "#10D9A0";
-      default:              return "#64748B";
+      case "race-ready":    return colors.signal;
+      default:              return colors.textSecondary;
     }
   };
 
   return (
-    <main className="report-shell" style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
+    <main className="report-shell" style={{ minHeight: "100vh", background: colors.void, color: colors.textPrimary, fontFamily: "system-ui, -apple-system, sans-serif", fontSize: fontSize.label }}>
 
       {/* ── TOP BAR ──────────────────────────────────────────────────────────── */}
-      <header style={{ borderBottom: "1px solid #1A2540", background: "#0B0E16", position: "sticky", top: 0, zIndex: 10, backdropFilter: "blur(12px)" }}>
+      <header style={{ borderBottom: `1px solid ${colors.border}`, background: colors.void, position: "sticky", top: 0, zIndex: 10, backdropFilter: "blur(12px)" }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <a href="/" style={{ textDecoration: "none" }}>
             <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px" }}>
-              <span style={{ color: "#10D9A0" }}>Ping</span><span style={{ color: "#F1F5F9" }}>Close</span>
+              <span style={{ color: colors.signal }}>Ping</span><span style={{ color: colors.textPrimary }}>Close</span>
             </span>
           </a>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#F1F5F9" }}>{hostname}</div>
-            <div style={{ fontSize: 16, color: "#475569" }}>
+            <div style={{ fontSize: fontSize.body, fontWeight: 700, color: colors.textPrimary }}>{hostname}</div>
+            <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>
               {new Date(audit.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             </div>
           </div>
@@ -326,29 +327,29 @@ export default function ReportPage() {
         <div style={{ maxWidth: 880, margin: "0 auto" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${verdictColor}18`, border: `1px solid ${verdictColor}40`, borderRadius: 6, padding: "4px 12px", marginBottom: 20 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: verdictColor, display: "inline-block" }} />
-            <span style={{ fontSize: 16, fontWeight: 700, color: verdictColor, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <span style={{ fontSize: fontSize.label, fontWeight: 700, color: verdictColor, letterSpacing: "0.1em", textTransform: "uppercase" }}>
               {speedTier === "superstar" ? "⭐ Under 1 Second — The Gold Standard" : speedTier === "pass" ? "Passes Google's 2.5-Second Test" : "Fails Google's 2.5-Second Test"}
             </span>
           </div>
-          <div style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, color: "#F1F5F9", letterSpacing: "-1.5px", lineHeight: 1.1, marginBottom: 16 }}>
+          <div style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 900, color: colors.textPrimary, letterSpacing: "-1.5px", lineHeight: 1.1, marginBottom: 16 }}>
             {speedTier === "superstar"
-              ? <>Your site hits the<br /><span style={{ color: "#10D9A0" }}>1-second gold standard.</span></>
+              ? <>Your site hits the<br /><span style={{ color: colors.signal }}>1-second gold standard.</span></>
               : speedTier === "pass"
-              ? <>Your site clears<br /><span style={{ color: "#FBBF24" }}>Google&apos;s first hurdle.</span></>
-              : <>Your site is failing<br /><span style={{ color: "#F87171" }}>Google&apos;s first hurdle.</span></>
+              ? <>Your site clears<br /><span style={{ color: colors.statusWarn }}>Google&apos;s first hurdle.</span></>
+              : <>Your site is failing<br /><span style={{ color: colors.statusFail }}>Google&apos;s first hurdle.</span></>
             }
           </div>
-          <div style={{ fontSize: 18, color: "#64748B", maxWidth: 520, lineHeight: 1.7 }}>
+          <div style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, maxWidth: 520, lineHeight: 1.7 }}>
             {speedTier === "superstar"
               ? "Sites that load in 1 second see conversion rates up to 3–5× higher than slow sites. This report shows what else needs fixing to stay there."
               : speedTier === "pass"
               ? "You pass Google's 2.5-second bar — but 1 second is the gold standard, and bounce probability jumps 32% as load time goes from 1 to 3 seconds. Here's what's holding you back."
               : "53% of mobile visitors abandon a page that takes over 3 seconds — and competitors who pass this test outrank you before your page even loads."}
           </div>
-          <div style={{ fontSize: 13, color: "#475569", marginTop: 14 }}>
+          <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 14 }}>
             {speedTier === "superstar"
-              ? <>Sources: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener" style={{ color: "#475569" }}>Google</a> · <a href="https://www.portent.com/blog/analytics/research-site-speed-hurting-everyones-revenue.htm" target="_blank" rel="noopener" style={{ color: "#475569" }}>Portent</a></>
-              : <>Source: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener" style={{ color: "#475569" }}>Google research</a></>}
+              ? <>Sources: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener" style={{ color: colors.textSecondary }}>Google</a> · <a href="https://www.portent.com/blog/analytics/research-site-speed-hurting-everyones-revenue.htm" target="_blank" rel="noopener" style={{ color: colors.textSecondary }}>Portent</a></>
+              : <>Source: <a href="https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener" style={{ color: colors.textSecondary }}>Google research</a></>}
           </div>
         </div>
       </div>
@@ -359,22 +360,22 @@ export default function ReportPage() {
         {/* PageSpeed didn't finish — offer a retry without redoing the whole audit */}
         {(audit.pagespeed_status === 'timeout' || audit.pagespeed_status === 'error') && (
           <Card variant="yellow" style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#FBBF24", marginBottom: 8 }}>⚠ Google&apos;s Speed Check Didn&apos;t Finish</div>
-            <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 20, lineHeight: 1.6 }}>
+            <div style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: colors.statusWarn, marginBottom: 8 }}>⚠ Google&apos;s Speed Check Didn&apos;t Finish</div>
+            <div style={{ fontSize: fontSize.body, color: colors.textSecondary, marginBottom: 20, lineHeight: 1.6 }}>
               {audit.pagespeed_status === 'timeout'
                 ? "Google's PageSpeed service didn't respond in time. This is usually temporary and not a problem with your site."
                 : "Google's PageSpeed service returned an error. This is usually temporary and not a problem with your site."}
             </div>
             <button onClick={retryPageSpeed} disabled={retrying} style={{
-              background: retrying ? "#1E3050" : "#FBBF24",
-              color: retrying ? "#64748B" : "#0B0E16",
+              background: retrying ? colors.border : colors.statusWarn,
+              color: retrying ? colors.textSecondary : colors.void,
               border: "none", borderRadius: 10, padding: "14px 28px",
-              fontSize: 17, fontWeight: 700, cursor: retrying ? "not-allowed" : "pointer",
+              fontSize: fontSize.body, fontWeight: 700, cursor: retrying ? "not-allowed" : "pointer",
             }}>
               {retrying ? "Retrying…" : "Retry Speed Check"}
             </button>
             {retryMessage && (
-              <div style={{ fontSize: 16, color: "#FBBF24", marginTop: 14 }}>{retryMessage}</div>
+              <div style={{ fontSize: fontSize.label, color: colors.statusWarn, marginTop: 14 }}>{retryMessage}</div>
             )}
           </Card>
         )}
@@ -392,10 +393,10 @@ export default function ReportPage() {
               { label: "Mobile",  score: audit.mobile_score },
               { label: "Desktop", score: audit.desktop_score },
             ].map(({ label, score }) => (
-              <div key={label} style={{ background: "#0D1528", border: `1px solid ${scoreColor(score)}30`, borderRadius: 14, padding: "32px 24px", textAlign: "center" }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#475569", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>{label}</div>
+              <div key={label} style={{ background: colors.surface, border: `1px solid ${scoreColor(score)}30`, borderRadius: 14, padding: "32px 24px", textAlign: "center" }}>
+                <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>{label}</div>
                 <div style={{ fontSize: "clamp(56px,10vw,84px)", fontWeight: 900, color: scoreColor(score), lineHeight: 1, letterSpacing: "-3px", animation: "countIn 600ms cubic-bezier(0.23,1,0.32,1) both" }}>{score}</div>
-                <div style={{ fontSize: 17, fontWeight: 600, color: scoreColor(score), marginTop: 10, letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.8 }}>{scoreLabel(score)}</div>
+                <div style={{ fontSize: fontSize.body, fontWeight: 600, color: scoreColor(score), marginTop: 10, letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.8 }}>{scoreLabel(score)}</div>
               </div>
             ))}
           </div>
@@ -416,15 +417,15 @@ export default function ReportPage() {
         </div>
 
         {/* 1-second badge */}
-        <div style={{ padding: "14px 20px", background: `${verdictColor}10`, border: `1px solid ${verdictColor}30`, borderRadius: 10, fontSize: 17, fontWeight: 600, color: verdictColor, marginBottom: 12 }}>
+        <div style={{ padding: "14px 20px", background: `${verdictColor}10`, border: `1px solid ${verdictColor}30`, borderRadius: 10, fontSize: fontSize.body, fontWeight: 600, color: verdictColor, marginBottom: 12 }}>
           {speedTier === "superstar" ? "⭐ Under 1 second — the gold standard" : speedTier === "pass" ? "✓ Passes Google's 2.5-second test — but not the 1-second gold standard" : "✗ Fails Google's 2.5-second speed test"}
         </div>
 
         {/* Mobile/Desktop gap */}
         {speed && speed.mobileDesktopGap >= 10 && (
           <Card variant="yellow">
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#FBBF24", marginBottom: 8 }}>⚠ Mobile vs Desktop Gap — {speed.mobileDesktopGap} Points</div>
-            <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.7 }}>{speed.gapExplanation}</div>
+            <div style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: colors.statusWarn, marginBottom: 8 }}>⚠ Mobile vs Desktop Gap — {speed.mobileDesktopGap} Points</div>
+            <div style={{ fontSize: fontSize.body, color: colors.textPrimary, lineHeight: 1.7 }}>{speed.gapExplanation}</div>
           </Card>
         )}
 
@@ -435,41 +436,41 @@ export default function ReportPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {speed.renderBlockingScripts > 0 && (
                 <Card variant="red">
-                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700, marginBottom: 6 }}>🚫 {speed.renderBlockingScripts} Render-Blocking Scripts</div>
-                  <div style={{ fontSize: 16, color: "#CBD5E1" }}>These scripts freeze your page before any content loads.</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700, marginBottom: 6 }}>🚫 {speed.renderBlockingScripts} Render-Blocking Scripts</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>These scripts freeze your page before any content loads.</div>
                   {speed.renderBlockingDetails.slice(0, 3).map((r, i) => (
-                    <div key={i} style={{ fontSize: 16, color: "#64748B", marginTop: 4, fontFamily: "monospace" }}>→ {r.url.split("/").pop()?.substring(0, 60)} ({r.savingsMs}ms)</div>
+                    <div key={i} style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 4, fontFamily: "monospace" }}>→ {r.url.split("/").pop()?.substring(0, 60)} ({r.savingsMs}ms)</div>
                   ))}
                 </Card>
               )}
               {speed.unusedJsKb > 0 && (
                 <Card variant="red">
-                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700, marginBottom: 6 }}>🗑 {speed.unusedJsKb}KB Unused JavaScript</div>
-                  <div style={{ fontSize: 16, color: "#CBD5E1" }}>JavaScript your visitors download but never use. Pure waste on every page load.</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700, marginBottom: 6 }}>🗑 {speed.unusedJsKb}KB Unused JavaScript</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>JavaScript your visitors download but never use. Pure waste on every page load.</div>
                 </Card>
               )}
               {speed.unusedCssKb > 0 && (
                 <Card variant="red">
-                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700, marginBottom: 6 }}>🗑 {speed.unusedCssKb}KB Unused CSS</div>
-                  <div style={{ fontSize: 16, color: "#CBD5E1" }}>Style rules loading on every visit that are never applied to your page.</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700, marginBottom: 6 }}>🗑 {speed.unusedCssKb}KB Unused CSS</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>Style rules loading on every visit that are never applied to your page.</div>
                 </Card>
               )}
               {speed.noBrowserCaching && (
                 <Card variant="yellow">
-                  <div style={{ fontSize: 17, color: "#FBBF24", fontWeight: 700, marginBottom: 6 }}>🔄 No Browser Caching</div>
-                  <div style={{ fontSize: 16, color: "#CBD5E1" }}>Repeat visitors re-download the same files every single visit instead of loading from cache.</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.statusWarn, fontWeight: 700, marginBottom: 6 }}>🔄 No Browser Caching</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>Repeat visitors re-download the same files every single visit instead of loading from cache.</div>
                 </Card>
               )}
               {speed.hasFontDisplayIssue && (
                 <Card variant="yellow">
-                  <div style={{ fontSize: 17, color: "#FBBF24", fontWeight: 700, marginBottom: 6 }}>🔤 Font Loading Issue</div>
-                  <div style={{ fontSize: 16, color: "#CBD5E1" }}>Fonts blocking render — text is invisible to visitors until fonts fully download.</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.statusWarn, fontWeight: 700, marginBottom: 6 }}>🔤 Font Loading Issue</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>Fonts blocking render — text is invisible to visitors until fonts fully download.</div>
                 </Card>
               )}
               {speed.hasRocketLoaderConflict && (
                 <Card variant="red">
-                  <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700, marginBottom: 6 }}>⚡ Cloudflare Rocket Loader Conflict</div>
-                  <div style={{ fontSize: 16, color: "#CBD5E1" }}>Rocket Loader is adding load time instead of reducing it — a common WordPress conflict. Disable it.</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700, marginBottom: 6 }}>⚡ Cloudflare Rocket Loader Conflict</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>Rocket Loader is adding load time instead of reducing it — a common WordPress conflict. Disable it.</div>
                 </Card>
               )}
             </div>
@@ -481,36 +482,36 @@ export default function ReportPage() {
         <Card>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
             {[
-              { label: "Total Images", value: speed?.totalImages ?? 0,   color: "#F1F5F9" },
-              { label: "No Issues Found ✓", value: speed?.webpImages  ?? 0,   color: "#10D9A0" },
-              { label: "Delivery Issues ✗", value: speed?.nonWebpImages ?? 0, color: (speed?.nonWebpImages ?? 0) > 0 ? "#F87171" : "#10D9A0" },
+              { label: "Total Images", value: speed?.totalImages ?? 0,   color: colors.textPrimary },
+              { label: "No Issues Found ✓", value: speed?.webpImages  ?? 0,   color: colors.signal },
+              { label: "Delivery Issues ✗", value: speed?.nonWebpImages ?? 0, color: (speed?.nonWebpImages ?? 0) > 0 ? colors.statusFail : colors.signal },
             ].map(({ label, value, color }) => (
-              <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
+              <div key={label} style={{ background: colors.surfaceInset, borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
                 <div style={{ fontSize: 32, fontWeight: 900, color }}>{value}</div>
-                <div style={{ fontSize: 16, color: "#475569", marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
               </div>
             ))}
           </div>
           {(speed?.estimatedWebPSavingKb ?? 0) > 0 && (
-            <div style={{ background: "#10D9A010", border: "1px solid #10D9A030", borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
-              <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>💡 Fixing image delivery would save approximately {speed!.estimatedWebPSavingKb}KB</div>
-              <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Oversized, uncompressed, or wrong-format images slow every visitor's load time — see specifics below.</div>
+            <div style={{ background: `${colors.signal}10`, border: `1px solid ${colors.signal}30`, borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
+              <div style={{ fontSize: fontSize.body, color: colors.signal, fontWeight: 600 }}>💡 Fixing image delivery would save approximately {speed!.estimatedWebPSavingKb}KB</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 4 }}>Oversized, uncompressed, or wrong-format images slow every visitor's load time — see specifics below.</div>
             </div>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <CheckRow label="No image delivery issues detected" pass={audit.images_webp} />
+            <CheckRow label={audit.images_webp ? "No image delivery issues detected" : "Image delivery issues detected"} pass={audit.images_webp} />
             <CheckRow label={`Largest image: ${audit.largest_image_kb}KB`} pass={audit.largest_image_kb < 200} detail={audit.largest_image_kb >= 200 ? "Images over 200KB significantly slow mobile load times" : undefined} />
             {(speed?.imagesMissingAltText ?? 0) > 0 && (
               <CheckRow label={`${speed!.imagesMissingAltText} images missing alt text`} pass={false} detail="Alt text is required for SEO — Google cannot read images without it" />
             )}
           </div>
           {(speed?.nonWebpImageList?.length ?? 0) > 0 && (
-            <div style={{ marginTop: 20, borderTop: "1px solid #1E3050", paddingTop: 16 }}>
-              <div style={{ fontSize: 16, color: "#475569", marginBottom: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Images With Delivery Issues:</div>
+            <div style={{ marginTop: 20, borderTop: `1px solid ${colors.border}`, paddingTop: 16 }}>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Images With Delivery Issues:</div>
               {speed!.nonWebpImageList.slice(0, 8).map((img, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #111827", fontSize: 16 }}>
-                  <span style={{ color: "#CBD5E1", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "62%" }}>{img.url.split("/").pop()?.substring(0, 50) || img.url}</span>
-                  <span style={{ color: "#F87171", flexShrink: 0, marginLeft: 8 }}>{img.format} · {img.sizeKb}KB{img.estimatedWebPSavingKb > 0 ? ` → save ${img.estimatedWebPSavingKb}KB` : ""}</span>
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${colors.surfaceInset}`, fontSize: fontSize.label }}>
+                  <span style={{ color: colors.textSecondary, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "62%" }}>{img.url.split("/").pop()?.substring(0, 50) || img.url}</span>
+                  <span style={{ color: colors.statusFail, flexShrink: 0, marginLeft: 8 }}>{img.format} · {img.sizeKb}KB{img.estimatedWebPSavingKb > 0 ? ` → save ${img.estimatedWebPSavingKb}KB` : ""}</span>
                 </div>
               ))}
             </div>
@@ -541,9 +542,9 @@ export default function ReportPage() {
               ["Page Builder",    tech?.pageBuilder && tech.pageBuilder !== "None detected" ? tech.pageBuilder : "None"],
               ["E-commerce",      tech?.ecommerce && tech.ecommerce !== "None detected" ? tech.ecommerce : "Not e-commerce"],
             ] as [string, string][]).map(([label, value]) => (
-              <div key={label} style={{ borderBottom: "1px solid #111827", paddingBottom: 14 }}>
-                <div style={{ fontSize: 16, color: "#475569", marginBottom: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</div>
-                <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9" }}>{value}</div>
+              <div key={label} style={{ borderBottom: `1px solid ${colors.surfaceInset}`, paddingBottom: 14 }}>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</div>
+                <div style={{ fontSize: fontSize.body, fontWeight: 600, color: colors.textPrimary }}>{value}</div>
               </div>
             ))}
           </div>
@@ -554,20 +555,20 @@ export default function ReportPage() {
           <Card style={{ border: `1px solid ${hostingVerdictColor()}35`, marginTop: -4 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: hostingVerdictColor(), display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontSize: 18, fontWeight: 700, color: hostingVerdictColor() }}>{tech.hostingVerdictLabel}</span>
+              <span style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: hostingVerdictColor() }}>{tech.hostingVerdictLabel}</span>
             </div>
-            <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.7 }}>{tech.hostingVerdictMessage}</div>
+            <div style={{ fontSize: fontSize.body, color: colors.textPrimary, lineHeight: 1.7 }}>{tech.hostingVerdictMessage}</div>
           </Card>
         )}
 
         {/* WordPress issues */}
         {(tech?.wordpressPluginIssues?.length ?? 0) > 0 && (
           <Card variant="red">
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#F87171", marginBottom: 14 }}>🔌 WordPress Issues Detected</div>
+            <div style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: colors.statusFail, marginBottom: 14 }}>🔌 WordPress Issues Detected</div>
             {tech!.wordpressPluginIssues.map((issue, i) => (
               <div key={i} style={{ display: "flex", gap: 12, marginBottom: 10 }}>
-                <span style={{ color: "#F87171", flexShrink: 0, fontSize: 17 }}>→</span>
-                <span style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.5 }}>{issue}</span>
+                <span style={{ color: colors.statusFail, flexShrink: 0, fontSize: fontSize.body }}>→</span>
+                <span style={{ fontSize: fontSize.body, color: colors.textPrimary, lineHeight: 1.5 }}>{issue}</span>
               </div>
             ))}
           </Card>
@@ -591,9 +592,9 @@ export default function ReportPage() {
                 <CheckRow label="HTTPS / SSL"        pass={tech.isHttps}       detail={!tech.isHttps ? "Google shows security warnings to all visitors on HTTP sites" : undefined} />
               </div>
               {tech.primaryKeyword && (
-                <div style={{ marginTop: 20, padding: "12px 16px", background: "#111827", borderRadius: 8 }}>
-                  <div style={{ fontSize: 16, color: "#475569", marginBottom: 4, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Primary Keyword Detected</div>
-                  <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>{tech.primaryKeyword}</div>
+                <div style={{ marginTop: 20, padding: "12px 16px", background: colors.surfaceInset, borderRadius: 8 }}>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 4, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Primary Keyword Detected</div>
+                  <div style={{ fontSize: fontSize.body, color: colors.signal, fontWeight: 600 }}>{tech.primaryKeyword}</div>
                 </div>
               )}
             </Card>
@@ -610,13 +611,13 @@ export default function ReportPage() {
               <Card>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
                   {[
-                    { label: "Total Pages",   value: sm.pageCount.toLocaleString(), color: "#F1F5F9" },
-                    { label: "Landing Pages", value: sm.landingPageCount,           color: sm.landingPageCount > 0 ? "#10D9A0" : "#475569" },
-                    { label: "City Pages",    value: sm.cityPageCount,              color: sm.cityPageCount > 0 ? "#10D9A0" : "#F87171" },
+                    { label: "Total Pages",   value: sm.pageCount.toLocaleString(), color: colors.textPrimary },
+                    { label: "Landing Pages", value: sm.landingPageCount,           color: sm.landingPageCount > 0 ? colors.signal : colors.textSecondary },
+                    { label: "City Pages",    value: sm.cityPageCount,              color: sm.cityPageCount > 0 ? colors.signal : colors.statusFail },
                   ].map(({ label, value, color }) => (
-                    <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
+                    <div key={label} style={{ background: colors.surfaceInset, borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
                       <div style={{ fontSize: 32, fontWeight: 900, color }}>{value}</div>
-                      <div style={{ fontSize: 16, color: "#475569", marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                     </div>
                   ))}
                 </div>
@@ -627,26 +628,26 @@ export default function ReportPage() {
                     ["Event pages",               sm.eventPageCount],
                     ["Category / tag archives",   sm.archivePageCount],
                   ].map(([label, val]) => (
-                    <div key={String(label)} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #111827", fontSize: 16, color: "#CBD5E1" }}>
-                      <span>{label}</span><span style={{ fontWeight: 700, color: "#F1F5F9" }}>{val}</span>
+                    <div key={String(label)} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${colors.surfaceInset}`, fontSize: fontSize.label, color: colors.textSecondary }}>
+                      <span>{label}</span><span style={{ fontWeight: 700, color: colors.textPrimary }}>{val}</span>
                     </div>
                   ))}
                 </div>
                 <CheckRow label={sm.hasImageSitemap ? `Image Sitemap (${sm.imageCount.toLocaleString()} images tagged)` : "Image Sitemap"} pass={sm.hasImageSitemap} detail={!sm.hasImageSitemap ? "No image sitemap entries — image search is a free, untapped discovery channel." : undefined} />
                 {sm.cityPageCount === 0 && (
-                  <div style={{ marginTop: 12, background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "14px 16px" }}>
-                    <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700, marginBottom: 6 }}>❌ No city pages detected</div>
-                    <div style={{ fontSize: 16, color: "#CBD5E1", lineHeight: 1.6 }}>City pages targeting specific service areas are one of the highest-ROI pages a local business can build. Each city page ranks independently for "[service] in [city]" searches.</div>
+                  <div style={{ marginTop: 12, background: `${colors.statusFail}10`, border: `1px solid ${colors.statusFail}30`, borderRadius: 8, padding: "14px 16px" }}>
+                    <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700, marginBottom: 6 }}>❌ No city pages detected</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary, lineHeight: 1.6 }}>City pages targeting specific service areas are one of the highest-ROI pages a local business can build. Each city page ranks independently for "[service] in [city]" searches.</div>
                   </div>
                 )}
                 {sm.cityPageUrls.length > 0 && (
                   <div style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: 16, color: "#475569", marginBottom: 8, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>City / Location Pages:</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 8, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>City / Location Pages:</div>
                     {sm.cityPageUrls.slice(0, 8).map((u, i) => {
                       let path = u; try { path = new URL(u).pathname; } catch { /* keep */ }
-                      return <div key={i} style={{ fontSize: 16, color: "#CBD5E1", fontFamily: "monospace", padding: "4px 0", borderBottom: "1px solid #111827" }}>{path}</div>;
+                      return <div key={i} style={{ fontSize: fontSize.label, color: colors.textSecondary, fontFamily: "monospace", padding: "4px 0", borderBottom: `1px solid ${colors.surfaceInset}` }}>{path}</div>;
                     })}
-                    {sm.cityPageCount > 8 && <div style={{ fontSize: 16, color: "#475569", marginTop: 6 }}>…and {sm.cityPageCount - 8} more</div>}
+                    {sm.cityPageCount > 8 && <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6 }}>…and {sm.cityPageCount - 8} more</div>}
                   </div>
                 )}
               </Card>
@@ -664,26 +665,26 @@ export default function ReportPage() {
             <>
               <Divider label={`Content Quality — ${cq.pagesSampled} posts sampled`} />
               <Card>
-                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 16, lineHeight: 1.6 }}>Internal links spread authority across the site and give Google a path to crawl. Rule of thumb: about 1 internal link per 150 words.</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 16, lineHeight: 1.6 }}>Internal links spread authority across the site and give Google a path to crawl. Rule of thumb: about 1 internal link per 150 words.</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
                   {[
-                    { label: "Avg Words / Post",   value: cq.avgWordCount.toLocaleString(), color: "#F1F5F9" },
-                    { label: "Avg Internal Links", value: cq.avgInternalLinks,              color: isRed ? "#F87171" : isYellow ? "#FBBF24" : "#10D9A0" },
-                    { label: "Recommended",        value: cq.recommendedLinksPerPost,       color: "#64748B" },
+                    { label: "Avg Words / Post",   value: cq.avgWordCount.toLocaleString(), color: colors.textPrimary },
+                    { label: "Avg Internal Links", value: cq.avgInternalLinks,              color: isRed ? colors.statusFail : isYellow ? colors.statusWarn : colors.signal },
+                    { label: "Recommended",        value: cq.recommendedLinksPerPost,       color: colors.textSecondary },
                   ].map(({ label, value, color }) => (
-                    <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
+                    <div key={label} style={{ background: colors.surfaceInset, borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
                       <div style={{ fontSize: 32, fontWeight: 900, color }}>{value}</div>
-                      <div style={{ fontSize: 16, color: "#475569", marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                     </div>
                   ))}
                 </div>
                 <CheckRow label={`Q&A content found on ${cq.qaPageCount} of ${cq.pagesSampled} sampled posts`} pass={cq.qaPageCount > 0} />
                 {(isRed || isYellow) && (
-                  <div style={{ marginTop: 12, background: isRed ? "#F8717110" : "#FBBF2410", border: `1px solid ${isRed ? "#F8717130" : "#FBBF2430"}`, borderRadius: 8, padding: "12px 16px" }}>
-                    <div style={{ fontSize: 17, color: isRed ? "#F87171" : "#FBBF24", fontWeight: 700, marginBottom: 4 }}>
+                  <div style={{ marginTop: 12, background: isRed ? `${colors.statusFail}10` : `${colors.statusWarn}10`, border: `1px solid ${isRed ? `${colors.statusFail}30` : `${colors.statusWarn}30`}`, borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ fontSize: fontSize.body, color: isRed ? colors.statusFail : colors.statusWarn, fontWeight: 700, marginBottom: 4 }}>
                       {isRed ? "❌" : "⚠️"} Averaging {cq.avgInternalLinks} internal link{cq.avgInternalLinks === 1 ? "" : "s"} per post — recommended is {cq.recommendedLinksPerPost}
                     </div>
-                    <div style={{ fontSize: 16, color: "#CBD5E1", lineHeight: 1.6 }}>Posts with no internal links are dead ends for both readers and Google's crawler.</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary, lineHeight: 1.6 }}>Posts with no internal links are dead ends for both readers and Google's crawler.</div>
                   </div>
                 )}
               </Card>
@@ -699,24 +700,24 @@ export default function ReportPage() {
             <>
               <Divider label="Schema Opportunities" />
               <Card>
-                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 16, lineHeight: 1.6 }}>Every schema type this site is eligible for — LocalBusiness, Review, Pricing, FAQ, and (for law firms) Attorney/LegalService.</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 16, lineHeight: 1.6 }}>Every schema type this site is eligible for — LocalBusiness, Review, Pricing, FAQ, and (for law firms) Attorney/LegalService.</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
                   {[
-                    { label: "Opportunities", value: so.totalOpportunities, color: "#F1F5F9" },
-                    { label: "Used",          value: so.totalUsed,          color: "#10D9A0" },
-                    { label: "Missed",        value: so.totalMissed,        color: so.totalMissed > 0 ? "#F87171" : "#475569" },
+                    { label: "Opportunities", value: so.totalOpportunities, color: colors.textPrimary },
+                    { label: "Used",          value: so.totalUsed,          color: colors.signal },
+                    { label: "Missed",        value: so.totalMissed,        color: so.totalMissed > 0 ? colors.statusFail : colors.textSecondary },
                   ].map(({ label, value, color }) => (
-                    <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
+                    <div key={label} style={{ background: colors.surfaceInset, borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
                       <div style={{ fontSize: 32, fontWeight: 900, color }}>{value}</div>
-                      <div style={{ fontSize: 16, color: "#475569", marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                     </div>
                   ))}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
                   {so.breakdown.map((b, i) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < so.breakdown.length - 1 ? "1px solid #111827" : "none" }}>
-                      <div style={{ fontSize: 16, color: "#CBD5E1" }}>{b.type}</div>
-                      <div style={{ fontSize: 16, color: b.missed > 0 ? "#F87171" : "#10D9A0", fontWeight: 700 }}>{b.used} / {b.opportunities} used</div>
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < so.breakdown.length - 1 ? `1px solid ${colors.surfaceInset}` : "none" }}>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>{b.type}</div>
+                      <div style={{ fontSize: fontSize.label, color: b.missed > 0 ? colors.statusFail : colors.signal, fontWeight: 700 }}>{b.used} / {b.opportunities} used</div>
                     </div>
                   ))}
                 </div>
@@ -729,7 +730,7 @@ export default function ReportPage() {
           <>
             <Divider label="Schema Markup" />
             <Card>
-              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 16, lineHeight: 1.6 }}>Schema markup tells Google exactly what your page contains and unlocks rich results — star ratings, FAQ answers, prices shown directly in search results.</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 16, lineHeight: 1.6 }}>Schema markup tells Google exactly what your page contains and unlocks rich results — star ratings, FAQ answers, prices shown directly in search results.</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <CheckRow label="LocalBusiness schema"           pass={tech.hasLocalBusinessSchema} detail={!tech.hasLocalBusinessSchema ? "Google has less confidence in your local signals without this" : undefined} />
                 <CheckRow label="FAQ page with FAQPage schema"   pass={tech.hasFAQSchema}           detail={!tech.hasFAQSchema ? "Unlocks free FAQ rich results in Google search" : undefined} />
@@ -753,28 +754,28 @@ export default function ReportPage() {
             <>
               <Divider label="Law Firm Q&A Schema" />
               <Card>
-                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 16, lineHeight: 1.6 }}>Law firm sites that answer legal questions should mark each one up with FAQPage/Question schema — free eligibility for Google's FAQ rich results.</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 16, lineHeight: 1.6 }}>Law firm sites that answer legal questions should mark each one up with FAQPage/Question schema — free eligibility for Google's FAQ rich results.</div>
                 {lf.hiddenFaqSchemaCount > 0 && (
-                  <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
-                    <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700 }}>❌ {lf.hiddenFaqSchemaCount} question{lf.hiddenFaqSchemaCount === 1 ? "" : "s"} tagged with FAQ schema but not visible on the page</div>
-                    <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 6 }}>Google requires FAQ rich-result content to be visible to visitors. Hidden schema risks suppression — or a manual penalty.</div>
+                  <div style={{ background: `${colors.statusFail}10`, border: `1px solid ${colors.statusFail}30`, borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
+                    <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700 }}>❌ {lf.hiddenFaqSchemaCount} question{lf.hiddenFaqSchemaCount === 1 ? "" : "s"} tagged with FAQ schema but not visible on the page</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6 }}>Google requires FAQ rich-result content to be visible to visitors. Hidden schema risks suppression — or a manual penalty.</div>
                   </div>
                 )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
                   {[
-                    { label: "Properly Tagged", value: lf.properUseCount,        color: lf.properUseCount > 0 ? "#10D9A0" : "#475569" },
-                    { label: "Missed",          value: lf.missedOpportunityCount, color: isRed ? "#F87171" : lf.missedOpportunityCount > 0 ? "#FBBF24" : "#475569" },
+                    { label: "Properly Tagged", value: lf.properUseCount,        color: lf.properUseCount > 0 ? colors.signal : colors.textSecondary },
+                    { label: "Missed",          value: lf.missedOpportunityCount, color: isRed ? colors.statusFail : lf.missedOpportunityCount > 0 ? colors.statusWarn : colors.textSecondary },
                   ].map(({ label, value, color }) => (
-                    <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "20px", textAlign: "center" }}>
+                    <div key={label} style={{ background: colors.surfaceInset, borderRadius: 10, padding: "20px", textAlign: "center" }}>
                       <div style={{ fontSize: 36, fontWeight: 900, color }}>{value}</div>
-                      <div style={{ fontSize: 16, color: "#475569", marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                     </div>
                   ))}
                 </div>
                 {lf.missedOpportunityCount > 0 && (
-                  <div style={{ background: isRed ? "#F8717110" : "#FBBF2410", border: `1px solid ${isRed ? "#F8717130" : "#FBBF2430"}`, borderRadius: 8, padding: "12px 16px" }}>
-                    <div style={{ fontSize: 17, color: isRed ? "#F87171" : "#FBBF24", fontWeight: 700, marginBottom: 4 }}>{isRed ? "❌" : "⚠️"} {lf.missedOpportunityCount} question{lf.missedOpportunityCount === 1 ? "" : "s"} answered without FAQ schema ({Math.round(missedPct * 100)}% missed)</div>
-                    <div style={{ fontSize: 16, color: "#CBD5E1" }}>Each one is a missed shot at a free rich result. Competitors who tag theirs win that real estate instead.</div>
+                  <div style={{ background: isRed ? `${colors.statusFail}10` : `${colors.statusWarn}10`, border: `1px solid ${isRed ? `${colors.statusFail}30` : `${colors.statusWarn}30`}`, borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ fontSize: fontSize.body, color: isRed ? colors.statusFail : colors.statusWarn, fontWeight: 700, marginBottom: 4 }}>{isRed ? "❌" : "⚠️"} {lf.missedOpportunityCount} question{lf.missedOpportunityCount === 1 ? "" : "s"} answered without FAQ schema ({Math.round(missedPct * 100)}% missed)</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>Each one is a missed shot at a free rich result. Competitors who tag theirs win that real estate instead.</div>
                   </div>
                 )}
               </Card>
@@ -791,22 +792,22 @@ export default function ReportPage() {
             <>
               <Divider label="Lawyer Schema" />
               <Card variant={missing > 0 ? "red" : "default"}>
-                <div style={{ fontSize: 16, color: "#64748B", marginBottom: 16, lineHeight: 1.6 }}>Attorney / LegalService schema tells Google this is a law firm — separate from FAQ schema. Every practice-area page plus the homepage is an opportunity.</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 16, lineHeight: 1.6 }}>Attorney / LegalService schema tells Google this is a law firm — separate from FAQ schema. Every practice-area page plus the homepage is an opportunity.</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
                   {[
-                    { label: "Opportunities", value: ls.opportunityCount, color: "#F1F5F9" },
-                    { label: "Used",          value: ls.usedCount,        color: ls.usedCount > 0 ? "#10D9A0" : "#F87171" },
+                    { label: "Opportunities", value: ls.opportunityCount, color: colors.textPrimary },
+                    { label: "Used",          value: ls.usedCount,        color: ls.usedCount > 0 ? colors.signal : colors.statusFail },
                   ].map(({ label, value, color }) => (
-                    <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "20px", textAlign: "center" }}>
+                    <div key={label} style={{ background: colors.surfaceInset, borderRadius: 10, padding: "20px", textAlign: "center" }}>
                       <div style={{ fontSize: 36, fontWeight: 900, color }}>{value}</div>
-                      <div style={{ fontSize: 16, color: "#475569", marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                     </div>
                   ))}
                 </div>
                 {missing > 0 && (
-                  <div style={{ background: "#F8717110", border: "1px solid #F8717130", borderRadius: 8, padding: "12px 16px" }}>
-                    <div style={{ fontSize: 17, color: "#F87171", fontWeight: 700, marginBottom: 4 }}>❌ Attorney / LegalService schema missing on {missing} of {ls.opportunityCount} eligible page{ls.opportunityCount === 1 ? "" : "s"}</div>
-                    <div style={{ fontSize: 16, color: "#CBD5E1" }}>Without this, Google has no structured signal that this is a law firm.</div>
+                  <div style={{ background: `${colors.statusFail}10`, border: `1px solid ${colors.statusFail}30`, borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ fontSize: fontSize.body, color: colors.statusFail, fontWeight: 700, marginBottom: 4 }}>❌ Attorney / LegalService schema missing on {missing} of {ls.opportunityCount} eligible page{ls.opportunityCount === 1 ? "" : "s"}</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>Without this, Google has no structured signal that this is a law firm.</div>
                   </div>
                 )}
               </Card>
@@ -819,7 +820,7 @@ export default function ReportPage() {
           <>
             <Divider label="Conversion Tracking" />
             <Card>
-              <div style={{ fontSize: 16, color: "#64748B", marginBottom: 16, lineHeight: 1.6 }}>Without tracking you cannot know which ads are working, which pages are converting, or where visitors drop off. You are making marketing decisions completely blind.</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 16, lineHeight: 1.6 }}>Without tracking you cannot know which ads are working, which pages are converting, or where visitors drop off. You are making marketing decisions completely blind.</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <CheckRow label="Google Analytics 4 (GA4)" pass={tech.hasGA4} />
                 <CheckRow label="Google Tag Manager"       pass={tech.hasGTM} />
@@ -848,25 +849,25 @@ export default function ReportPage() {
               <Card>
                 {keyword && (
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 16, color: "#475569", marginBottom: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Primary Keyword Detected</div>
+                    <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Primary Keyword Detected</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                      <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", padding: "8px 14px", background: "#111827", border: "1px solid #1E3050", borderRadius: 8 }}>&ldquo;{keyword}&rdquo;</div>
+                      <div style={{ fontSize: fontSize.body, fontWeight: 600, color: colors.textPrimary, padding: "8px 14px", background: colors.surfaceInset, border: `1px solid ${colors.border}`, borderRadius: 8 }}>&ldquo;{keyword}&rdquo;</div>
                       {rankCheckUrl && (
-                        <a href={rankCheckUrl} target="_blank" rel="noreferrer" style={{ fontSize: 16, color: "#F1F5F9", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", background: "#111827", borderRadius: 8 }}>Check Google Rankings →</a>
+                        <a href={rankCheckUrl} target="_blank" rel="noreferrer" style={{ fontSize: fontSize.label, color: colors.textPrimary, textDecoration: "none", padding: "8px 14px", border: `1px solid ${colors.border}`, background: colors.surfaceInset, borderRadius: 8 }}>Check Google Rankings →</a>
                       )}
-                      <a href={googleSearchUrl} target="_blank" rel="noreferrer" style={{ fontSize: 16, color: "#F1F5F9", textDecoration: "none", padding: "8px 14px", border: "1px solid #1E3050", background: "#111827", borderRadius: 8 }}>Site: Index Check →</a>
+                      <a href={googleSearchUrl} target="_blank" rel="noreferrer" style={{ fontSize: fontSize.label, color: colors.textPrimary, textDecoration: "none", padding: "8px 14px", border: `1px solid ${colors.border}`, background: colors.surfaceInset, borderRadius: 8 }}>Site: Index Check →</a>
                     </div>
                   </div>
                 )}
                 {h1 && (() => {
                   const result = scoreH1Content(h1, audit.full_report?.tech?.titleTag ?? "", audit.full_report?.tech?.primaryKeyword ?? "");
                   return (
-                    <div style={{ marginBottom: 20, padding: "14px 16px", background: "#111827", borderRadius: 8, borderLeft: `3px solid ${result.pass ? "#10D9A0" : "#F87171"}` }}>
-                      <div style={{ fontSize: 16, color: "#475569", marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Current H1 Tag</div>
-                      <div style={{ fontSize: 17, color: "#F1F5F9", fontStyle: "italic", marginBottom: result.pass ? 6 : 10 }}>&ldquo;{h1}&rdquo;</div>
+                    <div style={{ marginBottom: 20, padding: "14px 16px", background: colors.surfaceInset, borderRadius: 8, borderLeft: `3px solid ${result.pass ? colors.signal : colors.statusFail}` }}>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 4, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Current H1 Tag</div>
+                      <div style={{ fontSize: fontSize.body, color: colors.textPrimary, fontStyle: "italic", marginBottom: result.pass ? 6 : 10 }}>&ldquo;{h1}&rdquo;</div>
                       {result.pass
-                        ? <div style={{ fontSize: 16, color: "#10D9A0" }}>✓ Contains service keyword and location signal</div>
-                        : <div style={{ fontSize: 16, color: "#F87171", lineHeight: 1.6 }}>✗ {result.detail}</div>
+                        ? <div style={{ fontSize: fontSize.label, color: colors.signal }}>✓ Contains service keyword and location signal</div>
+                        : <div style={{ fontSize: fontSize.label, color: colors.statusFail, lineHeight: 1.6 }}>✗ {result.detail}</div>
                       }
                     </div>
                   );
@@ -877,9 +878,9 @@ export default function ReportPage() {
                     { label: "FAQ Schema",           value: hasFAQ },
                     { label: "Pricing Schema",       value: hasPricing },
                   ].map(({ label, value }) => (
-                    <div key={label} style={{ padding: "12px 14px", background: "#111827", borderRadius: 8, border: `1px solid ${value ? "#10D9A030" : "#F8717120"}` }}>
-                      <div style={{ fontSize: 16, color: "#475569", marginBottom: 4, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</div>
-                      <div style={{ fontSize: 17, fontWeight: 700, color: value ? "#10D9A0" : "#F87171" }}>{value ? "✓ Detected" : "✗ Missing"}</div>
+                    <div key={label} style={{ padding: "12px 14px", background: colors.surfaceInset, borderRadius: 8, border: `1px solid ${value ? `${colors.signal}30` : `${colors.statusFail}20`}` }}>
+                      <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginBottom: 4, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</div>
+                      <div style={{ fontSize: fontSize.body, fontWeight: 700, color: value ? colors.signal : colors.statusFail }}>{value ? "✓ Detected" : "✗ Missing"}</div>
                     </div>
                   ))}
                 </div>
@@ -894,18 +895,18 @@ export default function ReportPage() {
             const m = raw.match(/^\[(\d+)\]\s(.+)$/);
             return m ? { score: parseInt(m[1]), text: m[2] } : { score: 5, text: raw };
           });
-          const iColor  = (s: number) => s >= 9 ? "#F87171" : s >= 7 ? "#FB923C" : s >= 5 ? "#FBBF24" : "#4ADE80";
-          const iBg     = (s: number) => s >= 9 ? "#F8717115" : s >= 7 ? "#FB923C15" : s >= 5 ? "#FBBF2415" : "#4ADE8015";
-          const iBorder = (s: number) => s >= 9 ? "#F8717135" : s >= 7 ? "#FB923C35" : s >= 5 ? "#FBBF2435" : "#4ADE8035";
+          const iColor  = (s: number) => s >= 9 ? colors.statusFail : s >= 7 ? "#FB923C" : s >= 5 ? colors.statusWarn : "#4ADE80";
+          const iBg     = (s: number) => s >= 9 ? `${colors.statusFail}15` : s >= 7 ? "#FB923C15" : s >= 5 ? `${colors.statusWarn}15` : "#4ADE8015";
+          const iBorder = (s: number) => s >= 9 ? `${colors.statusFail}35` : s >= 7 ? "#FB923C35" : s >= 5 ? `${colors.statusWarn}35` : "#4ADE8035";
           const iLabel  = (s: number) => s >= 9 ? "Critical" : s >= 7 ? "Serious" : s >= 5 ? "Moderate" : "Minor";
           return (
             <>
               <Divider label={`Issues Found — ${parsed.length} Total`} />
               <div style={{ display: "flex", gap: 14, marginBottom: 20, flexWrap: "wrap" }}>
-                {[{ label: "Critical", color: "#F87171" }, { label: "Serious", color: "#FB923C" }, { label: "Moderate", color: "#FBBF24" }, { label: "Minor", color: "#4ADE80" }].map(({ label, color }) => (
+                {[{ label: "Critical", color: colors.statusFail }, { label: "Serious", color: "#FB923C" }, { label: "Moderate", color: colors.statusWarn }, { label: "Minor", color: "#4ADE80" }].map(({ label, color }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 16, color: "#64748B", fontWeight: 600 }}>{label}</span>
+                    <span style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 600 }}>{label}</span>
                   </div>
                 ))}
               </div>
@@ -913,11 +914,11 @@ export default function ReportPage() {
                 {parsed.map((issue, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, background: iBg(issue.score), border: `1px solid ${iBorder(issue.score)}`, borderRadius: 10, padding: "14px 16px", animation: `rowIn 280ms cubic-bezier(0.23,1,0.32,1) ${i * 25}ms both` }}>
                     <div style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 8, background: iColor(issue.score) + "25", border: `2px solid ${iColor(issue.score)}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: 17, fontWeight: 900, color: iColor(issue.score), lineHeight: 1 }}>{issue.score}</span>
+                      <span style={{ fontSize: fontSize.body, fontWeight: 900, color: iColor(issue.score), lineHeight: 1 }}>{issue.score}</span>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 16, fontWeight: 700, color: iColor(issue.score), letterSpacing: "0.08em", marginBottom: 4, textTransform: "uppercase" }}>{iLabel(issue.score)}</div>
-                      <div style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.55 }}>{issue.text.replace(/^[🔴🟠🟡🟢]\s/, '')}</div>
+                      <div style={{ fontSize: fontSize.label, fontWeight: 700, color: iColor(issue.score), letterSpacing: "0.08em", marginBottom: 4, textTransform: "uppercase" }}>{iLabel(issue.score)}</div>
+                      <div style={{ fontSize: fontSize.body, color: colors.textPrimary, lineHeight: 1.55 }}>{issue.text.replace(/^[🔴🟠🟡🟢]\s/, '')}</div>
                     </div>
                   </div>
                 ))}
@@ -933,8 +934,8 @@ export default function ReportPage() {
             <Card variant="green">
               {audit.top_fixes.map((fix, i) => (
                 <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-                  <span style={{ color: "#10D9A0", flexShrink: 0, fontSize: 18, fontWeight: 700 }}>✓</span>
-                  <span style={{ fontSize: 17, color: "#F1F5F9", lineHeight: 1.55 }}>{fix}</span>
+                  <span style={{ color: colors.signal, flexShrink: 0, fontSize: fontSize.bodyLarge, fontWeight: 700 }}>✓</span>
+                  <span style={{ fontSize: fontSize.body, color: colors.textPrimary, lineHeight: 1.55 }}>{fix}</span>
                 </div>
               ))}
             </Card>
@@ -944,44 +945,44 @@ export default function ReportPage() {
         {/* ── CLOSING CTA ──────────────────────────────────────────────────── */}
         <Divider label="Next Step" />
         <Card style={{ padding: "40px 36px", textAlign: "center" }}>
-          <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: "#F1F5F9", margin: "0 0 20px", letterSpacing: "-1px", lineHeight: 1.15 }}>
-            We Find <span style={{ color: "#10D9A0" }}>Broken Websites.</span>
+          <h2 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: colors.textPrimary, margin: "0 0 20px", letterSpacing: "-1px", lineHeight: 1.15 }}>
+            We Find <span style={{ color: colors.signal }}>Broken Websites.</span>
           </h2>
           {speedTier !== "fail" && audit.mobile_score >= 90 ? (
             <>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", lineHeight: 1.5, marginBottom: 10 }}>Your site is fast — but is the rest of the story this good?</div>
-              <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 32, lineHeight: 1.7 }}>Speed is just the first hurdle. Want to see how your Local SEO, Google Business Profile, citations, and conversion tracking stack up against your competitors?</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: colors.signal, lineHeight: 1.5, marginBottom: 10 }}>Your site is fast — but is the rest of the story this good?</div>
+              <div style={{ fontSize: fontSize.body, color: colors.textSecondary, marginBottom: 32, lineHeight: 1.7 }}>Speed is just the first hurdle. Want to see how your Local SEO, Google Business Profile, citations, and conversion tracking stack up against your competitors?</div>
             </>
           ) : (
             <>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#F1F5F9", lineHeight: 1.5, marginBottom: 10 }}>We can have 49 of these problems fixed in 24 hours.</div>
-              <div style={{ fontSize: 17, color: "#CBD5E1", marginBottom: 32, lineHeight: 1.7 }}>98% of the changes on this report are done within 48 hours.<br />Citations take longer — but everything else moves fast.<br /><strong style={{ color: "#F1F5F9" }}>Click below to get started.</strong></div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary, lineHeight: 1.5, marginBottom: 10 }}>We can have 49 of these problems fixed in 24 hours.</div>
+              <div style={{ fontSize: fontSize.body, color: colors.textSecondary, marginBottom: 32, lineHeight: 1.7 }}>98% of the changes on this report are done within 48 hours.<br />Citations take longer — but everything else moves fast.<br /><strong style={{ color: colors.textPrimary }}>Click below to get started.</strong></div>
             </>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 14 }}>
             <a href="/pricing"
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: "#10D9A010", border: "2px solid #10D9A050", borderRadius: 12, textDecoration: "none" }}>
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "28px 24px", background: `${colors.signal}10`, border: `2px solid ${colors.signal}50`, borderRadius: 12, textDecoration: "none" }}>
               <span style={{ fontSize: 32 }}>🚀</span>
-              <span style={{ fontSize: 20, fontWeight: 700, color: "#10D9A0", lineHeight: 1.3 }}>Get These Problems Fixed — $495 →</span>
-              <span style={{ fontSize: 17, color: "#CBD5E1", lineHeight: 1.6 }}>PingClose found them. PingClose fixes them.</span>
+              <span style={{ fontSize: 20, fontWeight: 700, color: colors.signal, lineHeight: 1.3 }}>Get These Problems Fixed — $495 →</span>
+              <span style={{ fontSize: fontSize.body, color: colors.textSecondary, lineHeight: 1.6 }}>PingClose found them. PingClose fixes them.</span>
             </a>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-              <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#10D9A0", borderRadius: 12, textDecoration: "none" }}>
+              <a href="tel:+13145172533" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: colors.signal, borderRadius: 12, textDecoration: "none" }}>
                 <span style={{ fontSize: 28 }}>📞</span>
-                <span style={{ fontSize: 18, fontWeight: 700, color: "#0B0E16" }}>Call or Text</span>
-                <span style={{ fontSize: 17, color: "#0B0E16", opacity: 0.85, fontWeight: 600 }}>(314) 517-2533</span>
+                <span style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: colors.void }}>Call or Text</span>
+                <span style={{ fontSize: fontSize.body, color: colors.void, opacity: 0.85, fontWeight: 600 }}>(314) 517-2533</span>
               </a>
-              <a href="mailto:jim@pingclose.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: "#1E3050", border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
+              <a href="mailto:jim@pingclose.com?subject=PingClose%20Report%20Follow-Up" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "24px 20px", background: colors.border, border: "1px solid #2D4A70", borderRadius: 12, textDecoration: "none" }}>
                 <span style={{ fontSize: 28 }}>✉️</span>
-                <span style={{ fontSize: 18, fontWeight: 700, color: "#F1F5F9" }}>Send an Email</span>
-                <span style={{ fontSize: 16, color: "#CBD5E1" }}>jim@pingclose.com</span>
+                <span style={{ fontSize: fontSize.bodyLarge, fontWeight: 700, color: colors.textPrimary }}>Send an Email</span>
+                <span style={{ fontSize: fontSize.label, color: colors.textSecondary }}>jim@pingclose.com</span>
               </a>
             </div>
           </div>
         </Card>
 
         <div style={{ textAlign: "center", marginTop: 28 }}>
-          <a href="/" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>← Run another audit at PingClose.com</a>
+          <a href="/" style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none" }}>← Run another audit at PingClose.com</a>
         </div>
       </div>
 

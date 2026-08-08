@@ -1,6 +1,7 @@
 import AuditForm from "./AuditForm";
 import PingCtaButton from "./PingCtaButton";
 import StickyNav from "./StickyNav";
+import { colors, fontSize } from "@/lib/designTokens";
 
 const schema = {
   "@context": "https://schema.org",
@@ -19,20 +20,20 @@ const schema = {
 // JS never gates the LCP element's render.
 export default function Home() {
   return (
-    <main style={{ minHeight: "100vh", background: "#0B0E16", color: "#F1F5F9", fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
+    <main style={{ minHeight: "100vh", background: colors.void, color: colors.textPrimary, fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 16 }}>
       <style>{`
-        input::placeholder { color: #6B7280; }
+        input::placeholder { color: ${colors.textSecondary}; }
         * { box-sizing: border-box; }
         .hero-grid  { grid-template-columns: 1fr 1fr; }
         .stats-grid { grid-template-columns: repeat(3, 1fr); }
         .preview-card { display: block; }
         .nav-btn { transition: background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1); }
-        .nav-btn:hover { background: #10D9A025; }
+        .nav-btn:hover { background: ${colors.signal}25; }
         .check-item { transition: background 150ms cubic-bezier(0.23,1,0.32,1); }
-        .check-item:hover { background: #10D9A008; }
+        .check-item:hover { background: ${colors.signal}08; }
         .footer-link, .footer-link-teal { transition: color 160ms cubic-bezier(0.23,1,0.32,1); }
-        .footer-link:hover { color: #94A3B8; }
-        .footer-link-teal:hover { color: #10D9A0; }
+        .footer-link:hover { color: ${colors.textPrimary}; }
+        .footer-link-teal:hover { color: ${colors.signal}; }
         @media (max-width: 768px) {
           .hero-grid    { grid-template-columns: 1fr !important; }
           .stats-grid   { grid-template-columns: 1fr !important; }
@@ -64,10 +65,10 @@ export default function Home() {
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         padding: "60px 24px 40px",
-        background: "linear-gradient(135deg, #0B0E16 0%, #0D1528 50%, #0B0E16 100%)",
+        background: `linear-gradient(135deg, ${colors.void} 0%, ${colors.surface} 50%, ${colors.void} 100%)`,
         position: "relative", overflow: "hidden",
       }}>
-        <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: "linear-gradient(#10D9A0 1px, transparent 1px), linear-gradient(90deg, #10D9A0 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: `linear-gradient(${colors.signal} 1px, transparent 1px), linear-gradient(90deg, ${colors.signal} 1px, transparent 1px)`, backgroundSize: "40px 40px" }} />
 
         {/* Logo + Nav */}
         <div style={{ marginBottom: 48, textAlign: "center", position: "relative" }}>
@@ -75,17 +76,17 @@ export default function Home() {
             {/* CSS radar icon — zero image requests */}
             <div style={{ position: "relative", width: 56, height: 56, flexShrink: 0 }}>
               <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-                <div style={{ position: "absolute", width: 88, height: 88, bottom: -44, left: -44, borderRadius: "50%", border: "1.5px solid #10D9A0", opacity: 0.28 }} />
-                <div style={{ position: "absolute", width: 60, height: 60, bottom: -30, left: -30, borderRadius: "50%", border: "2px solid #10D9A0", opacity: 0.58 }} />
-                <div style={{ position: "absolute", width: 34, height: 34, bottom: -17, left: -17, borderRadius: "50%", border: "2.5px solid #10D9A0", opacity: 1 }} />
+                <div style={{ position: "absolute", width: 88, height: 88, bottom: -44, left: -44, borderRadius: "50%", border: `1.5px solid ${colors.signal}`, opacity: 0.28 }} />
+                <div style={{ position: "absolute", width: 60, height: 60, bottom: -30, left: -30, borderRadius: "50%", border: `2px solid ${colors.signal}`, opacity: 0.58 }} />
+                <div style={{ position: "absolute", width: 34, height: 34, bottom: -17, left: -17, borderRadius: "50%", border: `2.5px solid ${colors.signal}`, opacity: 1 }} />
               </div>
-              <div style={{ position: "absolute", bottom: -4, left: -4, width: 8, height: 8, background: "#10D9A0", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1), 0 0 0 8px rgba(16,217,160,0.05)" }} />
+              <div style={{ position: "absolute", bottom: -4, left: -4, width: 8, height: 8, background: colors.signal, borderRadius: "50%", boxShadow: "0 0 0 4px rgba(16,217,160,0.1), 0 0 0 8px rgba(16,217,160,0.05)" }} />
             </div>
-            <div style={{ fontSize: "clamp(48px, 8vw, 84px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-2px", lineHeight: 1, fontFamily: "var(--font-geist-sans)" }}>
-              Ping<span style={{ color: "#F1F5F9" }}>Close</span>
+            <div style={{ fontSize: "clamp(48px, 8vw, 84px)", fontWeight: 800, color: colors.signal, letterSpacing: "-2px", lineHeight: 1, fontFamily: "var(--font-geist-sans)" }}>
+              Ping<span style={{ color: colors.textPrimary }}>Close</span>
             </div>
           </div>
-          <p style={{ fontSize: 18, color: "#94A3B8", margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: fontSize.body, color: colors.textSecondary, margin: 0, lineHeight: 1.5 }}>
             We are a click monitor. The faster you are, the more clicks you receive.
           </p>
         </div>
@@ -95,15 +96,15 @@ export default function Home() {
 
           {/* LEFT — headline + form */}
           <div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#10D9A010", border: "1px solid #10D9A030", borderRadius: 20, padding: "6px 14px", marginBottom: 24 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10D9A0", animation: "pulse 2s ease-in-out infinite" }} />
-              <span style={{ fontSize: 16, color: "#10D9A0", fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${colors.signal}10`, border: `1px solid ${colors.signal}30`, borderRadius: 20, padding: "6px 14px", marginBottom: 24 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: colors.signal, animation: "pulse 2s ease-in-out infinite" }} />
+              <span style={{ fontSize: 16, color: colors.signal, fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
             </div>
-            <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: "#F9FAFB" }}>
+            <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: colors.textPrimary }}>
               Ping Your Website to See How Many<br />
-              <span style={{ color: "#10D9A0" }}>Clicks You Are Losing.</span>
+              <span style={{ color: colors.signal }}>Clicks You Are Losing.</span>
             </h1>
-            <p style={{ fontSize: 22, color: "#CBD5E1", margin: "0 0 32px", lineHeight: 1.6 }}>
+            <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, margin: "0 0 32px", lineHeight: 1.6 }}>
               Ping your site and find out right now. We check 74 signals and tell you exactly what&apos;s slowing you down.
             </p>
 
@@ -111,96 +112,96 @@ export default function Home() {
 
             <div style={{ display: "flex", gap: 20, marginTop: 18, flexWrap: "wrap" }}>
               {["No account needed", "No credit card", "Results in 60 seconds"].map(t => (
-                <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 16, color: "#64748B" }}>
-                  <span style={{ color: "#10D9A0" }}>✓</span> {t}
+                <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: fontSize.label, color: colors.textSecondary }}>
+                  <span style={{ color: colors.signal }}>✓</span> {t}
                 </span>
               ))}
             </div>
-            <a href="#hurdles" style={{ display: "block", marginTop: 24, fontSize: 17, color: "#94A3B8", textDecoration: "none" }}>
+            <a href="#hurdles" style={{ display: "block", marginTop: 24, fontSize: fontSize.body, color: colors.textSecondary, textDecoration: "none" }}>
               Why does 1 second matter? ↓
             </a>
           </div>
 
           {/* RIGHT — sample report preview (desktop only) */}
           <div className="preview-card" style={{ position: "relative" }}>
-            <div style={{ fontSize: 16, color: "#374151", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", textAlign: "center", marginBottom: 10 }}>
+            <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", textAlign: "center", marginBottom: 10 }}>
               Sample Report Preview
             </div>
-            <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, overflow: "hidden", boxShadow: "0 24px 60px #00000050, 0 0 0 1px #10D9A010" }}>
+            <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 16, overflow: "hidden", boxShadow: `0 24px 60px #00000050, 0 0 0 1px ${colors.signal}10` }}>
               {/* Browser chrome */}
-              <div style={{ padding: "12px 16px", background: "#111827", borderBottom: "1px solid #1E3050", display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#F87171" }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FBBF24" }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#34D399" }} />
-                <span style={{ fontSize: 16, color: "#374151", marginLeft: 6, fontFamily: "monospace" }}>pingclose.com/report/abc123</span>
+              <div style={{ padding: "12px 16px", background: colors.surfaceInset, borderBottom: `1px solid ${colors.border}`, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: colors.statusFail }} />
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: colors.statusWarn }} />
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: colors.signal }} />
+                <span style={{ fontSize: fontSize.label, color: colors.textSecondary, marginLeft: 6, fontFamily: "monospace" }}>pingclose.com/report/abc123</span>
               </div>
               {/* Verdict */}
-              <div style={{ padding: "12px 20px", borderBottom: "1px solid #1E3050", display: "flex", alignItems: "center", gap: 8, background: "#F8717108" }}>
+              <div style={{ padding: "12px 20px", borderBottom: `1px solid ${colors.border}`, display: "flex", alignItems: "center", gap: 8, background: `${colors.statusFail}08` }}>
                 <span>❌</span>
-                <span style={{ fontSize: 16, color: "#F87171", fontWeight: 600 }}>Failing Google&apos;s 1-second test</span>
+                <span style={{ fontSize: fontSize.label, color: colors.statusFail, fontWeight: 600 }}>Failing Google&apos;s 1-second test</span>
               </div>
               {/* Top issues */}
               <div style={{ padding: "14px 20px" }}>
-                <div style={{ fontSize: 16, color: "#F87171", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Top Issues Found</div>
+                <div style={{ fontSize: fontSize.label, color: colors.statusFail, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Top Issues Found</div>
                 {[
                   "🔴 Images not in WebP format (4 files)",
                   "🔴 TTFB over 800ms — hosting is slow",
                   "🟠 Render-blocking JavaScript detected",
                   "🟡 No CDN — single-origin delivery",
                 ].map((issue, i) => (
-                  <div key={i} style={{ fontSize: 16, color: "#CBD5E1", lineHeight: 1.5, marginBottom: 6, paddingLeft: 8, borderLeft: "2px solid #F8717140" }}>
+                  <div key={i} style={{ fontSize: fontSize.label, color: colors.textSecondary, lineHeight: 1.5, marginBottom: 6, paddingLeft: 8, borderLeft: `2px solid ${colors.statusFail}40` }}>
                     {issue}
                   </div>
                 ))}
               </div>
               {/* Footer */}
-              <div style={{ padding: "12px 20px", background: "#10D9A008", borderTop: "1px solid #1E3050" }}>
-                <span style={{ fontSize: 16, color: "#10D9A0", fontWeight: 600 }}>⚡ 74 signals analyzed · Report emailed instantly</span>
+              <div style={{ padding: "12px 20px", background: `${colors.signal}08`, borderTop: `1px solid ${colors.border}` }}>
+                <span style={{ fontSize: fontSize.label, color: colors.signal, fontWeight: 600 }}>⚡ 74 signals analyzed · Report emailed instantly</span>
               </div>
             </div>
-            <div style={{ position: "absolute", inset: -24, background: "radial-gradient(ellipse at center, #10D9A006 0%, transparent 70%)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", inset: -24, background: `radial-gradient(ellipse at center, ${colors.signal}06 0%, transparent 70%)`, pointerEvents: "none" }} />
           </div>
         </div>
       </section>
 
       {/* ── STATS BAR ───────────────────────────────────────────── */}
-      <section style={{ padding: "36px 24px", background: "#080F1C", borderTop: "1px solid #1E2A40", borderBottom: "1px solid #1E2A40" }}>
+      <section style={{ padding: "36px 24px", background: colors.void, borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
         <div className="stats-grid" style={{ maxWidth: 1040, margin: "0 auto", display: "grid", gap: 0, textAlign: "center" }}>
           {[
             ["53%", "of visitors leave if your page takes over 3 seconds"],
             ["74", "signals checked on every free audit"],
             ["<1s", "Google's target for above-the-fold load time"],
           ].map(([stat, label], i) => (
-            <div key={stat} style={{ padding: "20px 24px", borderRight: i < 2 ? "1px solid #1E2A40" : "none" }}>
-              <div style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, color: "#10D9A0", letterSpacing: "-1px", lineHeight: 1 }}>{stat}</div>
-              <div style={{ fontSize: 16, color: "#64748B", marginTop: 8, lineHeight: 1.5 }}>{label}</div>
+            <div key={stat} style={{ padding: "20px 24px", borderRight: i < 2 ? `1px solid ${colors.border}` : "none" }}>
+              <div style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, color: colors.signal, letterSpacing: "-1px", lineHeight: 1 }}>{stat}</div>
+              <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 8, lineHeight: 1.5 }}>{label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── HURDLE SECTION ──────────────────────────────────────── */}
-      <section id="hurdles" style={{ padding: "90px 24px", background: "#080F1C", textAlign: "center" }}>
+      <section id="hurdles" style={{ padding: "90px 24px", background: colors.void, textAlign: "center" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, margin: "0 0 20px", letterSpacing: "-1px" }}>
             If You Can&apos;t Clear the First Hurdle,<br />
-            <span style={{ color: "#F87171" }}>You Can&apos;t Win the Race</span>
+            <span style={{ color: colors.statusFail }}>You Can&apos;t Win the Race</span>
           </h2>
-          <p style={{ fontSize: 22, color: "#94A3B8", margin: "0 0 56px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, margin: "0 0 56px", lineHeight: 1.6 }}>
             Google&apos;s first hurdle is loading your website in under 1 second on a 4G phone.<br />
             Most local businesses fail it before the race even begins.
           </p>
 
           {/* Animated comparison bars */}
-          <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, padding: "40px 32px", marginBottom: 40 }}>
+          <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 16, padding: "40px 32px", marginBottom: 40 }}>
             <div style={{ display: "flex", justifyContent: "center", gap: 80, alignItems: "flex-end", marginBottom: 28 }}>
               {[
-                { label: "Fast Competitor", pct: 36,  color: "#10D9A0", verdict: "4 ft hurdle ✅",  delay: "0.2s" },
-                { label: "Your Slow Site",  pct: 100, color: "#F87171", verdict: "10 ft hurdle 🔴", delay: "0.5s" },
+                { label: "Fast Competitor", pct: 36,  color: colors.signal, verdict: "4 ft hurdle ✅",  delay: "0.2s" },
+                { label: "Your Slow Site",  pct: 100, color: colors.statusFail, verdict: "10 ft hurdle 🔴", delay: "0.5s" },
               ].map(({ label, pct, color, verdict, delay }) => (
                 <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 16, color, fontWeight: 700 }}>{label}</div>
-                  <div style={{ width: 56, height: 160, background: "#0B0E16", borderRadius: 6, display: "flex", alignItems: "flex-end", overflow: "hidden" }}>
+                  <div style={{ fontSize: fontSize.label, color, fontWeight: 700 }}>{label}</div>
+                  <div style={{ width: 56, height: 160, background: colors.void, borderRadius: 6, display: "flex", alignItems: "flex-end", overflow: "hidden" }}>
                     <div style={{
                       width: "100%", height: `${pct}%`, background: color,
                       borderRadius: "4px 4px 0 0", transformOrigin: "bottom",
@@ -208,24 +209,24 @@ export default function Home() {
                       boxShadow: `0 0 20px ${color}40`,
                     }} />
                   </div>
-                  <div style={{ fontSize: 16, color: "#64748B" }}>{verdict}</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>{verdict}</div>
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 16, color: "#64748B", margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontSize: fontSize.label, color: colors.textSecondary, margin: 0, lineHeight: 1.6 }}>
               Every fast competitor sees a 4 ft hurdle. A slow site makes yours{" "}
-              <strong style={{ color: "#F87171" }}>10 feet tall</strong> — before the race even starts.
+              <strong style={{ color: colors.statusFail }}>10 feet tall</strong> — before the race even starts.
             </p>
           </div>
 
-          <p style={{ fontSize: 18, color: "#94A3B8", lineHeight: 1.7, maxWidth: 560, margin: "0 auto 48px" }}>
+          <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, lineHeight: 1.7, maxWidth: 560, margin: "0 auto 48px" }}>
             How difficult is it to win when you can&apos;t clear the first one?<br />
             PingClose shows you exactly where you stand — in 60 seconds.
           </p>
 
           {/* What We Check */}
-          <div style={{ background: "#0D1528", border: "1px solid #1E3050", borderRadius: 16, padding: "32px 24px", textAlign: "left", maxWidth: 560, margin: "0 auto 48px" }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#94A3B8", letterSpacing: "0.08em", marginBottom: 24, textTransform: "uppercase" }}>
+          <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 16, padding: "32px 24px", textAlign: "left", maxWidth: 560, margin: "0 auto 48px" }}>
+            <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.textSecondary, letterSpacing: "0.08em", marginBottom: 24, textTransform: "uppercase" }}>
               What We Check in 60 Seconds
             </div>
             {[
@@ -241,8 +242,8 @@ export default function Home() {
               >
                 <div style={{ fontSize: 22, flexShrink: 0, marginTop: 2 }}>{icon}</div>
                 <div>
-                  <div style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", marginBottom: 4 }}>{title}</div>
-                  <div style={{ fontSize: 16, color: "#94A3B8" }}>{desc}</div>
+                  <div style={{ fontSize: fontSize.body, fontWeight: 600, color: colors.textPrimary, marginBottom: 4 }}>{title}</div>
+                  <div style={{ fontSize: fontSize.label, color: colors.textSecondary }}>{desc}</div>
                 </div>
               </div>
             ))}
@@ -251,10 +252,10 @@ export default function Home() {
           <PingCtaButton />
 
           <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
-            <a href="/faq" className="footer-link" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
+            <a href="/faq" className="footer-link" style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none" }}>
               Have questions? Read our FAQ →
             </a>
-            <a href="/pricing" className="footer-link-teal" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none" }}>
+            <a href="/pricing" className="footer-link-teal" style={{ fontSize: fontSize.label, color: colors.textSecondary, textDecoration: "none" }}>
               See Pricing →
             </a>
           </div>

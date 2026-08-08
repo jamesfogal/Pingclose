@@ -14,3 +14,34 @@ Color carries exactly two functions and no others. The primary teal (#10D9A0) be
 Typography is the closing note of a composition that is primarily silent. The wordmark uses weight and contrast to split its meaning: the first word announces the action (teal, alive, present) while the second names the outcome (white, settled, complete). Letter spacing is tight — the words nearly touch — because precision leaves no waste. The typeface is grotesque in the truest sense: warm enough for a small business audience, structured enough to carry technical authority. This balance is the result of countless refinements, a painstaking calibration between approachability and expertise.
 
 The whole system is built to function at extremes of scale: a 16x16 favicon that holds its meaning as a single arc and dot, and a full wordmark that reads at twenty feet. This range demands the kind of master-level execution where every stroke weight, every anchor point, every optical compensation is deliberate. The mark should look as though it was drawn by someone who has drawn ten thousand marks and knows exactly what makes this one right.
+
+## Design Tokens
+
+The philosophy above is enforced in code, not just prose. `lib/designTokens.ts` is the single source of truth for every color and font size on the site — no component should hardcode a hex value or a raw font-size number that duplicates one of these. This exists because, as of 2026-08-08, the site had drifted to 115 distinct hardcoded hex values across 649 occurrences in 10 files, which is exactly the kind of accidental variation this philosophy exists to prevent.
+
+**Colors** (`colors` from `lib/designTokens.ts`):
+
+| Token | Hex | Role |
+| --- | --- | --- |
+| `void` | `#0B0E16` | The background — the void being measured |
+| `surface` | `#0D1528` | Card and panel backgrounds |
+| `surfaceInset` | `#111827` | Nested/inset surfaces (stat tiles, input fields) |
+| `border` | `#1E3050` | Hairline borders and dividers |
+| `signal` | `#10D9A0` | The one brand color — live data, emphasis, primary CTAs, "pass" status |
+| `textPrimary` | `#F1F5F9` | Language — headlines, primary copy |
+| `textSecondary` | `#94A3B8` | Language — supporting copy, labels, captions |
+| `statusFail` | `#F87171` | "Fail" / critical-severity status only |
+| `statusWarn` | `#FBBF24` | "Warn" / moderate-severity status only |
+
+Nine colors, not two, because a diagnostic tool has to show pass/fail/warn states — but every one of the nine still serves signal, language, or structure. Nothing is decorative. A handful of pages use one or two additional colors outside this set on purpose — e.g. a categorical severity scale (Critical/Serious/Moderate/Minor) or a Kanban pipeline stage list that genuinely needs more than nine distinguishable hues. Those are documented exceptions in the component itself, not drift.
+
+**Type scale** (`fontSize` from `lib/designTokens.ts`), matching the 16px-minimum rule:
+
+| Token | Size | Role |
+| --- | --- | --- |
+| `label` | 16px | Captions, labels, helper text — the floor, never smaller |
+| `body` | 17px | Description and paragraph text |
+| `bodyLarge` | 18px | Emphasized body copy |
+| `heading` | 22px | Minimum heading size |
+
+Large display numbers (hero stats, score counters) and responsive `clamp()` headings fall outside this four-value scale by design and stay as literals where they appear.
