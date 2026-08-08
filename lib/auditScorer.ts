@@ -35,7 +35,11 @@ export function scoreAudit(speedResult: PageSpeedResult, techResult: TechStackRe
   if (techResult.multipleH1s) issue(7, '🟠 Multiple H1 tags — confuses Google about which topic this page is targeting');
 
   // 🟡 MODERATE (5-6) — meaningful SEO and conversion impact
-  if (speedResult.nonWebpImages > 0) issue(6, `🟡 ${speedResult.nonWebpImages} of ${speedResult.totalImages} images not WebP — estimated ${speedResult.estimatedWebPSavingKb}KB savings available`);
+  // Google's own image-delivery-insight flags oversized/uncompressed/wrong-
+  // format images together with a free-text reason per image, not a clean
+  // WebP-specific signal (verified against a real site 2026-08-08) — worded
+  // generally so this doesn't claim a specific cause the data can't back up.
+  if (speedResult.nonWebpImages > 0) issue(6, `🟡 ${speedResult.nonWebpImages} of ${speedResult.totalImages} images have delivery issues (oversized, uncompressed, or wrong format) — estimated ${speedResult.estimatedWebPSavingKb}KB savings available`);
   if (!techResult.hasLocalBusinessSchema) issue(6, '🟡 No LocalBusiness schema — Google has reduced confidence in your local signals');
   if (!techResult.hasFAQSchema) issue(6, '🟡 No FAQ page with schema — missing free Google rich result opportunity your competitors may already have');
   if (!techResult.hasPricingSchema) issue(6, '🟡 No pricing page with schema — competitors with pricing schema rank higher for buying-intent searches');
@@ -50,7 +54,9 @@ export function scoreAudit(speedResult: PageSpeedResult, techResult: TechStackRe
   if (speedResult.ttfb > 600 && speedResult.ttfb <= 800) issue(5, `🟡 Server response time ${speedResult.ttfb}ms — slightly above the recommended 600ms threshold`);
 
   // 🟢 MINOR (3-4) — polish and optimization
-  if (!speedResult.imagesLazyLoaded) issue(4, '🟢 Lazy loading not enabled — off-screen images load immediately, wasting bandwidth');
+  // Lazy-loading detection (offscreen-images) has no replacement Lighthouse
+  // audit anymore (verified 2026-08-08, genuinely removed) — no finding
+  // generated here rather than guess at a value with no real signal behind it.
   if (speedResult.imagesMissingAltText > 0) issue(4, `🟢 ${speedResult.imagesMissingAltText} images missing alt text — hurting SEO and accessibility scores`);
   if (techResult.titleLength > 60) issue(4, `🟢 Title tag is ${techResult.titleLength} characters — Google truncates at 60, cutting off your message`);
   if (!techResult.hasReviewSchema) issue(3, '🟢 No review/rating schema — missing opportunity to show star ratings in search results');

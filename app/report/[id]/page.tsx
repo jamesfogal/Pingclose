@@ -482,8 +482,8 @@ export default function ReportPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
             {[
               { label: "Total Images", value: speed?.totalImages ?? 0,   color: "#F1F5F9" },
-              { label: "WebP ✓",       value: speed?.webpImages  ?? 0,   color: "#10D9A0" },
-              { label: "Not WebP ✗",   value: speed?.nonWebpImages ?? 0, color: (speed?.nonWebpImages ?? 0) > 0 ? "#F87171" : "#10D9A0" },
+              { label: "No Issues Found ✓", value: speed?.webpImages  ?? 0,   color: "#10D9A0" },
+              { label: "Delivery Issues ✗", value: speed?.nonWebpImages ?? 0, color: (speed?.nonWebpImages ?? 0) > 0 ? "#F87171" : "#10D9A0" },
             ].map(({ label, value, color }) => (
               <div key={label} style={{ background: "#111827", borderRadius: 10, padding: "18px 14px", textAlign: "center" }}>
                 <div style={{ fontSize: 32, fontWeight: 900, color }}>{value}</div>
@@ -493,13 +493,12 @@ export default function ReportPage() {
           </div>
           {(speed?.estimatedWebPSavingKb ?? 0) > 0 && (
             <div style={{ background: "#10D9A010", border: "1px solid #10D9A030", borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
-              <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>💡 Converting to WebP would save approximately {speed!.estimatedWebPSavingKb}KB</div>
-              <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>WebP images are 25–35% smaller than JPG/PNG with identical visual quality.</div>
+              <div style={{ fontSize: 17, color: "#10D9A0", fontWeight: 600 }}>💡 Fixing image delivery would save approximately {speed!.estimatedWebPSavingKb}KB</div>
+              <div style={{ fontSize: 16, color: "#CBD5E1", marginTop: 4 }}>Oversized, uncompressed, or wrong-format images slow every visitor's load time — see specifics below.</div>
             </div>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <CheckRow label="All images converted to WebP" pass={audit.images_webp} />
-            <CheckRow label="Lazy loading enabled on off-screen images" pass={audit.images_lazy_loaded} />
+            <CheckRow label="No image delivery issues detected" pass={audit.images_webp} />
             <CheckRow label={`Largest image: ${audit.largest_image_kb}KB`} pass={audit.largest_image_kb < 200} detail={audit.largest_image_kb >= 200 ? "Images over 200KB significantly slow mobile load times" : undefined} />
             {(speed?.imagesMissingAltText ?? 0) > 0 && (
               <CheckRow label={`${speed!.imagesMissingAltText} images missing alt text`} pass={false} detail="Alt text is required for SEO — Google cannot read images without it" />
@@ -507,7 +506,7 @@ export default function ReportPage() {
           </div>
           {(speed?.nonWebpImageList?.length ?? 0) > 0 && (
             <div style={{ marginTop: 20, borderTop: "1px solid #1E3050", paddingTop: 16 }}>
-              <div style={{ fontSize: 16, color: "#475569", marginBottom: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Images That Need Converting:</div>
+              <div style={{ fontSize: 16, color: "#475569", marginBottom: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Images With Delivery Issues:</div>
               {speed!.nonWebpImageList.slice(0, 8).map((img, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #111827", fontSize: 16 }}>
                   <span style={{ color: "#CBD5E1", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "62%" }}>{img.url.split("/").pop()?.substring(0, 50) || img.url}</span>

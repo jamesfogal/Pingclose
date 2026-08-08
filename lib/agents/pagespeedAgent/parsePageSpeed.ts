@@ -1,9 +1,28 @@
 import type { PageSpeedResult, ImageDetail, VideoDetail } from './types';
 
+// Lighthouse migrated many audits to new "-insight" IDs at some point (the
+// old flat IDs return nothing, silently, in current API responses — this
+// was discovered 2026-08-08 after 8 checks had been defaulting to false
+// "all clear" results on every audit). Every ID this file reads from
+// `audits` is checked here so a *future* Lighthouse rename shows up as a
+// loud warning instead of another silent months-long lie.
+const EXPECTED_AUDIT_KEYS = [
+  'server-response-time', 'largest-contentful-paint', 'first-contentful-paint',
+  'cumulative-layout-shift', 'total-blocking-time', 'total-byte-weight', 'network-requests',
+  'render-blocking-insight', 'unused-javascript', 'unused-css-rules',
+  'cache-insight', 'font-display-insight', 'image-delivery-insight',
+];
+
 export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<string, unknown>): PageSpeedResult {
   const lhr = (mobile as { lighthouseResult?: Record<string, unknown> }).lighthouseResult;
   const audits = (lhr?.audits as Record<string, { numericValue?: number; details?: { items?: Array<Record<string, unknown>> }; title?: string; displayValue?: string }>) || {};
   const categories = (lhr?.categories as Record<string, { score?: number }>) || {};
+
+  for (const key of EXPECTED_AUDIT_KEYS) {
+    if (audits[key] === undefined) {
+      console.warn(`PAGESPEED_PARSE_WARNING: expected audit "${key}" missing from Lighthouse response — Google likely renamed/removed it again. This check is silently defaulting instead of measuring anything real.`);
+    }
+  }
 
   const crux = ((mobile as { loadingExperience?: { metrics?: Record<string, { percentile?: number }> } }).loadingExperience?.metrics) || {};
 
@@ -26,15 +45,21 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
   // True "under 1 second": LCP < 1000ms (metrics are in milliseconds)
   const passesOneSecond = lcp > 0 && lcp < 1000;
 
-  const webpAuditItems = audits['uses-webp-images']?.details?.items || [];
-  const lazyItems = audits['offscreen-images']?.details?.items || [];
+  // Google merged the old uses-webp-images/uses-optimized-images audits into
+  // one general "image-delivery-insight" — it flags oversized, uncompressed,
+  // AND wrong-format images together with a free-text reason per image, not
+  // a clean isWebP boolean. Verified against a real site's live response
+  // (2026-08-08): the flagged reason was oversized dimensions, not format —
+  // so this is now reported as general image-delivery savings, not a
+  // WebP-specific claim, to avoid asserting something the data can't back up.
+  const imageDeliveryItems = audits['image-delivery-insight']?.details?.items || [];
   const allNetworkItems: Array<Record<string, unknown>> = audits['network-requests']?.details?.items || [];
 
   const allImageItems = allNetworkItems.filter(
     i => typeof i.url === 'string' && /\.(jpg|jpeg|png|gif|bmp|webp|avif|svg)/i.test(i.url as string)
   );
 
-  const nonWebpImageList: ImageDetail[] = webpAuditItems.map((item: Record<string, unknown>) => {
+  const nonWebpImageList: ImageDetail[] = imageDeliveryItems.map((item: Record<string, unknown>) => {
     const imgUrl = (item.url as string) || '';
     const ext = imgUrl.split('.').pop()?.split('?')[0]?.toUpperCase() || 'IMG';
     const sizeKb = Math.round(Number(item.totalBytes || 0) / 1024);
@@ -47,13 +72,18 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
   const webpImages = totalImages - nonWebpImages;
   const estimatedWebPSavingKb = nonWebpImageList.reduce((sum, i) => sum + i.estimatedWebPSavingKb, 0);
   const imagesWebP = nonWebpImages === 0;
-  const imagesLazyLoaded = lazyItems.length === 0;
+  // Lazy-loading detection (offscreen-images) has no replacement audit in
+  // current Lighthouse responses — genuinely removed, not renamed (verified:
+  // it only appears as WordPress stack-pack reference text, never as a real
+  // audit result). Rather than guess, this no longer asserts a pass/fail —
+  // see auditScorer.ts and the report page, which both stopped claiming it.
+  const imagesLazyLoaded = totalImages === 0;
 
   const largestImageKb = Math.round(
     Math.max(0, ...allImageItems.map(i => Number(i.transferSize) || 0)) / 1024
   );
 
-  const rbItems = audits['render-blocking-resources']?.details?.items || [];
+  const rbItems = audits['render-blocking-insight']?.details?.items || [];
   const renderBlockingScripts = rbItems.length;
   const renderBlockingDetails = rbItems.map((item: Record<string, unknown>) => ({
     url: String(item.url || ''),
@@ -69,9 +99,12 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
     unusedCssItems.reduce((sum: number, i: Record<string, unknown>) => sum + Number(i.wastedBytes || 0), 0) / 1024
   );
 
-  const cachingItems = audits['uses-long-cache-ttl']?.details?.items || [];
-  const noBrowserCaching = cachingItems.length > 3;
-  const fontItems: Array<Record<string, unknown>> = audits['font-display']?.details?.items || [];
+  // cache-insight's items are already the flagged problem resources (not a
+  // raw resource dump like the old audit), so any item present is real —
+  // no arbitrary ">3" threshold needed anymore.
+  const cachingItems = audits['cache-insight']?.details?.items || [];
+  const noBrowserCaching = cachingItems.length > 0;
+  const fontItems: Array<Record<string, unknown>> = audits['font-display-insight']?.details?.items || [];
   const hasFontDisplayIssue = fontItems.length > 0;
 
   const scriptUrls = allNetworkItems
@@ -111,22 +144,27 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
     gapExplanation = `Your mobile and desktop scores are well-matched — good sign that your site is consistently optimized across devices.`;
   }
 
+  // uses-text-compression and offscreen-images have no replacement audit at
+  // all in current Lighthouse responses (verified 2026-08-08) — omitted
+  // rather than left silently referencing a dead key.
   const opportunities = [
-    audits['uses-optimized-images'],
-    audits['uses-webp-images'],
-    audits['render-blocking-resources'],
+    audits['image-delivery-insight'],
+    audits['render-blocking-insight'],
     audits['unused-javascript'],
     audits['unused-css-rules'],
-    audits['uses-text-compression'],
-    audits['offscreen-images'],
-    audits['uses-long-cache-ttl'],
-    audits['font-display'],
+    audits['cache-insight'],
+    audits['font-display-insight'],
   ]
     .filter((a): a is { numericValue?: number; title?: string; displayValue?: string } => !!a && (a.numericValue || 0) > 200)
     .map(a => ({ title: a.title || '', savings: a.displayValue || '', savingsMs: Math.round(a.numericValue || 0) }))
     .sort((a, b) => (b.savingsMs || 0) - (a.savingsMs || 0))
     .slice(0, 8);
 
+  // image-alt is an accessibility-category audit, and this request only ever
+  // asks for category=performance (fetchPageSpeed.ts sends no category
+  // param, which defaults to performance-only) — this key is never present
+  // in the response, not renamed, a genuinely separate gap from the
+  // insight-ID migration fixed above. Known open issue, not fixed here.
   const altItems = audits['image-alt']?.details?.items || [];
   const imagesMissingAltText = altItems.length;
 
