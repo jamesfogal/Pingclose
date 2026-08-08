@@ -37,6 +37,15 @@ export async function fetchPage(url: string): Promise<FetchedPage | null> {
       }),
       alpnPromise,
     ]);
+
+    // A non-2xx response (404, 500, a WAF block page, a "site suspended"
+    // page) still has a body — without this check, every detector below
+    // would confidently parse an error page as if it were the real site.
+    if (!res.ok) {
+      console.error('AGENT_FAIL: HtmlAgent — non-OK status', res.status, url);
+      return null;
+    }
+
     const html = await res.text();
     const headers: Record<string, string> = {};
     res.headers.forEach((value, key) => { headers[key.toLowerCase()] = value; });
