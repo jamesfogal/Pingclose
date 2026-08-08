@@ -6,7 +6,7 @@
 export const colors = {
   // Structure — void, surface, and border. Unchanged values, just now a
   // single named source instead of scattered inline hex.
-  void: '#0B0E16',
+  void: '#0A1330',
   surface: '#0D1528',
   surfaceInset: '#111827',
   border: '#FFFFFF',
@@ -30,8 +30,8 @@ export const colors = {
 // (nothing under 16px, body 17-18px, headings 22px+), applied consistently
 // instead of the previous ad-hoc mix.
 export const fontSize = {
-  label: 16,   // uppercase captions/labels — small end of the allowed range
-  body: 17,    // description/paragraph text
-  bodyLarge: 18,
-  heading: 22, // minimum heading size
+  label: 18,   // uppercase captions/labels
+  body: 19,    // description/paragraph text
+  bodyLarge: 20,
+  heading: 24,
 } as const;

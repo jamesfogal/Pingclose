@@ -5,7 +5,7 @@
    following the visitor's system light/dark preference. Keep in sync with
    that file if the palette ever changes. */
 :root {
-  --background: #0B0E16;
+  --background: #0A1330;
   --foreground: #F1F5F9;
 }
 
