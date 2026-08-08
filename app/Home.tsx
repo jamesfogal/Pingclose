@@ -1,5 +1,6 @@
 import AuditForm from "./AuditForm";
 import PingCtaButton from "./PingCtaButton";
+import StickyNav from "./StickyNav";
 
 const schema = {
   "@context": "https://schema.org",
@@ -29,6 +30,9 @@ export default function Home() {
         .nav-btn:hover { background: #10D9A025; }
         .check-item { transition: background 150ms cubic-bezier(0.23,1,0.32,1); }
         .check-item:hover { background: #10D9A008; }
+        .footer-link, .footer-link-teal { transition: color 160ms cubic-bezier(0.23,1,0.32,1); }
+        .footer-link:hover { color: #94A3B8; }
+        .footer-link-teal:hover { color: #10D9A0; }
         @media (max-width: 768px) {
           .hero-grid    { grid-template-columns: 1fr !important; }
           .stats-grid   { grid-template-columns: 1fr !important; }
@@ -53,6 +57,7 @@ export default function Home() {
         }
       `}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <StickyNav />
 
       {/* ── ABOVE THE FOLD ──────────────────────────────────────── */}
       <section style={{
@@ -80,17 +85,9 @@ export default function Home() {
               Ping<span style={{ color: "#F1F5F9" }}>Close</span>
             </div>
           </div>
-          <p style={{ fontSize: 18, color: "#94A3B8", margin: "0 0 20px", lineHeight: 1.5 }}>
+          <p style={{ fontSize: 18, color: "#94A3B8", margin: 0, lineHeight: 1.5 }}>
             We are a click monitor. The faster you are, the more clicks you receive.
           </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-            <a href="/faq" className="nav-btn"
-              style={{ fontSize: 17, fontWeight: 600, color: "#F1F5F9", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A040", borderRadius: 8, padding: "10px 22px" }}
-            >Website Speed FAQ</a>
-            <a href="/pricing" className="nav-btn"
-              style={{ fontSize: 17, fontWeight: 600, color: "#10D9A0", textDecoration: "none", background: "#10D9A015", border: "1px solid #10D9A060", borderRadius: 8, padding: "10px 22px" }}
-            >See Pricing →</a>
-          </div>
         </div>
 
         {/* Hero grid: form left, preview right */}
@@ -252,6 +249,15 @@ export default function Home() {
           </div>
 
           <PingCtaButton />
+
+          <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
+            <a href="/faq" className="footer-link" style={{ fontSize: 16, color: "#475569", textDecoration: "none" }}>
+              Have questions? Read our FAQ →
+            </a>
+            <a href="/pricing" className="footer-link-teal" style={{ fontSize: 16, color: "#94A3B8", textDecoration: "none" }}>
+              See Pricing →
+            </a>
+          </div>
         </div>
       </section>
     </main>
