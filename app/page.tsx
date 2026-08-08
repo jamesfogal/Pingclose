@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HomeClient from "./HomeClient";
+import Home from "./Home";
 
 export const metadata: Metadata = {
   title: "PingClose — Free Website Speed Test for Local Businesses",
@@ -62,7 +62,7 @@ export default function Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaWebSite) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaApp) }} />
-      <HomeClient />
+      <Home />
     </>
   );
 }
