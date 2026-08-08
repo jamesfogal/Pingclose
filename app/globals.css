@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
+/* Always dark — no light-mode toggle anywhere on the site — so these match
+   lib/designTokens.ts's colors.void / colors.textPrimary directly instead of
+   following the visitor's system light/dark preference. Keep in sync with
+   that file if the palette ever changes. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0B0E16;
+  --foreground: #F1F5F9;
 }
 
 @theme inline {
@@ -10,13 +14,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

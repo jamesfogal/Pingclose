@@ -18,7 +18,7 @@ export const colors = {
   // Language — text, in two weights of the same white, not two unrelated
   // hues. Hierarchy comes from prominence, not from inventing new greys.
   textPrimary: '#F1F5F9',
-  textSecondary: '#94A3B8',
+  textSecondary: '#CBD5E1',
 
   // Status — functionally necessary for a tool whose entire job is showing
   // pass/fail/warn. Not decorative color choice.

@@ -24,9 +24,7 @@ export default function Home() {
       <style>{`
         input::placeholder { color: ${colors.textSecondary}; }
         * { box-sizing: border-box; }
-        .hero-grid  { grid-template-columns: 1fr 1fr; }
         .stats-grid { grid-template-columns: repeat(3, 1fr); }
-        .preview-card { display: block; }
         .nav-btn { transition: background 180ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1); }
         .nav-btn:hover { background: ${colors.signal}25; }
         .check-item { transition: background 150ms cubic-bezier(0.23,1,0.32,1); }
@@ -35,9 +33,8 @@ export default function Home() {
         .footer-link:hover { color: ${colors.textPrimary}; }
         .footer-link-teal:hover { color: ${colors.signal}; }
         @media (max-width: 768px) {
-          .hero-grid    { grid-template-columns: 1fr !important; }
           .stats-grid   { grid-template-columns: 1fr !important; }
-          .preview-card { display: none !important; }
+          .site-pad     { padding-left: 28px !important; padding-right: 28px !important; }
         }
         @media (hover: hover) and (pointer: fine) {
           a:active { transform: scale(0.97); }
@@ -61,7 +58,7 @@ export default function Home() {
       <StickyNav />
 
       {/* ── ABOVE THE FOLD ──────────────────────────────────────── */}
-      <section style={{
+      <section className="site-pad" style={{
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         padding: "60px 24px 40px",
@@ -91,81 +88,39 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Hero grid: form left, preview right */}
-        <div className="hero-grid" style={{ width: "100%", maxWidth: 1280, display: "grid", gap: 72, alignItems: "center", position: "relative" }}>
+        {/* Hero: headline + form, single centered column */}
+        <div style={{ width: "100%", maxWidth: 640, position: "relative", textAlign: "center" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${colors.signal}10`, border: `1px solid ${colors.signal}30`, borderRadius: 20, padding: "6px 14px", marginBottom: 24 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: colors.signal, animation: "pulse 2s ease-in-out infinite" }} />
+            <span style={{ fontSize: 16, color: colors.signal, fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
+          </div>
+          <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: colors.textPrimary }}>
+            Ping Your Website to See How Many{" "}
+            <span style={{ color: colors.signal }}>Clicks You Are Losing.</span>
+          </h1>
+          <p style={{ fontSize: fontSize.bodyLarge, color: colors.textPrimary, margin: "0 0 32px", lineHeight: 1.6 }}>
+            Ping your site and find out right now. We check 74 signals and tell you exactly what&apos;s slowing you down.
+          </p>
 
-          {/* LEFT — headline + form */}
-          <div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${colors.signal}10`, border: `1px solid ${colors.signal}30`, borderRadius: 20, padding: "6px 14px", marginBottom: 24 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: colors.signal, animation: "pulse 2s ease-in-out infinite" }} />
-              <span style={{ fontSize: 16, color: colors.signal, fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
-            </div>
-            <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: colors.textPrimary }}>
-              Ping Your Website to See How Many<br />
-              <span style={{ color: colors.signal }}>Clicks You Are Losing.</span>
-            </h1>
-            <p style={{ fontSize: fontSize.bodyLarge, color: colors.textSecondary, margin: "0 0 32px", lineHeight: 1.6 }}>
-              Ping your site and find out right now. We check 74 signals and tell you exactly what&apos;s slowing you down.
-            </p>
-
+          <div style={{ textAlign: "left" }}>
             <AuditForm />
-
-            <div style={{ display: "flex", gap: 20, marginTop: 18, flexWrap: "wrap" }}>
-              {["No account needed", "No credit card", "Results in 60 seconds"].map(t => (
-                <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: fontSize.label, color: colors.textSecondary }}>
-                  <span style={{ color: colors.signal }}>✓</span> {t}
-                </span>
-              ))}
-            </div>
-            <a href="#hurdles" style={{ display: "block", marginTop: 24, fontSize: fontSize.body, color: colors.textSecondary, textDecoration: "none" }}>
-              Why does 1 second matter? ↓
-            </a>
           </div>
 
-          {/* RIGHT — sample report preview (desktop only) */}
-          <div className="preview-card" style={{ position: "relative" }}>
-            <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", textAlign: "center", marginBottom: 10 }}>
-              Sample Report Preview
-            </div>
-            <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 16, overflow: "hidden", boxShadow: `0 24px 60px #00000050, 0 0 0 1px ${colors.signal}10` }}>
-              {/* Browser chrome */}
-              <div style={{ padding: "12px 16px", background: colors.surfaceInset, borderBottom: `1px solid ${colors.border}`, display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: colors.statusFail }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: colors.statusWarn }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: colors.signal }} />
-                <span style={{ fontSize: fontSize.label, color: colors.textSecondary, marginLeft: 6, fontFamily: "monospace" }}>pingclose.com/report/abc123</span>
-              </div>
-              {/* Verdict */}
-              <div style={{ padding: "12px 20px", borderBottom: `1px solid ${colors.border}`, display: "flex", alignItems: "center", gap: 8, background: `${colors.statusFail}08` }}>
-                <span>❌</span>
-                <span style={{ fontSize: fontSize.label, color: colors.statusFail, fontWeight: 600 }}>Failing Google&apos;s 1-second test</span>
-              </div>
-              {/* Top issues */}
-              <div style={{ padding: "14px 20px" }}>
-                <div style={{ fontSize: fontSize.label, color: colors.statusFail, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Top Issues Found</div>
-                {[
-                  "🔴 Images not in WebP format (4 files)",
-                  "🔴 TTFB over 800ms — hosting is slow",
-                  "🟠 Render-blocking JavaScript detected",
-                  "🟡 No CDN — single-origin delivery",
-                ].map((issue, i) => (
-                  <div key={i} style={{ fontSize: fontSize.label, color: colors.textSecondary, lineHeight: 1.5, marginBottom: 6, paddingLeft: 8, borderLeft: `2px solid ${colors.statusFail}40` }}>
-                    {issue}
-                  </div>
-                ))}
-              </div>
-              {/* Footer */}
-              <div style={{ padding: "12px 20px", background: `${colors.signal}08`, borderTop: `1px solid ${colors.border}` }}>
-                <span style={{ fontSize: fontSize.label, color: colors.signal, fontWeight: 600 }}>⚡ 74 signals analyzed · Report emailed instantly</span>
-              </div>
-            </div>
-            <div style={{ position: "absolute", inset: -24, background: `radial-gradient(ellipse at center, ${colors.signal}06 0%, transparent 70%)`, pointerEvents: "none" }} />
+          <div style={{ display: "flex", gap: 20, marginTop: 18, flexWrap: "wrap", justifyContent: "center" }}>
+            {["No account needed", "No credit card", "Results in 60 seconds"].map(t => (
+              <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: fontSize.label, color: colors.textSecondary }}>
+                <span style={{ color: colors.signal }}>✓</span> {t}
+              </span>
+            ))}
           </div>
+          <a href="#hurdles" style={{ display: "block", marginTop: 24, fontSize: fontSize.body, color: colors.textSecondary, textDecoration: "none" }}>
+            Why does 1 second matter? ↓
+          </a>
         </div>
       </section>
 
       {/* ── STATS BAR ───────────────────────────────────────────── */}
-      <section style={{ padding: "36px 24px", background: colors.void, borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
+      <section className="site-pad" style={{ padding: "36px 24px", background: colors.void, borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
         <div className="stats-grid" style={{ maxWidth: 1040, margin: "0 auto", display: "grid", gap: 0, textAlign: "center" }}>
           {[
             ["53%", "of visitors leave if your page takes over 3 seconds"],
@@ -181,7 +136,7 @@ export default function Home() {
       </section>
 
       {/* ── HURDLE SECTION ──────────────────────────────────────── */}
-      <section id="hurdles" style={{ padding: "90px 24px", background: colors.void, textAlign: "center" }}>
+      <section id="hurdles" className="site-pad" style={{ padding: "90px 24px", background: colors.void, textAlign: "center" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, margin: "0 0 20px", letterSpacing: "-1px" }}>
             If You Can&apos;t Clear the First Hurdle,<br />
