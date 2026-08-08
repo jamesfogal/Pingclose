@@ -95,7 +95,7 @@ export default function Home() {
             <span style={{ fontSize: 16, color: colors.signal, fontWeight: 600 }}>Live · 74 signals · 60 seconds · Free</span>
           </div>
           <h1 style={{ fontSize: "clamp(36px, 5.5vw, 68px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 24px", letterSpacing: "-1.5px", color: colors.textPrimary }}>
-            Ping Your Website to See How Many{" "}
+            Ping Your Website to See How Many<br />
             <span style={{ color: colors.signal }}>Clicks You Are Losing.</span>
           </h1>
           <p style={{ fontSize: fontSize.bodyLarge, color: colors.textPrimary, margin: "0 0 32px", lineHeight: 1.6 }}>

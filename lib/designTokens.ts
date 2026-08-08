@@ -9,7 +9,7 @@ export const colors = {
   void: '#0B0E16',
   surface: '#0D1528',
   surfaceInset: '#111827',
-  border: '#1E3050',
+  border: '#FFFFFF',
 
   // Signal — the one brand color. Live data, emphasis, primary CTAs, and
   // "good/passing" status all share this, since teal already means "good."
