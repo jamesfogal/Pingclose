@@ -32,7 +32,6 @@ export interface PageSpeedResult {
   totalRequests: number;
   passesOneSecond: boolean;
 
-  imagesLazyLoaded: boolean;
   imagesWebP: boolean;
   largestImageKb: number;
   totalImages: number;

@@ -72,12 +72,11 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
   const webpImages = totalImages - nonWebpImages;
   const estimatedWebPSavingKb = nonWebpImageList.reduce((sum, i) => sum + i.estimatedWebPSavingKb, 0);
   const imagesWebP = nonWebpImages === 0;
-  // Lazy-loading detection (offscreen-images) has no replacement audit in
-  // current Lighthouse responses — genuinely removed, not renamed (verified:
-  // it only appears as WordPress stack-pack reference text, never as a real
-  // audit result). Rather than guess, this no longer asserts a pass/fail —
-  // see auditScorer.ts and the report page, which both stopped claiming it.
-  const imagesLazyLoaded = totalImages === 0;
+  // Lazy-loading detection moved to lib/agents/htmlAgent/imageVideoAudit.ts,
+  // which checks the real HTML for loading="lazy" — offscreen-images (the
+  // old Lighthouse audit this used to read) has no replacement, so this file
+  // no longer computes it at all rather than guess at a value with nothing
+  // real behind it.
 
   const largestImageKb = Math.round(
     Math.max(0, ...allImageItems.map(i => Number(i.transferSize) || 0)) / 1024
@@ -174,7 +173,7 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
     ttfb: Math.round(ttfb), lcp: Math.round(lcp), fcp: Math.round(fcp),
     cls: Math.round(cls * 1000) / 1000, inp: Math.round(inp), tbt: Math.round(tbt),
     totalPageSize: Math.round(totalPageSize / 1024), totalRequests, passesOneSecond,
-    imagesLazyLoaded, imagesWebP, largestImageKb, totalImages, webpImages, nonWebpImages,
+    imagesWebP, largestImageKb, totalImages, webpImages, nonWebpImages,
     nonWebpImageList, estimatedWebPSavingKb, imagesMissingAltText,
     totalVideos: videoDetails.length, videoDetails,
     hasAutoPlayVideo: false, hasAboveFoldEmbed: embedUrls.length > 0,

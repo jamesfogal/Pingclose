@@ -49,6 +49,7 @@ export interface TechStackResult {
   imagesWithoutAlt: string[];
   hasAutoPlayVideo: boolean;
   videoHasPoster: boolean;
+  imagesLazyLoaded: boolean;
 
   // WordPress
   wordpressPluginIssues: string[];

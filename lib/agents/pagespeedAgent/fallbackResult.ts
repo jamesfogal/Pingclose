@@ -16,7 +16,6 @@ export function buildFallbackResult(status: Exclude<PageSpeedStatus, 'OK'>): Pag
     totalPageSize: 0,
     totalRequests: 0,
     passesOneSecond: false,
-    imagesLazyLoaded: false,
     imagesWebP: false,
     largestImageKb: 0,
     totalImages: 0,

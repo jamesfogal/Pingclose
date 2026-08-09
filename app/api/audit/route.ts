@@ -129,6 +129,7 @@ export async function POST(req: NextRequest) {
       imagesWithoutAlt: htmlResult.imagesWithoutAlt,
       hasAutoPlayVideo: htmlResult.hasAutoPlayVideo,
       videoHasPoster: htmlResult.videoHasPoster,
+      imagesLazyLoaded: htmlResult.imagesLazyLoaded,
       wordpressPluginIssues: htmlResult.wordpressPluginIssues,
     };
 
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
         hosting: techResult.hosting,
         cdn: techResult.cdn,
         http_version: techResult.httpVersion,
-        images_lazy_loaded: speedResult.imagesLazyLoaded,
+        images_lazy_loaded: techResult.imagesLazyLoaded,
         images_webp: speedResult.imagesWebP,
         largest_image_kb: speedResult.largestImageKb,
         render_blocking_scripts: speedResult.renderBlockingScripts,

@@ -235,7 +235,7 @@ export async function POST(req: NextRequest) {
       total_page_size: speedResult.totalPageSize,
       total_requests: speedResult.totalRequests,
       passes_one_second: speedResult.passesOneSecond,
-      images_lazy_loaded: speedResult.imagesLazyLoaded,
+      images_lazy_loaded: techResult?.imagesLazyLoaded ?? false,
       images_webp: speedResult.imagesWebP,
       largest_image_kb: speedResult.largestImageKb,
       render_blocking_scripts: speedResult.renderBlockingScripts,

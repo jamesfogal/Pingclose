@@ -24,7 +24,7 @@ export async function runHtmlAgent(url: string): Promise<HtmlAgentResult> {
     hasCanonical: false, primaryKeyword: '',
     hasFAQSchema: false, hasPricingSchema: false, hasLocalBusinessSchema: false, hasReviewSchema: false,
     hasGA4: false, hasGTM: false, hasFacebookPixel: false, hasTikTokPixel: false, hasCallTracking: false,
-    imagesWithoutAlt: [], hasAutoPlayVideo: false, videoHasPoster: false,
+    imagesWithoutAlt: [], hasAutoPlayVideo: false, videoHasPoster: false, imagesLazyLoaded: false,
     wordpressPluginIssues: [],
   };
 

@@ -40,6 +40,7 @@ export interface HtmlAgentResult {
   imagesWithoutAlt: string[];
   hasAutoPlayVideo: boolean;
   videoHasPoster: boolean;
+  imagesLazyLoaded: boolean;
 
   // WordPress
   wordpressPluginIssues: string[];
