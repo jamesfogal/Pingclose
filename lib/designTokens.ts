@@ -7,8 +7,8 @@ export const colors = {
   // Structure — void, surface, and border. Unchanged values, just now a
   // single named source instead of scattered inline hex.
   void: '#0A1330',
-  surface: '#0D1528',
-  surfaceInset: '#111827',
+  surface: '#132A54',
+  surfaceInset: '#0F2040',
   border: '#FFFFFF',
 
   // Signal — the one brand color. Live data, emphasis, primary CTAs, and
