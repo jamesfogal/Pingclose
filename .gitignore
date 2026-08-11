@@ -55,3 +55,10 @@ next-env.d.ts
 .dfpassword.tmp
 *.tmp
 
+# superAgent generated artifacts — regenerable, not source
+/lib/agents/superAgent/snapshots/
+/lib/agents/superAgent/runs/
+
+# task dashboard — regenerable, run projects/pingclose/scripts/build-task-dashboard.mjs
+/projects/pingclose/task-dashboard.html
+
