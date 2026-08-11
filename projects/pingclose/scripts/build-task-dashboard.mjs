@@ -106,11 +106,13 @@ function renderItem(it) {
   }).join('\n      ');
   return `  <details class="row" data-search="${searchBlob}">
     <summary>
-      <span class="num">#${it.num}</span>
-      <span class="pill pill-${status}">${statusLabel}</span>
-      ${isReflagged ? '<span class="pill pill-flag">Re-flagged</span>' : ''}
-      <span class="title">${mdInline(title)}</span>
-      ${category ? `<span class="tag" title="${esc(tag || category)}">${esc(category)}</span>` : ''}
+      <div class="summary-main">
+        <span class="num">#${it.num}</span>
+        <span class="pill pill-${status}">${statusLabel}</span>
+        ${isReflagged ? '<span class="pill pill-flag">Re-flagged</span>' : ''}
+        <span class="title">${mdInline(title)}</span>
+      </div>
+      ${category ? `<span class="tag" title="${esc(tag || category)}">${esc(category)}</span>` : '<span></span>'}
     </summary>
     <div class="body">
       ${flagNote}
@@ -177,24 +179,28 @@ section { margin-bottom: 28px; }
 .section-title .count { background: var(--surface-inset); border-radius: 6px; padding: 1px 7px; font-variant-numeric: tabular-nums; }
 .list { display: flex; flex-direction: column; gap: 6px; }
 .row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-.row summary { list-style: none; cursor: pointer; padding: 10px 14px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+/* Grid, not flex-wrap: the tag lives in its own fixed right-hand column
+   (auto width, pinned via justify-self: end) that never moves regardless
+   of how long the title gets or how the left side wraps internally. */
+.row summary { list-style: none; cursor: pointer; padding: 10px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 6px 14px; }
 .row summary::-webkit-details-marker { display: none; }
 .row summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .row[open] summary { border-bottom: 1px solid var(--border); }
-.num { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-variant-numeric: tabular-nums; color: var(--text-primary); font-size: 16px; min-width: 56px; }
-.pill { font-size: 16px; font-weight: 600; padding: 2px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.summary-main { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.num { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-variant-numeric: tabular-nums; color: var(--text-primary); font-size: 16px; min-width: 56px; flex-shrink: 0; }
+.pill { font-size: 16px; font-weight: 600; padding: 2px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; flex-shrink: 0; }
 .pill-done { background: var(--done-bg); color: var(--done); }
 .pill-open { background: var(--open-bg); color: var(--open); }
 .pill-deferred { background: var(--deferred-bg); color: var(--deferred); }
 .pill-flag { background: var(--flag-bg); color: var(--flag); }
-.title { flex: 1; min-width: 200px; color: var(--text-primary); font-size: 16px; }
-.tag { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 16px; color: var(--accent); background: var(--surface-inset); padding: 2px 8px; border-radius: 6px; }
-.body { padding: 12px 14px 14px 74px; color: var(--text-secondary); font-size: 16px; }
+.title { min-width: 0; flex: 1 1 200px; color: var(--text-primary); font-size: 16px; overflow-wrap: break-word; word-break: break-word; }
+.tag { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 16px; color: var(--accent); background: var(--surface-inset); padding: 2px 8px; border-radius: 6px; white-space: nowrap; justify-self: end; align-self: start; }
+.body { padding: 12px 14px 14px 74px; color: var(--text-secondary); font-size: 16px; overflow-wrap: break-word; word-break: break-word; }
 .body p { margin: 0 0 8px; }
 .body p:last-child { margin-bottom: 0; }
 .flagnote { color: var(--flag) !important; }
-.detail code { background: var(--surface-inset); padding: 1px 5px; border-radius: 5px; font-size: 1em; }
-.files { font-size: 16px; color: var(--text-primary) !important; }
+.detail code { background: var(--surface-inset); padding: 1px 5px; border-radius: 5px; font-size: 1em; overflow-wrap: anywhere; }
+.files { font-size: 16px; color: var(--text-primary) !important; overflow-wrap: break-word; word-break: break-word; }
 .files-label { text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-right: 4px; color: var(--text-primary); }
 .empty { text-align: center; color: var(--text-tertiary); padding: 30px 0; display: none; }
 </style>
