@@ -10,7 +10,7 @@ import { analyzeLawFaqSchema } from '@/lib/agents/lawFaqAgent';
 import { analyzeLawyerSchema } from '@/lib/agents/lawyerSchemaAgent';
 import { buildSchemaOpportunities } from '@/lib/schemaOpportunities';
 import { analyzeContentQuality } from '@/lib/agents/contentQualityAgent';
-import { checkRateLimit, checkAgencySignal, isVIP } from '@/lib/rateLimiter';
+import { checkRateLimit, checkIpRateLimit, checkAgencySignal, isVIP } from '@/lib/rateLimiter';
 import { scoreAudit } from '@/lib/auditScorer';
 import { deliverReport } from '@/lib/reportDelivery';
 import type { TechStackResult } from '@/lib/htmlAudit';
@@ -43,13 +43,21 @@ export async function POST(req: NextRequest) {
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || '0.0.0.0';
 
+    // Phone-only submissions (no email) have nothing for checkRateLimit to
+    // key off of -- calling it with email === undefined crashed inside
+    // isVIP's email.toLowerCase() (PC-SEC11). Rate-limit by IP instead when
+    // there's no email, fail-closed since this route inserts into Supabase
+    // regardless of which path is taken (same reasoning PC-SEC9 already
+    // used for the email-based limiter).
     console.log('STEP1: checkRateLimit');
-    const { limited, reason } = await checkRateLimit(email);
+    const { limited, reason } = email
+      ? await checkRateLimit(email)
+      : await checkIpRateLimit(ip, { failClosed: true });
     if (limited) {
       if (reason === 'error') {
         return NextResponse.json({ error: 'Something went wrong on our end. Please try again in a few minutes.' });
       }
-      return NextResponse.json({ limit: true, message: "You've run 5 free audits today. Come back tomorrow for more!" });
+      return NextResponse.json({ limit: true, message: "You've reached today's free audit limit. Come back tomorrow for more!" });
     }
 
     const hostname = new URL(normalizedUrl).hostname;

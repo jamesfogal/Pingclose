@@ -47,7 +47,16 @@ export async function checkRateLimit(email: string): Promise<{ limited: boolean;
 // limit on the full audit since one IP can be a shared office/cafe network.
 const IP_MAX_ATTEMPTS = 10;
 
-export async function checkIpRateLimit(ip: string): Promise<{ limited: boolean }> {
+// failClosed defaults to false (the original /api/audit/fast behavior,
+// PC-SEC9: that route has no other Supabase dependency, so failing open on
+// a transient error doesn't cost anything). Pass failClosed: true from a
+// caller that inserts into Supabase regardless of this check's outcome
+// (e.g. /api/audit for a phone-only submission, PC-SEC11) — same
+// reasoning PC-SEC9 already used to make the email-based limiter fail
+// closed: the row gets written either way, so a transient error here
+// shouldn't let an unlimited number of audits through uncounted.
+export async function checkIpRateLimit(ip: string, options?: { failClosed?: boolean }): Promise<{ limited: boolean; reason?: 'limit' | 'error' }> {
+  const failClosed = options?.failClosed ?? false;
   try {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count, error } = await supabase
@@ -58,19 +67,14 @@ export async function checkIpRateLimit(ip: string): Promise<{ limited: boolean }
 
     if (error) {
       console.error('IP_RATE_LIMIT_SUPABASE_ERROR:', JSON.stringify(error));
-      // Deliberately stays fail-open (Jim's decision, PC-SEC9, 2026-08-01) —
-      // unlike the admin login and email-based limiters, this one guards
-      // /api/audit/fast, which has no other Supabase dependency. Fail-closed
-      // here would mean an unrelated Supabase outage takes down a feature
-      // that doesn't need Supabase to do its actual work.
-      return { limited: false };
+      return failClosed ? { limited: true, reason: 'error' } : { limited: false };
     }
 
-    return { limited: !!count && count >= IP_MAX_ATTEMPTS };
+    return { limited: !!count && count >= IP_MAX_ATTEMPTS, reason: 'limit' };
   } catch (err) {
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
     console.error('IP_RATE_LIMIT_FAIL:', msg);
-    return { limited: false };
+    return failClosed ? { limited: true, reason: 'error' } : { limited: false };
   }
 }
 
