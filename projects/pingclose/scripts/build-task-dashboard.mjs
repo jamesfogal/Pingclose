@@ -72,11 +72,35 @@ function parseHeader(headerRest) {
   if (tagMatch) tag = tagMatch[1];
   return { title: title.trim(), detail: detail.trim(), tag };
 }
+// Categories that are specific PingClose-product engineering work --
+// everything else (a named client, or genuinely untagged) renders in
+// yellow so client/general items are visually distinct at a glance.
+const PINGCLOSE_SPECIFIC = new Set([
+  'Edge Agent', 'GBP Agent', 'Client-Fix Agent', 'Security',
+  'Performance', 'Code Quality', 'Phone/Text', 'Future',
+]);
+
 // Reads the real tag prefix, not scattered text in the title — a title
 // like "...via edge proxy (PC-FIX-3)" contains the word "edge" but is not
 // Edge Agent work; only the tag itself is authoritative. Falls back to a
 // title scan only when there's no tag at all.
-function categorize(tag, title) {
+// Always returns a label -- "General" is the deliberate fallback for
+// items that were never tagged to a specific initiative, so the right
+// column never reads as blank/broken. An empty cell and an intentionally
+// general item look identical otherwise.
+// Client mentions checked first and win over a PC- tag, since knowing
+// *which* client an item is about is more useful than knowing it's
+// generically "Client-Fix Agent" work. Title only, not detail text --
+// a detail paragraph mentioning a client in passing (as discovery
+// context, a comparison, an example) doesn't mean the item is actually
+// about that client. E.g. "pingclose.com's own /pricing page..." once
+// wrongly tagged CWHA because its detail said "before the
+// citywideheatingair.com audit" -- the title is the reliable signal.
+function categorize(tag, title, detail) {
+  const tt0 = title.toLowerCase();
+  if (tt0.includes('citywideheatingair')) return 'CWHA';
+  if (tt0.includes('citywidealarms')) return 'CWA';
+
   const t = tag.toLowerCase();
   if (t.startsWith('pc-edge')) return 'Edge Agent';
   if (t.startsWith('pc-gbp')) return 'GBP Agent';
@@ -84,14 +108,18 @@ function categorize(tag, title) {
   if (t.startsWith('pc-sec')) return 'Security';
   if (t.startsWith('pc-perf')) return 'Performance';
   if (t.startsWith('pc-cq')) return 'Code Quality';
-  if (t.startsWith('pc-e')) return 'Phone';
+  if (t.startsWith('pc-e')) return 'Phone/Text';
   if (t.startsWith('pc-future')) return 'Future';
   if (t) return 'General';
   const tt = title.toLowerCase();
   if (tt.includes('edge agent')) return 'Edge Agent';
   if (tt.includes('gbp agent') || tt.includes('gbp superagent')) return 'GBP Agent';
   if (tt.includes('client-fix agent')) return 'Client-Fix Agent';
-  return '';
+  // Compound phrases only -- a bare "phone" match false-positived on an
+  // unrelated item that merely quoted the string "PHONE-SYSTEM" while
+  // explaining that fake tier name doesn't exist.
+  if (tt.includes('phone verification') || tt.includes('openphone') || tt.includes('sms consent') || tt.includes('10dlc')) return 'Phone/Text';
+  return 'General';
 }
 
 function renderItem(it) {
@@ -99,8 +127,10 @@ function renderItem(it) {
   const status = STATUS[it.statusIcon];
   const statusLabel = STATUS_LABEL[it.statusIcon];
   const isReflagged = /\(Previously shown as complete/i.test(detail) || it.extraLines.some(l => /\(Previously shown as complete/i.test(l));
-  const category = categorize(tag, title);
-  const searchBlob = esc((title + ' ' + tag + ' ' + detail + ' ' + it.extraLines.join(' ')).toLowerCase());
+  const fullDetail = detail + ' ' + it.extraLines.join(' ');
+  const category = categorize(tag, title, fullDetail);
+  const isSpecific = PINGCLOSE_SPECIFIC.has(category);
+  const searchBlob = esc((title + ' ' + tag + ' ' + fullDetail).toLowerCase());
 
   let flagNote = '';
   let mainDetail = detail;
@@ -120,7 +150,7 @@ function renderItem(it) {
         ${isReflagged ? '<span class="pill pill-flag">Re-flagged</span>' : ''}
       </div>
       <span class="title">${mdInline(title)}</span>
-      <span class="tag-cell">${category ? `<span class="tag" title="${esc(tag || category)}">${esc(category)}</span>` : ''}</span>
+      <span class="tag-cell"><span class="tag${isSpecific ? '' : ' tag-other'}" title="${esc(tag || category)}">${esc(category)}</span></span>
     </summary>
     <div class="body">
       ${flagNote}
@@ -148,6 +178,7 @@ const html = `<!doctype html>
   --open: #F87171; --open-bg: rgba(248,113,113,0.16);
   --deferred: #FBBF24; --deferred-bg: rgba(251,191,36,0.16);
   --flag-bg: rgba(251,146,60,0.18); --flag: #FDBA74;
+  --other: #FDE047;
 }
 :root[data-theme="light"] {
   --void: #F4F6FB; --surface: #FFFFFF; --surface-inset: #EBF0FA; --border: #10162B;
@@ -156,6 +187,7 @@ const html = `<!doctype html>
   --open: #DC2626; --open-bg: rgba(220,38,38,0.10);
   --deferred: #B45309; --deferred-bg: rgba(180,83,9,0.12);
   --flag-bg: rgba(234,88,12,0.12); --flag: #C2410C;
+  --other: #92700E;
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
@@ -165,10 +197,16 @@ const html = `<!doctype html>
     --open: #DC2626; --open-bg: rgba(220,38,38,0.10);
     --deferred: #B45309; --deferred-bg: rgba(180,83,9,0.12);
     --flag-bg: rgba(234,88,12,0.12); --flag: #C2410C;
+    --other: #92700E;
   }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--void); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 18px; line-height: 1.5; }
+/* min-height: 100vh so the dark background fills the whole render frame
+   even when that frame is taller than the actual content -- otherwise
+   the area below short content shows as unstyled black instead of
+   continuing the page's own background. */
+html { min-height: 100%; background: var(--void); }
+body { margin: 0; min-height: 100vh; background: var(--void); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 18px; line-height: 1.5; }
 .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 80px; }
 header { margin-bottom: 20px; }
 h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
@@ -214,6 +252,11 @@ section { margin-bottom: 28px; }
 
 .tag-cell { grid-area: tag; min-width: 0; }
 .tag { display: inline-block; font-size: 15px; font-weight: 600; color: var(--accent); background: var(--surface-inset); border: 1px solid var(--accent); padding: 3px 10px; border-radius: 6px; white-space: normal; overflow-wrap: break-word; line-height: 1.3; }
+/* Anything that isn't specific PingClose-product work -- a named client
+   (CWHA, CWA) or a genuinely untagged "General" item -- renders in
+   yellow instead of teal, so it's visually distinct at a glance from
+   PingClose's own engineering categories. */
+.tag-other { color: var(--other); border-color: var(--other); }
 
 .body { padding: 4px 16px 16px 104px; color: var(--text-secondary); font-size: 18px; overflow-wrap: break-word; word-break: break-word; }
 .body p { margin: 0 0 8px; }
@@ -271,7 +314,28 @@ ${deferredHtml}</div>
         if (match) visible++;
       });
       document.querySelector('.empty').style.display = visible === 0 ? 'block' : 'none';
+      reportHeight();
     }
+
+    // Best-effort: if this page is embedded in an iframe whose host
+    // listens for a resize signal, ask it to match the frame height to
+    // actual content instead of leaving unstyled space below a shorter
+    // page. Harmless no-op if the host doesn't listen for any of these --
+    // there's no single standard format, so a few common conventions are
+    // sent together.
+    function reportHeight() {
+      if (window.parent === window) return;
+      const h = document.documentElement.scrollHeight;
+      try {
+        window.parent.postMessage({ type: 'resize', height: h }, '*');
+        window.parent.postMessage({ type: 'iframeResize', height: h }, '*');
+        window.parent.postMessage({ height: h }, '*');
+        window.parent.postMessage('resize:' + h, '*');
+      } catch (e) {}
+    }
+    reportHeight();
+    window.addEventListener('resize', reportHeight);
+    new ResizeObserver(reportHeight).observe(document.body);
   </script>
 </body>`;
 
