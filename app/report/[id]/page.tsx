@@ -215,6 +215,15 @@ function playDone() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
+// Every other network call in this file already has a timeout or a retry
+// path (see the pending-report poll and the pagespeed retry button below) —
+// this is what the very first report fetch was missing. A bare fetch() has
+// no default timeout in the browser; if the request stalls without ever
+// resolving or rejecting, `loading` stayed true forever with no way out —
+// confirmed live 2026-09-01 (network tab showed a 200 response, but the UI
+// never left "Loading your report…").
+const INITIAL_FETCH_TIMEOUT_MS = 15_000;
+
 export default function ReportPage() {
   const params  = useParams();
   const [audit, setAudit]   = useState<Audit | null>(null);
@@ -223,10 +232,18 @@ export default function ReportPage() {
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/report?id=${params.id}`)
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), INITIAL_FETCH_TIMEOUT_MS);
+    fetch(`/api/report?id=${params.id}`, { signal: controller.signal })
       .then(r => r.json())
       .then(data => { setAudit(data); setLoading(false); playDone(); })
-      .catch(() => setLoading(false));
+      // A timeout lands here same as any other fetch failure — audit stays
+      // null, which already renders the "Report not found. Run a new audit
+      // →" screen below. That's a real escape hatch either way; no need for
+      // a timeout-specific message.
+      .catch(() => setLoading(false))
+      .finally(() => clearTimeout(timer));
+    return () => { controller.abort(); clearTimeout(timer); };
   }, [params.id]);
 
   // If PageSpeed hadn't finished when this page was fetched, poll instead of
