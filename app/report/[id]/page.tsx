@@ -45,6 +45,7 @@ interface Audit {
       totalOpportunities: number; totalUsed: number; totalMissed: number;
     };
     speed?: {
+      hasFieldData?: boolean; fieldLcp?: number; fieldFcp?: number; fieldCls?: number;
       mobileDesktopGap: number; gapExplanation: string; tbt: number;
       totalImages: number; webpImages: number; nonWebpImages: number;
       nonWebpImageList: ImageDetail[]; estimatedWebPSavingKb: number;
@@ -399,6 +400,30 @@ export default function ReportPage() {
 
         {/* Load time hero + timeline */}
         {audit.lcp > 0 && <LoadTimeHero ttfb={audit.ttfb} fcp={audit.fcp} lcp={audit.lcp} />}
+
+        {/* ── REAL-WORLD SPEED (Google field data — actual visitors, not a lab test) ──
+            Only rendered when Google has enough real Chrome-user traffic for this
+            origin to report it (most small/new sites won't qualify) — the number above
+            (LoadTimeHero) is always a simulated lab test; this, when present, is what
+            real visitors on real devices actually experienced. */}
+        {speed?.hasFieldData && (
+          <Card variant="green" style={{ textAlign: "center" }}>
+            <div style={{ fontSize: fontSize.label, fontWeight: 700, color: colors.signal, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+              ✓ Real-World Speed — Actual Visitors, Not a Lab Test
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 32, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 36, fontWeight: 900, color: metricColor(speed.fieldLcp || 0, "lcp") }}>{((speed.fieldLcp || 0) / 1000).toFixed(1)}s</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Real LCP</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 36, fontWeight: 900, color: metricColor(speed.fieldFcp || 0, "fcp") }}>{((speed.fieldFcp || 0) / 1000).toFixed(1)}s</div>
+                <div style={{ fontSize: fontSize.label, color: colors.textSecondary, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Real FCP</div>
+              </div>
+            </div>
+            <div style={{ fontSize: fontSize.label, color: colors.textSecondary, marginTop: 12 }}>Source: Google Chrome User Experience Report (28-day rolling average)</div>
+          </Card>
+        )}
 
         {/* ── PERFORMANCE SCORES ───────────────────────────────────────────── */}
         <Divider label="Performance Scores" />

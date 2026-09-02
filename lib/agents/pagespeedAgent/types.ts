@@ -28,6 +28,14 @@ export interface PageSpeedResult {
   cls: number;
   inp: number;
   tbt: number;
+
+  // Real-user field data (Google CrUX) — actual visitors on actual devices,
+  // not a lab simulation. Only present for origins with enough Chrome-user
+  // traffic; hasFieldData is false (and the three below stay 0) otherwise.
+  hasFieldData: boolean;
+  fieldLcp: number;
+  fieldFcp: number;
+  fieldCls: number;
   totalPageSize: number;
   totalRequests: number;
   passesOneSecond: boolean;

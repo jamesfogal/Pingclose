@@ -24,7 +24,17 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
     }
   }
 
+  // Real-user field data (CrUX — actual visitors on actual devices), not a
+  // lab simulation. Was already being fetched (Google includes it in every
+  // runPagespeed response) but only INP was ever read from it — the real
+  // LCP/FCP/CLS sat unused in the same object. Only present for origins
+  // with enough Chrome-user traffic to qualify; hasFieldData tells callers
+  // whether to trust these or fall back to lab-only numbers.
   const crux = ((mobile as { loadingExperience?: { metrics?: Record<string, { percentile?: number }> } }).loadingExperience?.metrics) || {};
+  const hasFieldData = Object.keys(crux).length > 0;
+  const fieldLcp = crux['LARGEST_CONTENTFUL_PAINT_MS']?.percentile || 0;
+  const fieldFcp = crux['FIRST_CONTENTFUL_PAINT_MS']?.percentile || 0;
+  const fieldCls = (crux['CUMULATIVE_LAYOUT_SHIFT_SCORE']?.percentile || 0) / 100; // API returns this one as an integer percentile (e.g. 5 = 0.05), unlike the ms-based metrics
 
   const desktopLhr = (desktop as { lighthouseResult?: { categories?: Record<string, { score?: number }> } }).lighthouseResult;
 
@@ -172,6 +182,8 @@ export function parsePageSpeed(mobile: Record<string, unknown>, desktop: Record<
     mobileScore, desktopScore, mobileDesktopGap, gapExplanation,
     ttfb: Math.round(ttfb), lcp: Math.round(lcp), fcp: Math.round(fcp),
     cls: Math.round(cls * 1000) / 1000, inp: Math.round(inp), tbt: Math.round(tbt),
+    hasFieldData, fieldLcp: Math.round(fieldLcp), fieldFcp: Math.round(fieldFcp),
+    fieldCls: Math.round(fieldCls * 1000) / 1000,
     totalPageSize: Math.round(totalPageSize / 1024), totalRequests, passesOneSecond,
     imagesWebP, largestImageKb, totalImages, webpImages, nonWebpImages,
     nonWebpImageList, estimatedWebPSavingKb, imagesMissingAltText,
